@@ -6,7 +6,7 @@ export interface User {
   username: string;
   first_name: string;
   last_name: string;
-  user_type: 'student' | 'graduate' | 'mentor' | 'admin' | 'institution';
+  user_type: 'student' | 'graduate' | 'community_talent' | 'professional' | 'mentor' | 'admin' | 'institution';
   profile_picture?: string;
   bio?: string;
   location?: string;

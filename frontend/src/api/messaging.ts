@@ -45,7 +45,7 @@ export interface BookingSession {
   start_time: string;
   end_time?: string | null;
   duration_minutes: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'in_progress';
+  status: 'pending' | 'scheduled' | 'confirmed' | 'cancelled' | 'completed' | 'in_progress';
   session_type?: string;
   notes?: string;
   mentee_notes?: string;
@@ -133,8 +133,8 @@ export const bookingApi = {
     api.get<BookingSession>(`/bookings/sessions/${bookingId}/`),
 
   // Cancel booking
-  cancelBooking: (bookingId: number, reason?: string) =>
-    api.post(`/bookings/sessions/${bookingId}/cancel/`, { reason }),
+  cancelBooking: (bookingId: number) =>
+    api.delete(`/mentors/bookings/${bookingId}/`),
 
   // Confirm booking (mentor only)
   confirmBooking: (bookingId: number) =>

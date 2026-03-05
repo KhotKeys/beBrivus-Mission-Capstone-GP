@@ -9,6 +9,7 @@ class Application(models.Model):
     """
     STATUS_CHOICES = [
         ('draft', 'Draft'),
+        ('submitted', 'Submitted'),
         ('clicked', 'Clicked'),
         ('under_review', 'Under Review'),
         ('interview_scheduled', 'Interview Scheduled'),
@@ -23,6 +24,15 @@ class Application(models.Model):
     # Application content
     cover_letter = models.TextField(blank=True)
     additional_info = models.TextField(blank=True)
+    
+    # New application form fields
+    age = models.PositiveIntegerField(blank=True, null=True)
+    university = models.CharField(max_length=200, blank=True)
+    course = models.CharField(max_length=200, blank=True)
+    year_of_study = models.CharField(max_length=50, blank=True)
+    country_of_residence = models.CharField(max_length=100, blank=True)
+    why_chosen = models.TextField(blank=True)
+    career_goals = models.TextField(blank=True)
     
     # Status tracking
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')

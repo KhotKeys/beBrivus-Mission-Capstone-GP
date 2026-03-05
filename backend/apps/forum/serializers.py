@@ -90,13 +90,19 @@ class ReplySerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         if not user.is_authenticated:
             return False
-        return obj.author == user or getattr(user.forum_profile, 'is_moderator', False)
+        try:
+            return obj.author == user or user.forum_profile.is_moderator
+        except (UserForumProfile.DoesNotExist, AttributeError):
+            return obj.author == user
     
     def get_can_delete(self, obj):
         user = self.context['request'].user
         if not user.is_authenticated:
             return False
-        return obj.author == user or getattr(user.forum_profile, 'is_moderator', False)
+        try:
+            return obj.author == user or user.forum_profile.is_moderator
+        except (UserForumProfile.DoesNotExist, AttributeError):
+            return obj.author == user
 
 
 class DiscussionListSerializer(serializers.ModelSerializer):
@@ -114,7 +120,7 @@ class DiscussionListSerializer(serializers.ModelSerializer):
             'views_count', 'likes_count', 'replies_count',
             'is_pinned', 'is_locked', 'is_resolved',
             'created_at', 'updated_at', 'last_activity',
-            'latest_reply', 'is_liked_by_user', 'tag_list'
+            'latest_reply', 'is_liked_by_user', 'tag_list', 'image'
         ]
     
     def get_latest_reply(self, obj):
@@ -137,7 +143,7 @@ class DiscussionDetailSerializer(serializers.ModelSerializer):
     """Serializer for discussion detail view with replies"""
     author = UserForumSerializer(read_only=True)
     category = ForumCategorySerializer(read_only=True)
-    replies = ReplySerializer(many=True, read_only=True)
+    replies = serializers.SerializerMethodField()
     is_liked_by_user = serializers.SerializerMethodField()
     can_edit = serializers.SerializerMethodField()
     can_delete = serializers.SerializerMethodField()
@@ -156,6 +162,10 @@ class DiscussionDetailSerializer(serializers.ModelSerializer):
             'tag_list'
         ]
     
+    def get_replies(self, obj):
+        top_level_replies = obj.replies.filter(parent__isnull=True)
+        return ReplySerializer(top_level_replies, many=True, context=self.context).data
+    
     def get_is_liked_by_user(self, obj):
         user = self.context['request'].user
         if user.is_authenticated:
@@ -166,19 +176,28 @@ class DiscussionDetailSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         if not user.is_authenticated:
             return False
-        return obj.author == user or getattr(user.forum_profile, 'is_moderator', False)
+        try:
+            return obj.author == user or user.forum_profile.is_moderator
+        except (UserForumProfile.DoesNotExist, AttributeError):
+            return obj.author == user
     
     def get_can_delete(self, obj):
         user = self.context['request'].user
         if not user.is_authenticated:
             return False
-        return obj.author == user or getattr(user.forum_profile, 'is_moderator', False)
+        try:
+            return obj.author == user or user.forum_profile.is_moderator
+        except (UserForumProfile.DoesNotExist, AttributeError):
+            return obj.author == user
     
     def get_can_moderate(self, obj):
         user = self.context['request'].user
         if not user.is_authenticated:
             return False
-        return getattr(user.forum_profile, 'is_moderator', False)
+        try:
+            return user.forum_profile.is_moderator
+        except (UserForumProfile.DoesNotExist, AttributeError):
+            return False
 
 
 class DiscussionCreateSerializer(serializers.ModelSerializer):
@@ -193,7 +212,7 @@ class DiscussionCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Discussion
-        fields = ['id', 'title', 'slug', 'content', 'discussion_type', 'category', 'tags', 'tag_list']
+        fields = ['id', 'title', 'slug', 'content', 'discussion_type', 'category', 'tags', 'tag_list', 'image']
         extra_kwargs = {
             'slug': {'required': False, 'allow_blank': True}
         }

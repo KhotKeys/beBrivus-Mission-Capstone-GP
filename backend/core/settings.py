@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-4t2k#-s0%u5dit!-=$rgfh98l-miu_o@uo*ed%7itdyn9&7rd(')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = config('DEBUG', default='True', cast=lambda v: v.lower() in ('true', '1', 'yes') if isinstance(v, str) else bool(v))
 
 ALLOWED_HOSTS = ['*']
 # Application definition
@@ -51,6 +51,7 @@ LOCAL_APPS = [
     'apps.gamification',
     'apps.video',
     'apps.messaging',
+    'apps.notifications',
 ]
 
 INSTALLED_APPS = THIRD_PARTY_APPS + DJANGO_APPS + LOCAL_APPS
@@ -157,10 +158,10 @@ REST_FRAMEWORK = {
 
 # Simple JWT Configuration
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
     'UPDATE_LAST_LOGIN': True,
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,

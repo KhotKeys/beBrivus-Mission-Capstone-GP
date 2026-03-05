@@ -43,6 +43,8 @@ export const UserManagement: React.FC = () => {
     user_type: "institution",
     password: "",
   });
+  const [visibleCount, setVisibleCount] = useState(5);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -92,6 +94,12 @@ export const UserManagement: React.FC = () => {
     switch (userType) {
       case "student":
         return "bg-primary-100 text-primary-800";
+      case "graduate":
+        return "bg-primary-100 text-primary-800";
+      case "community_talent":
+        return "bg-emerald-100 text-emerald-800";
+      case "professional":
+        return "bg-blue-100 text-blue-800";
       case "mentor":
         return "bg-secondary-100 text-secondary-800";
       case "institution":
@@ -100,6 +108,27 @@ export const UserManagement: React.FC = () => {
         return "bg-warning-100 text-warning-800";
       default:
         return "bg-neutral-100 text-neutral-800";
+    }
+  };
+
+  const getRoleLabel = (userType: string) => {
+    switch (userType) {
+      case "student":
+        return "Student";
+      case "graduate":
+        return "Graduate";
+      case "community_talent":
+        return "Community Talent";
+      case "professional":
+        return "Professional";
+      case "mentor":
+        return "Mentor";
+      case "institution":
+        return "Institution";
+      case "admin":
+        return "Admin";
+      default:
+        return userType;
     }
   };
 
@@ -213,6 +242,16 @@ export const UserManagement: React.FC = () => {
     }
   };
 
+  const handleShowMore = () => {
+    setVisibleCount(prev => prev + 5);
+    setIsExpanded(true);
+  };
+
+  const handleShowLess = () => {
+    setVisibleCount(5);
+    setIsExpanded(false);
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -249,6 +288,16 @@ export const UserManagement: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-neutral-900">
             User Management
+            <span style={{
+              background: '#10B981',
+              color: 'white',
+              borderRadius: '12px',
+              padding: '2px 10px',
+              fontSize: '12px',
+              marginLeft: '8px',
+            }}>
+              {totalUsers}
+            </span>
           </h1>
           <p className="text-neutral-600 mt-1">
             Manage and moderate user accounts, profiles, and permissions
@@ -356,6 +405,9 @@ export const UserManagement: React.FC = () => {
             >
               <option value="">All Roles</option>
               <option value="student">Students</option>
+              <option value="graduate">Graduates</option>
+              <option value="community_talent">Community Talent</option>
+              <option value="professional">Professionals</option>
               <option value="mentor">Mentors</option>
               <option value="institution">Institutions</option>
               <option value="admin">Admins</option>
@@ -381,8 +433,9 @@ export const UserManagement: React.FC = () => {
       </Card>
 
       {/* Users List */}
-      <div className="space-y-4">
-        {users.map((user) => {
+      <div style={{ maxHeight: '500px', overflowY: 'auto', scrollBehavior: 'smooth' }}>
+        <div className="space-y-4">
+          {users.slice(0, visibleCount).map((user) => {
           const StatusIcon = getStatusIcon(user.is_active);
 
           return (
@@ -411,8 +464,7 @@ export const UserManagement: React.FC = () => {
                             user.user_type
                           )}`}
                         >
-                          {user.user_type.charAt(0).toUpperCase() +
-                            user.user_type.slice(1)}
+                          {getRoleLabel(user.user_type)}
                         </div>
                         <div
                           className={`px-2 py-1 rounded-full text-xs font-medium flex items-center ${getStatusColor(
@@ -526,8 +578,42 @@ export const UserManagement: React.FC = () => {
               </CardBody>
             </Card>
           );
-        })}
+          })}
+        </div>
       </div>
+
+      {/* Show More / Show Less */}
+      {users.length > 5 && (
+        <div style={{ textAlign: 'center', marginTop: '12px' }}>
+          {visibleCount < users.length ? (
+            <button onClick={handleShowMore}
+              style={{
+                color: '#10B981',
+                background: 'none',
+                border: '1px solid #10B981',
+                borderRadius: '8px',
+                padding: '8px 20px',
+                cursor: 'pointer',
+                fontSize: '14px',
+              }}>
+              Show More ({users.length - visibleCount} remaining)
+            </button>
+          ) : (
+            <button onClick={handleShowLess}
+              style={{
+                color: '#6b7280',
+                background: 'none',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                padding: '8px 20px',
+                cursor: 'pointer',
+                fontSize: '14px',
+              }}>
+              Show Less
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Empty State */}
       {users.length === 0 && (
@@ -656,6 +742,10 @@ user3@example.com"
                     setInviteForm((prev) => ({ ...prev, user_type: e.target.value }))
                   }
                 >
+                  <option value="student">Student</option>
+                  <option value="graduate">Graduate</option>
+                  <option value="community_talent">Community Talent</option>
+                  <option value="professional">Professional</option>
                   <option value="mentor">Mentor</option>
                   <option value="institution">Institution</option>
                   <option value="admin">Admin</option>

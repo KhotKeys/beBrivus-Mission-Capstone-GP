@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Layout } from "../components/layout";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -31,6 +32,7 @@ import type {
 } from "../api/profile";
 
 export const ProfilePage: React.FC = () => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { updateProfile: updateAuthProfile } = useAuth();
   const [isEditingBasic, setIsEditingBasic] = useState(false);
@@ -211,7 +213,7 @@ export const ProfilePage: React.FC = () => {
                     ) : (
                       <>
                         <Edit className="w-4 h-4" />
-                        Edit Profile
+                        {t("Edit Profile")}
                       </>
                     )}
                   </button>
@@ -260,7 +262,7 @@ export const ProfilePage: React.FC = () => {
           <div className="card mb-4 sm:mb-6">
             <div className="card-body p-4 sm:p-6">
               <h2 className="text-lg sm:text-xl font-semibold text-secondary-900 mb-3 sm:mb-4">
-                About
+                {t("About")}
               </h2>
               {profile.bio ? (
                 <p className="text-sm sm:text-base text-secondary-700 whitespace-pre-wrap leading-relaxed">
@@ -280,7 +282,7 @@ export const ProfilePage: React.FC = () => {
           <div className="card-body p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h2 className="text-lg sm:text-xl font-semibold text-secondary-900">
-                Education & Academic Info
+                {t("Education")} & Academic Info
               </h2>
             </div>
 
@@ -331,7 +333,7 @@ export const ProfilePage: React.FC = () => {
           <div className="card mb-4 sm:mb-6">
             <div className="card-body p-4 sm:p-6">
               <h2 className="text-lg sm:text-xl font-semibold text-secondary-900 mb-3 sm:mb-4">
-                Links
+                {t("Links")}
               </h2>
               <div className="space-y-3">
                 {profile.linkedin_profile && (
@@ -342,7 +344,7 @@ export const ProfilePage: React.FC = () => {
                     className="flex items-center gap-3 text-primary-600 hover:text-primary-700 text-sm sm:text-base break-all"
                   >
                     <Linkedin className="w-5 h-5 flex-shrink-0" />
-                    <span>LinkedIn Profile</span>
+                    <span>{t("LinkedIn Profile")}</span>
                   </a>
                 )}
                 {profile.github_profile && (
@@ -353,7 +355,7 @@ export const ProfilePage: React.FC = () => {
                     className="flex items-center gap-3 text-primary-600 hover:text-primary-700 text-sm sm:text-base break-all"
                   >
                     <Github className="w-5 h-5 flex-shrink-0" />
-                    <span>GitHub Profile</span>
+                    <span>{t("GitHub Profile")}</span>
                   </a>
                 )}
                 {profile.portfolio_website && (
@@ -364,7 +366,7 @@ export const ProfilePage: React.FC = () => {
                     className="flex items-center gap-3 text-primary-600 hover:text-primary-700 text-sm sm:text-base break-all"
                   >
                     <LinkIcon className="w-5 h-5 flex-shrink-0" />
-                    <span>Portfolio Website</span>
+                    <span>{t("Portfolio Website")}</span>
                   </a>
                 )}
               </div>
@@ -408,6 +410,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
   onCancel,
   isSaving,
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     first_name: profile.first_name,
     last_name: profile.last_name,
@@ -700,6 +703,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
   isEditing,
   onEditToggle,
 }) => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [newSkill, setNewSkill] = useState({
     name: "",
@@ -707,18 +711,29 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
   });
   const [error, setError] = useState<string>("");
 
-  const { data: skills = [], isLoading: isLoadingSkills, isError: isSkillsError } = useQuery({
+  const { data: skills = [], isLoading: isLoadingSkills, isError: isSkillsError, refetch: refetchSkills } = useQuery({
     queryKey: ["skills"],
     queryFn: () => profileApi.getSkills().then((res) => res.data),
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   const addSkillMutation = useMutation({
     mutationFn: (skill: Omit<UserSkill, "id" | "verified" | "created_at">) =>
       profileApi.addSkill(skill),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["skills"] });
+    onSuccess: async (response) => {
+      await queryClient.invalidateQueries({ queryKey: ["skills"] });
+      await refetchSkills();
       setNewSkill({ name: "", level: "beginner" });
-      setError("");
+      
+      // Show message if skill was updated instead of created
+      if (response.data.message) {
+        setError(response.data.message);
+        setTimeout(() => setError(""), 3000);
+      } else {
+        setError("");
+      }
     },
     onError: (error: any) => {
       let errorMessage = "Failed to add skill. Please try again.";
@@ -749,6 +764,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
     mutationFn: (id: number) => profileApi.deleteSkill(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["skills"] });
+      queryClient.refetchQueries({ queryKey: ["skills"] });
       setError("");
     },
     onError: (error: any) => {
@@ -821,6 +837,8 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
             )}
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <input
+                id="skill-name"
+                name="skill-name"
                 type="text"
                 className="form-input flex-1 px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                 placeholder="Skill name (e.g., JavaScript)"
@@ -830,6 +848,8 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
                 }
               />
               <select
+                id="skill-level"
+                name="skill-level"
                 className="form-input px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                 value={newSkill.level}
                 onChange={(e) =>
@@ -904,6 +924,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
   isEditing,
   onEditToggle,
 }) => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showAddForm, setShowAddForm] = useState(false);
   const [error, setError] = useState<string>("");
@@ -920,19 +941,31 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     current: false,
   });
 
-  const { data: education = [], isLoading: isLoadingEducation, isError: isEducationError } = useQuery({
+  const { data: education = [], isLoading: isLoadingEducation, isError: isEducationError, refetch: refetchEducation } = useQuery({
     queryKey: ["education"],
     queryFn: () => profileApi.getEducation().then((res) => res.data),
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   const addEducationMutation = useMutation({
     mutationFn: (
       data: Omit<UserEducation, "id" | "created_at" | "updated_at">
     ) => profileApi.addEducation(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["education"] });
+    onSuccess: async (response) => {
+      await queryClient.invalidateQueries({ queryKey: ["education"] });
+      await refetchEducation();
       setShowAddForm(false);
-      setError("");
+      
+      // Show message if education was updated instead of created
+      if (response.data.message) {
+        setError(response.data.message);
+        setTimeout(() => setError(""), 3000);
+      } else {
+        setError("");
+      }
+      
       setNewEducation({
         institution: "",
         degree: "",
@@ -973,6 +1006,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     mutationFn: (id: number) => profileApi.deleteEducation(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["education"] });
+      queryClient.refetchQueries({ queryKey: ["education"] });
       setError("");
     },
     onError: (error: any) => {
@@ -1051,6 +1085,8 @@ const EducationSection: React.FC<EducationSectionProps> = ({
             )}
             <div className="space-y-3">
               <input
+                id="education-institution"
+                name="institution"
                 type="text"
                 className="form-input w-full text-sm sm:text-base"
                 placeholder="Institution"
@@ -1065,6 +1101,8 @@ const EducationSection: React.FC<EducationSectionProps> = ({
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input
+                  id="education-degree"
+                  name="degree"
                   type="text"
                   className="form-input text-sm sm:text-base"
                   placeholder="Degree"
@@ -1075,6 +1113,8 @@ const EducationSection: React.FC<EducationSectionProps> = ({
                   required
                 />
                 <input
+                  id="education-field"
+                  name="field_of_study"
                   type="text"
                   className="form-input text-sm sm:text-base"
                   placeholder="Field of Study"
@@ -1092,6 +1132,8 @@ const EducationSection: React.FC<EducationSectionProps> = ({
                 <div>
                   <label className="form-label text-xs sm:text-sm">Start Date</label>
                   <input
+                    id="education-start-date"
+                    name="start_date"
                     type="date"
                     className="form-input text-sm sm:text-base"
                     value={newEducation.start_date}
@@ -1107,6 +1149,8 @@ const EducationSection: React.FC<EducationSectionProps> = ({
                 <div>
                   <label className="form-label text-xs sm:text-sm">End Date</label>
                   <input
+                    id="education-end-date"
+                    name="end_date"
                     type="date"
                     className="form-input text-sm sm:text-base"
                     value={newEducation.end_date}
@@ -1122,6 +1166,8 @@ const EducationSection: React.FC<EducationSectionProps> = ({
               </div>
               <label className="flex items-center gap-2">
                 <input
+                  id="education-current"
+                  name="current"
                   type="checkbox"
                   checked={newEducation.current}
                   onChange={(e) =>
@@ -1137,6 +1183,8 @@ const EducationSection: React.FC<EducationSectionProps> = ({
                 </span>
               </label>
               <textarea
+                id="education-description"
+                name="description"
                 className="form-input text-sm sm:text-base"
                 placeholder="Description (optional)"
                 rows={3}
@@ -1234,6 +1282,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
   isEditing,
   onEditToggle,
 }) => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showAddForm, setShowAddForm] = useState(false);
   const [error, setError] = useState<string>("");
@@ -1249,19 +1298,31 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     current: false,
   });
 
-  const { data: experience = [], isLoading: isLoadingExperience, isError: isExperienceError } = useQuery({
+  const { data: experience = [], isLoading: isLoadingExperience, isError: isExperienceError, refetch: refetchExperience } = useQuery({
     queryKey: ["experience"],
     queryFn: () => profileApi.getExperience().then((res) => res.data),
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   const addExperienceMutation = useMutation({
     mutationFn: (
       data: Omit<UserExperience, "id" | "created_at" | "updated_at">
     ) => profileApi.addExperience(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["experience"] });
+    onSuccess: async (response) => {
+      await queryClient.invalidateQueries({ queryKey: ["experience"] });
+      await refetchExperience();
       setShowAddForm(false);
-      setError("");
+      
+      // Show message if experience was updated instead of created
+      if (response.data.message) {
+        setError(response.data.message);
+        setTimeout(() => setError(""), 3000);
+      } else {
+        setError("");
+      }
+      
       setNewExperience({
         company: "",
         position: "",
@@ -1301,6 +1362,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     mutationFn: (id: number) => profileApi.deleteExperience(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["experience"] });
+      queryClient.refetchQueries({ queryKey: ["experience"] });
       setError("");
     },
     onError: (error: any) => {
@@ -1379,6 +1441,8 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
             )}
             <div className="space-y-3">
               <input
+                id="experience-company"
+                name="company"
                 type="text"
                 className="form-input text-sm sm:text-base"
                 placeholder="Company"
@@ -1393,6 +1457,8 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input
+                  id="experience-position"
+                  name="position"
                   type="text"
                   className="form-input text-sm sm:text-base"
                   placeholder="Position"
@@ -1406,6 +1472,8 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                   required
                 />
                 <input
+                  id="experience-location"
+                  name="location"
                   type="text"
                   className="form-input text-sm sm:text-base"
                   placeholder="Location (optional)"
@@ -1422,6 +1490,8 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                 <div>
                   <label className="form-label text-xs sm:text-sm">Start Date</label>
                   <input
+                    id="experience-start-date"
+                    name="start_date"
                     type="date"
                     className="form-input text-sm sm:text-base"
                     value={newExperience.start_date}
@@ -1437,6 +1507,8 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                 <div>
                   <label className="form-label text-xs sm:text-sm">End Date</label>
                   <input
+                    id="experience-end-date"
+                    name="end_date"
                     type="date"
                     className="form-input text-sm sm:text-base"
                     value={newExperience.end_date}
@@ -1452,6 +1524,8 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
               </div>
               <label className="flex items-center gap-2">
                 <input
+                  id="experience-current"
+                  name="current"
                   type="checkbox"
                   checked={newExperience.current}
                   onChange={(e) =>
@@ -1467,6 +1541,8 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                 </span>
               </label>
               <textarea
+                id="experience-description"
+                name="description"
                 className="form-input text-sm sm:text-base"
                 placeholder="Description (optional)"
                 rows={3}

@@ -157,6 +157,10 @@ class Notification(models.Model):
         ('reminder', 'Session Reminder'),
         ('admin_escalation', 'Admin Escalation'),
         ('institution_activity', 'Institution Activity'),
+        ('moderation', 'Content Moderation'),
+        ('ai_coach', 'AI Coach Alert'),
+        ('user_registration', 'User Registration'),
+        ('application', 'Application Submitted'),
     ]
 
     user = models.ForeignKey(
@@ -168,6 +172,7 @@ class Notification(models.Model):
     body = models.TextField()
     notification_type = models.CharField(max_length=30, choices=NOTIFICATION_TYPES)
     data = models.JSONField(blank=True, null=True)
+    link = models.CharField(max_length=500, blank=True, null=True)
     read_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

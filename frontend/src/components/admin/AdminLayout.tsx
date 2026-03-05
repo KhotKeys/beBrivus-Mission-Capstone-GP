@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -14,10 +14,16 @@ import {
   Menu,
   X,
   MessageSquare,
+  AlertTriangle,
+  Calendar,
+  UserPlus,
+  FileCheck,
+  Bot,
 } from "lucide-react";
 import { useAdminAuth } from "../../contexts/AdminAuthContext";
-import { useState } from "react";
 import { notificationsApi, type NotificationItem } from "../../api/notifications";
+import { adminApi } from "../../services/adminApi";
+import { OfflineBanner } from "../OfflineBanner";
 
 export const AdminLayout: React.FC = () => {
   const { adminUser, adminLogout } = useAdminAuth();
@@ -27,6 +33,11 @@ export const AdminLayout: React.FC = () => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -51,14 +62,69 @@ export const AdminLayout: React.FC = () => {
       try {
         setNotificationsLoading(true);
         const response = await notificationsApi.list();
-        setNotifications(response.data);
+        setNotifications(Array.isArray(response.data) ? response.data : []);
       } finally {
         setNotificationsLoading(false);
       }
     };
 
     loadNotifications();
+    const interval = setInterval(loadNotifications, 30000);
+    return () => clearInterval(interval);
   }, [notificationsOpen]);
+
+  const performSearch = useCallback(async (query: string) => {
+    if (!query || query.length < 2) {
+      setSearchResults([]);
+      setSearchOpen(false);
+      return;
+    }
+    
+    try {
+      setSearchLoading(true);
+      const response = await adminApi.get(`/admin/search/?q=${encodeURIComponent(query)}`);
+      setSearchResults(response.data.results || []);
+      setSearchOpen(true);
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, []);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    searchTimeoutRef.current = setTimeout(() => {
+      performSearch(query);
+    }, 300);
+  };
+
+  const handleSearchResultClick = (result: any) => {
+    navigate(result.link);
+    setSearchQuery('');
+    setSearchResults([]);
+    setSearchOpen(false);
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'moderation': return <AlertTriangle className="w-4 h-4 text-red-500" />;
+      case 'booking': return <Calendar className="w-4 h-4 text-blue-500" />;
+      case 'ai_coach': return <Bot className="w-4 h-4 text-purple-500" />;
+      case 'user_registration': return <UserPlus className="w-4 h-4 text-green-500" />;
+      case 'application': return <FileCheck className="w-4 h-4 text-orange-500" />;
+      default: return <Bell className="w-4 h-4 text-gray-500" />;
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.read_at).length;
 
   const handleLogout = () => {
     adminLogout();
@@ -102,22 +168,17 @@ export const AdminLayout: React.FC = () => {
       icon: BarChart3,
       current: location.pathname.startsWith("/admin/analytics"),
     },
-    // {
-    //   name: "Content",
-    //   href: "/admin/content",
-    //   icon: BookOpen,
-    //   current: location.pathname.startsWith("/admin/content"),
-    // },
-    // {
-    //   name: "Settings",
-    //   href: "/admin/settings",
-    //   icon: Settings,
-    //   current: location.pathname.startsWith("/admin/settings"),
-    // },
+    {
+      name: "Applications",
+      href: "/admin/applications",
+      icon: FileText,
+      current: location.pathname.startsWith("/admin/applications"),
+    },
   ];
 
   return (
     <div className="min-h-screen bg-neutral-50 lg:flex overflow-x-hidden">
+      <OfflineBanner />
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden pointer-events-none" />
@@ -131,8 +192,15 @@ export const AdminLayout: React.FC = () => {
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-6 bg-gradient-to-r from-primary-600 to-secondary-600">
-            <div className="flex items-center">
+          <div className="flex items-center justify-between h-16 px-6 relative">
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'url(/moderation-forum.jpeg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }} />
+            <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }} />
+            <div className="flex items-center relative z-10">
               <img
                 src="/beBivus.png"
                 alt="beBrivus Logo"
@@ -142,7 +210,7 @@ export const AdminLayout: React.FC = () => {
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-white hover:text-neutral-200"
+              className="lg:hidden text-white hover:text-neutral-200 relative z-10"
             >
               <X className="w-6 h-6" />
             </button>
@@ -227,9 +295,45 @@ export const AdminLayout: React.FC = () => {
                 </div>
                 <input
                   type="text"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  onFocus={() => searchResults.length > 0 && setSearchOpen(true)}
                   className="w-64 pl-10 pr-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
-                  placeholder="Search..."
+                  placeholder="Search users, opportunities..."
                 />
+                {searchOpen && searchResults.length > 0 && (
+                  <div className="absolute top-full mt-2 w-full bg-white border border-neutral-200 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
+                    {searchLoading ? (
+                      <div className="px-4 py-3 text-sm text-neutral-500">Searching...</div>
+                    ) : (
+                      searchResults.map((result, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleSearchResultClick(result)}
+                          className="w-full text-left px-4 py-3 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-primary-600 uppercase">{result.type}</span>
+                          </div>
+                          <p className="text-sm font-medium text-neutral-900 mt-1">{result.title}</p>
+                          <p className="text-xs text-neutral-500">{result.subtitle}</p>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+                {searchQuery && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSearchResults([]);
+                      setSearchOpen(false);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
               </div>
 
               {/* Notifications */}
@@ -238,8 +342,10 @@ export const AdminLayout: React.FC = () => {
                 className="relative p-2 text-neutral-400 hover:text-neutral-600 rounded-lg hover:bg-neutral-100"
               >
                 <Bell className="w-5 h-5" />
-                {notifications.some((item) => !item.read_at) && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-error-500 rounded-full"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-error-500 rounded-full">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
                 )}
               </button>
 
@@ -247,7 +353,7 @@ export const AdminLayout: React.FC = () => {
                 <div className="absolute right-4 sm:right-6 top-16 w-80 bg-white border border-neutral-200 rounded-xl shadow-xl z-50">
                   <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
                     <span className="text-sm font-semibold text-neutral-900">
-                      Notifications
+                      Notifications {unreadCount > 0 && `(${unreadCount})`}
                     </span>
                     <button
                       className="text-xs text-primary-600 hover:text-primary-700"
@@ -271,7 +377,7 @@ export const AdminLayout: React.FC = () => {
                         No notifications yet.
                       </div>
                     ) : (
-                      notifications.slice(0, 8).map((item) => (
+                      notifications.slice(0, 10).map((item) => (
                         <button
                           key={item.id}
                           className={`w-full text-left px-4 py-3 border-b border-neutral-100 hover:bg-neutral-50 ${
@@ -288,17 +394,26 @@ export const AdminLayout: React.FC = () => {
                                 )
                               );
                             }
+                            if (item.link) {
+                              navigate(item.link);
+                              setNotificationsOpen(false);
+                            }
                           }}
                         >
-                          <p className="text-sm font-semibold text-neutral-900">
-                            {item.title}
-                          </p>
-                          <p className="text-xs text-neutral-600 mt-1">
-                            {item.body}
-                          </p>
-                          <p className="text-xs text-neutral-400 mt-2">
-                            {new Date(item.created_at).toLocaleString()}
-                          </p>
+                          <div className="flex items-start gap-2">
+                            {getNotificationIcon(item.notification_type)}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-neutral-900">
+                                {item.title}
+                              </p>
+                              <p className="text-xs text-neutral-600 mt-1">
+                                {item.body}
+                              </p>
+                              <p className="text-xs text-neutral-400 mt-2">
+                                {new Date(item.created_at).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
                         </button>
                       ))
                     )}

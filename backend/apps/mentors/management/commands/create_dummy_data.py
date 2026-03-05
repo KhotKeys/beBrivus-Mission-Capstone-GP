@@ -85,13 +85,13 @@ class Command(BaseCommand):
         # Create admin user first
         admin_user = None
         try:
-            admin_user = User.objects.get(email='admin@bebrivus.com')
+            admin_user = User.objects.get(email='kkhotmachil@gmail.com')
             self.stdout.write('Admin user already exists')
         except User.DoesNotExist:
             try:
                 admin_user = User.objects.create_user(
                     username='bebrivus_admin',
-                    email='admin@bebrivus.com',
+                    email='kkhotmachil@gmail.com',
                     first_name='Admin',
                     last_name='User',
                     password='admin123'

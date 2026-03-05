@@ -12,14 +12,15 @@ export const AdminLoginPage: React.FC = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { adminLogin, isAdminAuthenticated } = useAdminAuth();
+  const { adminLogin, isAdminAuthenticated, isLoading: authLoading } = useAdminAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAdminAuthenticated) {
+    // Only redirect if auth is loaded and user is authenticated
+    if (!authLoading && isAdminAuthenticated) {
       navigate("/admin/dashboard");
     }
-  }, [isAdminAuthenticated, navigate]);
+  }, [isAdminAuthenticated, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +48,18 @@ export const AdminLoginPage: React.FC = () => {
       [name]: value,
     }));
   };
+
+  // Show loading screen while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-900">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

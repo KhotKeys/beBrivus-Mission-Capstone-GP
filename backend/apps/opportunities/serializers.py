@@ -30,8 +30,8 @@ class OpportunitySerializer(serializers.ModelSerializer):
             'id', 'title', 'short_description', 'organization', 'organization_logo', 'location', 'remote_allowed',
             'category', 'category_name', 'difficulty_level', 'description', 'requirements',
             'salary_min', 'salary_max', 'currency', 'benefits', 'application_process', 'required_documents',
-            'application_deadline', 'start_date', 'end_date', 'external_url',
-            'match_score', 'days_remaining', 'is_active', 'status', 'featured',
+            'application_deadline', 'start_date', 'end_date', 'application_type', 'external_url',
+            'match_score', 'days_remaining', 'is_active', 'status', 'featured', 'posted_by_type',
             'views_count', 'applications_count', 'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at', 'is_active', 'views_count', 'applications_count']

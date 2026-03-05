@@ -357,8 +357,8 @@ export const AdminDashboard: React.FC = () => {
           </h2>
           <Card>
             <CardBody className="p-0">
-              <div className="space-y-0">
-                {recentActivity?.activities?.map((activity, index) => {
+              <div className="max-h-[350px] overflow-y-auto">
+                {recentActivity?.activities?.slice(0, 5).map((activity, index) => {
                   // Map icon names to components
                   const getIcon = (iconName: string) => {
                     switch (iconName) {

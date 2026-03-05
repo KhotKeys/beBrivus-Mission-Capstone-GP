@@ -25,8 +25,34 @@ class ApplicationViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
     def get_queryset(self):
+        user = self.request.user
+
+        is_institution = (
+            getattr(user, 'user_type', '') == 'institution' or
+            getattr(user, 'role', '') == 'institution' or
+            hasattr(user, 'institution_profile')
+        )
+
+        if is_institution:
+            return Application.objects.filter(
+                opportunity__posted_by=user
+            ).select_related('user', 'opportunity').order_by('-created_at')
+
+        if user.is_staff:
+            # Admin sees applications for admin-posted opportunities
+            try:
+                qs = Application.objects.filter(
+                    opportunity__posted_by_type='admin'
+                ).select_related('user', 'opportunity').order_by('-created_at')
+                # If empty, fall back to all
+                if qs.count() == 0:
+                    return Application.objects.all().select_related('user', 'opportunity').order_by('-created_at')
+                return qs
+            except Exception:
+                return Application.objects.all().select_related('user', 'opportunity').order_by('-created_at')
+
         return Application.objects.filter(
-            user=self.request.user
+            user=user
         ).select_related('opportunity').order_by('-created_at')
 
     def get_serializer_class(self):
@@ -35,23 +61,215 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         return ApplicationSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        application = serializer.save(user=self.request.user)
+        
+        # Import here to avoid circular imports
+        from apps.notifications.models import Notification
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        
+        # Notify institution or admin who owns the opportunity
+        opportunity_owner = application.opportunity.posted_by
+        if opportunity_owner:
+            Notification.objects.create(
+                recipient=opportunity_owner,
+                notification_type='application_submitted',
+                title='New Application Received',
+                message=f'{self.request.user.get_full_name() or self.request.user.username} applied for "{application.opportunity.title}".',
+                related_application=application,
+                related_opportunity=application.opportunity,
+            )
+
+        # Always notify admin if institution received the application
+        if application.opportunity.posted_by_type == 'institution':
+            admins = User.objects.filter(is_staff=True)
+            for admin in admins:
+                if admin != opportunity_owner:
+                    Notification.objects.create(
+                        recipient=admin,
+                        notification_type='application_submitted',
+                        title='New Application to Institution Opportunity',
+                        message=f'{self.request.user.get_full_name() or self.request.user.username} applied for institution opportunity "{application.opportunity.title}".',
+                        related_application=application,
+                        related_opportunity=application.opportunity,
+                    )
+    
+    def update(self, request, *args, **kwargs):
+        """Override update to handle feedback and status changes"""
+        instance = self.get_object()
+        feedback_text = request.data.get('notes') or request.data.get('feedback')
+        new_status = request.data.get('status')
+        
+        # Track old status for history
+        old_status = instance.status
+        
+        # Update status if provided
+        if new_status and new_status != old_status:
+            instance.status = new_status
+            
+            # Create status history
+            from .models import ApplicationStatusHistory
+            ApplicationStatusHistory.objects.create(
+                application=instance,
+                old_status=old_status,
+                new_status=new_status,
+                changed_by=request.user,
+                notes=feedback_text or ''
+            )
+            
+            # Send email notification to applicant
+            self._send_status_update_email(instance, old_status, new_status)
+        
+        # Save feedback if provided
+        if feedback_text:
+            from .models import ApplicationFeedback
+            feedback, created = ApplicationFeedback.objects.get_or_create(
+                application=instance,
+                defaults={'created_by': request.user}
+            )
+            feedback.general_comments = feedback_text
+            feedback.public = True
+            feedback.created_by = request.user
+            feedback.save()
+            
+            instance.notes = feedback_text
+        
+        # Update other fields from request
+        for field in ['cover_letter', 'additional_info', 'interview_date']:
+            if field in request.data:
+                setattr(instance, field, request.data[field])
+        
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+    
+    def _send_status_update_email(self, application, old_status, new_status):
+        """Send email notification when application status changes"""
+        from django.core.mail import EmailMultiAlternatives
+        from django.conf import settings
+        from django.template.loader import render_to_string
+        from threading import Thread
+        
+        def send_async():
+            try:
+                frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+                user_name = application.user.get_full_name()
+                opportunity_title = application.opportunity.title
+                
+                # Select template and subject based on status
+                if new_status == 'accepted':
+                    template = 'emails/application_accepted.html'
+                    subject = f'🎉 Congratulations! Your Application Has Been Accepted — {opportunity_title}'
+                elif new_status == 'rejected':
+                    template = 'emails/application_rejected.html'
+                    subject = f'Your Application Update — {opportunity_title}'
+                elif new_status == 'under_review':
+                    template = 'emails/application_under_review.html'
+                    subject = f'Your Application Is Under Review — {opportunity_title}'
+                else:
+                    # Fallback for other statuses
+                    template = None
+                    subject = f'Application Status Update — {opportunity_title}'
+                
+                if template:
+                    from .email_utils import get_logo_base64
+                    html_content = render_to_string(template, {
+                        'user_name': user_name,
+                        'opportunity_title': opportunity_title,
+                        'frontend_url': frontend_url,
+                        'dashboard_url': f'{frontend_url}/applications',
+                        'opportunities_url': f'{frontend_url}/opportunities',
+                        'logo_base64': get_logo_base64(),
+                    })
+                    
+                    from_email = settings.EMAIL_HOST_USER or 'no-reply@bebrivus.com'
+                    email = EmailMultiAlternatives(
+                        subject=subject,
+                        body=f'Your application for {opportunity_title} has been updated to: {new_status.replace("_", " ").title()}',
+                        from_email=from_email,
+                        to=[application.user.email]
+                    )
+                    email.attach_alternative(html_content, "text/html")
+                    email.send(fail_silently=True)
+                    print(f'✓ Email sent to {application.user.email} — application {new_status}')
+            except Exception as e:
+                print(f'Failed to send status update email: {e}')
+        
+        Thread(target=send_async, daemon=True).start()
 
     @action(detail=True, methods=['patch'])
     def update_status(self, request, pk=None):
         """Update application status"""
         application = self.get_object()
-        new_status = request.data.get('status')
-        
-        if new_status in [choice[0] for choice in Application.STATUS_CHOICES]:
-            application.status = new_status
-            application.save()
-            return Response(ApplicationSerializer(application).data)
-        
-        return Response(
-            {'error': 'Invalid status'}, 
-            status=status.HTTP_400_BAD_REQUEST
+        user = request.user
+
+        # Permission check
+        is_admin = user.is_staff
+        is_opportunity_owner = (
+            application.opportunity.posted_by == user
         )
+
+        if not is_admin and not is_opportunity_owner:
+            return Response({'error': 'Permission denied.'}, status=403)
+
+        new_status = request.data.get('status')
+        feedback = request.data.get('feedback', '')
+
+        valid_statuses = [
+            'pending', 'under_review',
+            'interview_scheduled', 'accepted', 'rejected'
+        ]
+        if new_status not in valid_statuses:
+            return Response({'error': f'Invalid status.'}, status=400)
+
+        old_status = application.status
+        application.status = new_status
+        if feedback:
+            application.notes = feedback
+        application.save()
+
+        # Import here to avoid circular imports
+        from apps.notifications.models import Notification
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+
+        status_labels = {
+            'pending': 'Pending',
+            'under_review': 'Under Review',
+            'interview_scheduled': 'Interview Scheduled',
+            'accepted': 'Accepted ✅',
+            'rejected': 'Rejected ❌',
+        }
+
+        # Notify the STUDENT about their application status change
+        Notification.objects.create(
+            recipient=application.user,
+            notification_type='status_changed',
+            title=f'Application {status_labels.get(new_status, new_status)}',
+            message=f'Your application for "{application.opportunity.title}" has been updated to {status_labels.get(new_status, new_status)}.' + (f' Feedback: {feedback}' if feedback else ''),
+            related_application=application,
+            related_opportunity=application.opportunity,
+        )
+
+        # Notify ADMIN if status was changed by an institution
+        if is_opportunity_owner and not is_admin:
+            admins = User.objects.filter(is_staff=True)
+            for admin in admins:
+                Notification.objects.create(
+                    recipient=admin,
+                    notification_type='status_changed',
+                    title=f'Institution updated application status',
+                    message=f'Institution updated application for "{application.opportunity.title}" from {status_labels.get(old_status, old_status)} to {status_labels.get(new_status, new_status)}.',
+                    related_application=application,
+                    related_opportunity=application.opportunity,
+                )
+
+        return Response({
+            'id': application.id,
+            'status': application.status,
+            'notes': application.notes,
+            'message': f'Status updated to {new_status}'
+        })
 
     @action(detail=True, methods=['post'])
     def add_interview(self, request, pk=None):
@@ -79,6 +297,27 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         application.notes = notes
         application.save()
         return Response(ApplicationSerializer(application).data)
+    
+    @action(detail=False, methods=['get'])
+    def my_opportunities(self, request):
+        """Get applications for opportunities created by the current user"""
+        from apps.opportunities.models import Opportunity
+        
+        # Get opportunities created by current user
+        user_opportunities = Opportunity.objects.filter(created_by=request.user)
+        
+        # Get applications for those opportunities
+        applications = Application.objects.filter(
+            opportunity__in=user_opportunities
+        ).select_related('user', 'opportunity').order_by('-submitted_at')
+        
+        # Apply status filter if provided
+        status_filter = request.query_params.get('status')
+        if status_filter and status_filter != 'all':
+            applications = applications.filter(status=status_filter)
+        
+        serializer = ApplicationDetailSerializer(applications, many=True)
+        return Response(serializer.data)
 
 
 class ApplicationDashboardView(APIView):

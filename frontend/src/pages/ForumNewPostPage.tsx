@@ -10,6 +10,8 @@ export const ForumNewPostPage: React.FC = () => {
   const [category, setCategory] = useState("");
   const [discussionType, setDiscussionType] = useState("discussion");
   const [tags, setTags] = useState<string[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -21,7 +23,29 @@ export const ForumNewPostPage: React.FC = () => {
   const categories = categoriesData?.results || [];
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => api.post("/forum/discussions/", data),
+    mutationFn: async (postData: any) => {
+      const formData = new FormData();
+      formData.append('title', postData.title);
+      formData.append('content', postData.content);
+      if (postData.category) formData.append('category', String(postData.category));
+      if (postData.discussion_type) formData.append('discussion_type', postData.discussion_type);
+      if (postData.tags && postData.tags.length > 0) {
+        formData.append('tags', JSON.stringify(postData.tags));
+      }
+      if (postData.image instanceof File) {
+        formData.append('image', postData.image);
+        console.log('Appending image:', postData.image.name, postData.image.size);
+      }
+      // Log FormData contents
+      for (let [key, val] of formData.entries()) {
+        console.log('FormData:', key, val);
+      }
+      const response = await api.post('/forum/discussions/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      console.log('Response:', response.data);
+      return response;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forum-discussions"] });
       navigate("/forum");
@@ -36,6 +60,7 @@ export const ForumNewPostPage: React.FC = () => {
       content,
       category,
       discussion_type: discussionType,
+      image: imageFile, // Pass the File object
     };
 
     // Only include tags if they exist
@@ -70,6 +95,59 @@ export const ForumNewPostPage: React.FC = () => {
               rows={6}
               required
             />
+          </div>
+          
+          {/* Image Upload */}
+          <div>
+            <label className="block mb-1 font-medium">Image (optional)</label>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
+              {imagePreview ? (
+                <div className="space-y-3">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="max-w-full max-h-64 mx-auto rounded-lg shadow-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageFile(null);
+                      setImagePreview(null);
+                    }}
+                    className="text-red-600 hover:text-red-800 text-sm font-medium"
+                  >
+                    Remove image
+                  </button>
+                </div>
+              ) : (
+                <label className="cursor-pointer">
+                  <div className="space-y-2">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <div className="text-gray-600">
+                      <span className="font-medium text-primary-600 hover:text-primary-500">Click to upload</span> or drag and drop
+                    </div>
+                    <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 5 * 1024 * 1024) {
+                        alert('Image must be under 5MB');
+                        return;
+                      }
+                      setImageFile(file);
+                      setImagePreview(URL.createObjectURL(file));
+                    }}
+                  />
+                </label>
+              )}
+            </div>
           </div>
           <div>
             <label className="block mb-1 font-medium">Category</label>

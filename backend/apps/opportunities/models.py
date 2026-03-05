@@ -42,6 +42,11 @@ class Opportunity(models.Model):
         ('advanced', 'Advanced'),
     ]
     
+    APPLICATION_TYPES = [
+        ('internal', 'Internal Application'),
+        ('external', 'External Application'),
+    ]
+    
     # Basic Information
     title = models.CharField(max_length=200)
     description = models.TextField()
@@ -74,6 +79,7 @@ class Opportunity(models.Model):
     # Meta
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     difficulty_level = models.CharField(max_length=20, choices=DIFFICULTY_LEVELS, default='intermediate')
+    application_type = models.CharField(max_length=20, choices=APPLICATION_TYPES, default='internal')
     external_url = models.URLField(blank=True)
     ai_imported = models.BooleanField(default=False)
     verified = models.BooleanField(default=False)
@@ -85,6 +91,17 @@ class Opportunity(models.Model):
     
     # Relations
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_opportunities')
+    posted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='posted_opportunities'
+    )
+    posted_by_type = models.CharField(
+        max_length=20,
+        choices=[('admin', 'Admin'), ('institution', 'Institution')],
+        default='admin'
+    )
     tags = TaggableManager()
     
     # Timestamps

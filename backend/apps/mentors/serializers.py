@@ -259,15 +259,19 @@ class MentorSessionSerializer(serializers.ModelSerializer):
 
 class BookSessionSerializer(serializers.Serializer):
     """Serializer for booking a mentor session"""
-    session_date = serializers.DateField()
-    start_time = serializers.TimeField()
+    session_date = serializers.DateField(input_formats=['%Y-%m-%d'])
+    start_time = serializers.TimeField(input_formats=['%H:%M:%S', '%H:%M'])
     duration = serializers.IntegerField(default=60, min_value=30, max_value=180)
-    session_type = serializers.ChoiceField(choices=[
-        ('career_guidance', 'Career Guidance'),
-        ('interview_prep', 'Interview Preparation'),
-        ('skill_development', 'Skill Development'),
-        ('portfolio_review', 'Portfolio Review'),
-        ('networking', 'Networking'),
-        ('other', 'Other')
-    ])
-    notes = serializers.CharField(required=False, allow_blank=True)
+    session_type = serializers.ChoiceField(
+        choices=[
+            ('career_guidance', 'Career Guidance'),
+            ('interview_prep', 'Interview Preparation'),
+            ('skill_development', 'Skill Development'),
+            ('portfolio_review', 'Portfolio Review'),
+            ('networking', 'Networking'),
+            ('general', 'General'),
+            ('other', 'Other')
+        ],
+        default='general'
+    )
+    notes = serializers.CharField(required=False, allow_blank=True, default='')

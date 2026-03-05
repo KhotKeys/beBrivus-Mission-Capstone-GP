@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { mentorApi, type MentorSession } from "../api/mentors";
 import { Layout } from "../components/layout";
 import { Button } from "../components/ui";
+import { useLanguage } from "../hooks/useLanguage";
 import {
   Calendar,
   Clock,
@@ -34,6 +35,8 @@ interface Mentee {
 }
 
 const MentorDashboard: React.FC = () => {
+  useLanguage();
+  
   const [activeTab, setActiveTab] = useState<
     "overview" | "pending" | "upcoming" | "mentees" | "history"
   >("overview");
@@ -46,29 +49,37 @@ const MentorDashboard: React.FC = () => {
 
   const queryClient = useQueryClient();
 
-  // Fetch mentor's sessions
+  // Fetch mentor's sessions - always enabled, refetch on mount
   const { data: pendingSessions, isLoading: pendingLoading } = useQuery<MentorSession[]>({
     queryKey: ["mentor-pending-sessions"],
     queryFn: () => mentorApi.getPendingSessions(),
-    enabled: activeTab === "pending" || activeTab === "overview",
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   const { data: upcomingSessions, isLoading: upcomingLoading } = useQuery<MentorSession[]>({
     queryKey: ["mentor-upcoming-sessions"],
     queryFn: () => mentorApi.getUpcomingSessions(),
-    enabled: activeTab === "upcoming" || activeTab === "overview",
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   const { data: allSessions } = useQuery<MentorSession[]>({
     queryKey: ["mentor-all-sessions"],
     queryFn: () => mentorApi.getMySessions(),
-    enabled: activeTab === "history" || activeTab === "overview",
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   const { data: mentees, isLoading: menteesLoading } = useQuery<Mentee[]>({
     queryKey: ["mentor-mentees"],
     queryFn: () => mentorApi.getMyMentees(),
-    enabled: activeTab === "mentees" || activeTab === "overview",
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   const { data: notificationsData } = useQuery({
@@ -162,12 +173,31 @@ const MentorDashboard: React.FC = () => {
   };
 
   const getSessionDateTime = (session: MentorSession) => {
-    const baseDate = session.session_date || "";
-    if (!baseDate) {
-      return null;
+    // Use session_date field (which comes from scheduled_start in backend)
+    if (session.session_date) {
+      try {
+        const date = new Date(session.session_date);
+        if (!isNaN(date.getTime())) {
+          return date;
+        }
+      } catch (e) {
+        console.error('Failed to parse session_date:', session.session_date, e);
+      }
     }
-    const timePart = session.start_time ? `T${session.start_time}` : "";
-    return new Date(`${baseDate}${timePart}`);
+    
+    // Fallback to scheduled_start
+    if (session.scheduled_start) {
+      try {
+        const date = new Date(session.scheduled_start);
+        if (!isNaN(date.getTime())) {
+          return date;
+        }
+      } catch (e) {
+        console.error('Failed to parse scheduled_start:', session.scheduled_start, e);
+      }
+    }
+    
+    return null;
   };
 
   const handleConfirmSession = () => {
@@ -191,8 +221,12 @@ const MentorDashboard: React.FC = () => {
 
   const handleStartSession = (session: MentorSession) => {
     startSessionMutation.mutate(session.id);
-    // Navigate to video call
-    window.location.href = `/video-call/${session.meeting_id || session.id}`;
+    // Open the Google Meet meeting link in a new tab
+    if (session.meeting_link) {
+      window.open(session.meeting_link, '_blank', 'noopener,noreferrer');
+    } else {
+      alert('Meeting link not yet available. Please wait for the mentor to provide the meeting link.');
+    }
   };
 
   const renderOverviewTab = () => {
@@ -520,10 +554,20 @@ const MentorDashboard: React.FC = () => {
               </div>
             </div>
 
-            {session.agenda && (
+            {(session.notes || session.agenda) && (
               <div className="bg-neutral-50 rounded-md xs:rounded-lg p-2 xs:p-3 sm:p-4 mt-2 xs:mt-3 sm:mt-4">
-                <p className="text-[8px] xs:text-[10px] sm:text-xs lg:text-sm text-neutral-500 mb-0.5 xs:mb-1">Session Agenda:</p>
-                <p className="text-[9px] xs:text-xs sm:text-sm lg:text-base text-secondary-700">{session.agenda}</p>
+                {session.notes && (
+                  <>
+                    <p className="text-[8px] xs:text-[10px] sm:text-xs lg:text-sm text-neutral-500 mb-0.5 xs:mb-1">Mentee Notes:</p>
+                    <p className="text-[9px] xs:text-xs sm:text-sm lg:text-base text-secondary-700">{session.notes}</p>
+                  </>
+                )}
+                {session.agenda && (
+                  <>
+                    <p className="text-[8px] xs:text-[10px] sm:text-xs lg:text-sm text-neutral-500 mt-2 mb-0.5 xs:mb-1">Session Agenda:</p>
+                    <p className="text-[9px] xs:text-xs sm:text-sm lg:text-base text-secondary-700">{session.agenda}</p>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -631,8 +675,16 @@ const MentorDashboard: React.FC = () => {
               </div>
             </div>
 
-            {(session.agenda || session.mentor_notes || session.meeting_link) && (
+            {(session.notes || session.agenda || session.mentor_notes || session.meeting_link) && (
               <div className="space-y-3 mt-4">
+                {session.notes && (
+                  <div className="bg-neutral-50 rounded-lg p-4">
+                    <p className="text-sm text-neutral-500 mb-1">
+                      Mentee Notes:
+                    </p>
+                    <p className="text-secondary-700">{session.notes}</p>
+                  </div>
+                )}
                 {session.agenda && (
                   <div className="bg-neutral-50 rounded-lg p-4">
                     <p className="text-sm text-neutral-500 mb-1">
@@ -663,21 +715,7 @@ const MentorDashboard: React.FC = () => {
               </div>
             )}
 
-            {session.meeting_link && (
-              <div className="mt-4 p-4 bg-success-50 rounded-lg border border-success-200">
-                <p className="text-sm text-success-700 mb-2 font-medium">
-                  Meeting Link:
-                </p>
-                <a
-                  href={session.meeting_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-success-600 hover:text-success-700 underline break-all"
-                >
-                  {session.meeting_link}
-                </a>
-              </div>
-            )}
+
           </div>
         ))}
 

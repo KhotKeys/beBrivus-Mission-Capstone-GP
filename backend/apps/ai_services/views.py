@@ -381,6 +381,7 @@ class ChatView(APIView):
     def post(self, request):
         message = request.data.get('message', '')
         context = request.data.get('context', 'career_coach')
+        session_id = request.data.get('session_id')  # Optional existing session
         
         if not message:
             return Response(
@@ -389,15 +390,94 @@ class ChatView(APIView):
             )
         
         try:
-            # Build context-specific system prompt
+            # Moderate user input
+            moderation_result = gemini_service.moderate_content(message, 'chat_message')
+            if moderation_result.get('should_flag', False):
+                self._create_moderation_flag(
+                    request.user,
+                    'chat_message',
+                    0,  # No specific ID yet
+                    message,
+                    moderation_result
+                )
+            
+            # Get or create chat session
+            if session_id:
+                session = get_object_or_404(ChatSession, id=session_id, user=request.user)
+            else:
+                # Auto-generate title from first message
+                title = message[:50] + ('...' if len(message) > 50 else '')
+                session = ChatSession.objects.create(
+                    user=request.user,
+                    title=title,
+                    session_type='general'
+                )
+            
+            # Save user message
+            ChatMessage.objects.create(
+                session=session,
+                is_user=True,
+                content=message
+            )
+            
+            # Get or create user memory profile
+            from .models import UserMemoryProfile
+            memory, created = UserMemoryProfile.objects.get_or_create(user=request.user)
+            
+            # Also load user's profile data for context
+            from apps.accounts.models import UserSkill, UserEducation
+            user_skills = list(UserSkill.objects.filter(user=request.user).values_list('name', flat=True))
+            user_education = UserEducation.objects.filter(user=request.user).first()
+            
+            # Get language preference
+            language = request.data.get('language', 'English')
+            
+            language_instruction = f"CRITICAL: You MUST respond ONLY in {language}. Every word of your response must be in {language}. Never respond in English unless language is English. Never mix languages.\n\n"
+            
+            # Build context-specific system prompt with memory
             system_prompts = {
                 'career_coach': "You are a helpful career coach and counselor. Provide guidance on career development, job search, interview preparation, resume writing, and professional growth.",
                 'application_help': "You are an expert in job applications. Help users craft compelling applications, cover letters, and prepare for interviews.",
                 'general': "You are a helpful AI assistant focused on career and professional development."
             }
             
-            system_prompt = system_prompts.get(context, system_prompts['general'])
-            full_prompt = f"{system_prompt}\n\nUser: {message}\n\nAssistant:"
+            system_prompt = language_instruction + system_prompts.get(context, system_prompts['general'])
+            
+            # Add personalized memory to prompt
+            memory_context = "\n\nUser Profile (remember this):"
+            if memory.preferred_name or request.user.first_name:
+                name = memory.preferred_name or f"{request.user.first_name} {request.user.last_name}".strip()
+                memory_context += f"\n- Name: {name}"
+            
+            # Add skills from both memory and profile
+            all_skills = list(set(memory.skills_mentioned + user_skills))
+            if all_skills:
+                memory_context += f"\n- Skills: {', '.join(all_skills)}"
+            
+            # Add education from profile
+            if user_education:
+                memory_context += f"\n- Education: {user_education.degree} in {user_education.field_of_study} from {user_education.institution}"
+            
+            if memory.career_goals:
+                memory_context += f"\n- Career Goals: {memory.career_goals}"
+            if memory.last_conversation_summary:
+                memory_context += f"\n- Last conversation: {memory.last_conversation_summary}"
+            
+            system_prompt += memory_context
+            
+            # Personalized greeting for returning users
+            if memory.conversation_count > 0 and not session_id:
+                user_name = memory.preferred_name or request.user.first_name or 'the user'
+                system_prompt += f"\n\nGreet {user_name} warmly and reference what you discussed last time."
+            
+            # Build conversation history for context
+            recent_messages = session.messages.all()[:10]
+            conversation_history = "\n".join([
+                f"{'User' if msg.is_user else 'Assistant'}: {msg.content}"
+                for msg in reversed(recent_messages)
+            ])
+            
+            full_prompt = f"{system_prompt}\n\n{conversation_history}\n\nAssistant:"
             
             # Generate response using Gemini
             start_time = time.time()
@@ -406,16 +486,58 @@ class ChatView(APIView):
                     "AI coach is not configured yet. Please contact support or try again later."
                 )
                 processing_time = 0
+                model_version = "unavailable"
             else:
                 response = gemini_service.generate_content(full_prompt)
                 processing_time = int((time.time() - start_time) * 1000)
+                model_version = 'gemini-2.0-flash'
             
-            # Optionally save to chat session (simplified)
-            # You can create a default session or skip saving for now
+            # Save AI response
+            ChatMessage.objects.create(
+                session=session,
+                is_user=False,
+                content=response,
+                model_version=model_version,
+                processing_time_ms=processing_time
+            )
+            
+            # Update user memory profile
+            conversation_text = f"User: {message}\nAssistant: {response}"
+            existing_memory = {
+                'preferred_name': memory.preferred_name,
+                'skills_mentioned': memory.skills_mentioned,
+                'career_goals': memory.career_goals,
+                'interests': memory.interests,
+                'past_topics': memory.past_topics,
+            }
+            updated_memory = gemini_service.extract_user_memory(conversation_text, existing_memory)
+            
+            # Update memory fields
+            if updated_memory.get('preferred_name'):
+                memory.preferred_name = updated_memory['preferred_name']
+            if updated_memory.get('skills_mentioned'):
+                memory.skills_mentioned = list(set(memory.skills_mentioned + updated_memory['skills_mentioned']))
+            if updated_memory.get('career_goals'):
+                memory.career_goals = updated_memory['career_goals']
+            if updated_memory.get('interests'):
+                memory.interests = list(set(memory.interests + updated_memory['interests']))
+            if updated_memory.get('past_topics'):
+                memory.past_topics = list(set(memory.past_topics + updated_memory['past_topics']))[-10:]  # Keep last 10
+            if updated_memory.get('last_conversation_summary'):
+                memory.last_conversation_summary = updated_memory['last_conversation_summary']
+            
+            memory.conversation_count += 1
+            memory.save()
+            
+            # Update session timestamp
+            session.updated_at = timezone.now()
+            session.save()
             
             return Response({
                 'response': response,
-                'processing_time_ms': processing_time
+                'processing_time_ms': processing_time,
+                'session_id': session.id,
+                'session_title': session.title
             })
             
         except Exception as e:
@@ -435,3 +557,134 @@ class ChatView(APIView):
                 'processing_time_ms': 0,
                 'error': error_str if settings.DEBUG else None
             })
+    
+    def _create_moderation_flag(self, user, content_type, content_id, content_text, moderation_result):
+        """Create moderation flag and send email to admin"""
+        from .models import ContentModerationFlag
+        from apps.forum.moderation_models import FlaggedContent
+        from django.core.mail import send_mail
+        from threading import Thread
+        
+        categories = moderation_result.get('categories', [])
+        violation_category = ', '.join(categories) if categories else 'Policy Violation'
+        
+        # Create ContentModerationFlag (existing)
+        flag = ContentModerationFlag.objects.create(
+            content_type=content_type,
+            content_id=content_id,
+            content_text=content_text[:500],  # Truncate
+            violation_category=violation_category,
+            confidence_score=moderation_result.get('confidence_score', 0.0),
+            reason=moderation_result.get('reason', ''),
+            flagged_user=user,
+            status='pending'
+        )
+        
+        # Also create FlaggedContent for Admin Moderation Center
+        FlaggedContent.objects.create(
+            post_id=0,  # No specific post ID for AI Coach
+            content=content_text[:500],
+            author_username=user.username,
+            violation_categories=categories,
+            ai_confidence=moderation_result.get('confidence_score', 0.0),
+            reason=f"AI Coach: {moderation_result.get('reason', '')}",
+            status='pending'
+        )
+        
+        # Send email notification to admin
+        def send_async():
+            try:
+                subject = f'[beBrivus] Content Moderation Alert - {violation_category}'
+                message = (
+                    f'Content flagged for moderation review:\n\n'
+                    f'Source: AI Coach\n'
+                    f'Type: {content_type}\n'
+                    f'User: {user.email}\n'
+                    f'Violation: {violation_category}\n'
+                    f'Confidence: {moderation_result.get("confidence_score", 0.0):.2f}\n'
+                    f'Reason: {moderation_result.get("reason", "")}\n\n'
+                    f'Content Preview:\n{content_text[:200]}...\n\n'
+                    f'Review in Admin Moderation Center'
+                )
+                
+                send_mail(
+                    subject,
+                    message,
+                    settings.EMAIL_HOST_USER or 'no-reply@bebrivus.com',
+                    ['ethxkeys@gmail.com'],
+                    fail_silently=True
+                )
+                flag.admin_notified = True
+                flag.save()
+            except Exception as e:
+                logger.error(f'Failed to send moderation alert: {e}')
+        
+        Thread(target=send_async, daemon=True).start()
+    
+    def get(self, request):
+        """Get user's chat sessions"""
+        sessions = ChatSession.objects.filter(user=request.user).order_by('-is_starred', '-updated_at')
+        return Response([
+            {
+                'id': s.id,
+                'title': s.title,
+                'is_starred': s.is_starred,
+                'created_at': s.created_at,
+                'updated_at': s.updated_at,
+                'message_count': s.messages.count()
+            }
+            for s in sessions
+        ])
+
+
+class ChatSessionDetailView(APIView):
+    """Manage individual chat sessions"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, session_id):
+        """Get messages for a chat session"""
+        session = get_object_or_404(ChatSession, id=session_id, user=request.user)
+        messages = session.messages.all().order_by('created_at')
+        return Response({
+            'session': {
+                'id': session.id,
+                'title': session.title,
+                'is_starred': session.is_starred,
+                'created_at': session.created_at,
+                'updated_at': session.updated_at,
+            },
+            'messages': [
+                {
+                    'id': m.id,
+                    'role': 'user' if m.is_user else 'assistant',
+                    'content': m.content,
+                    'timestamp': m.created_at,
+                }
+                for m in messages
+            ]
+        })
+    
+    def patch(self, request, session_id):
+        """Update chat session (rename or star)"""
+        session = get_object_or_404(ChatSession, id=session_id, user=request.user)
+        
+        if 'title' in request.data:
+            session.title = request.data['title']
+        
+        if 'is_starred' in request.data:
+            session.is_starred = request.data['is_starred']
+        
+        session.save()
+        
+        return Response({
+            'id': session.id,
+            'title': session.title,
+            'is_starred': session.is_starred,
+            'updated_at': session.updated_at,
+        })
+    
+    def delete(self, request, session_id):
+        """Delete chat session and all its messages"""
+        session = get_object_or_404(ChatSession, id=session_id, user=request.user)
+        session.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

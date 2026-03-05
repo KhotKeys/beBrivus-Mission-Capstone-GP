@@ -77,6 +77,8 @@ export const ForumDiscussionPage: React.FC = () => {
   const [replyContent, setReplyContent] = useState("");
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [replyError, setReplyError] = useState<string | null>(null);
+  const [nestedReplyContent, setNestedReplyContent] = useState<{ [key: number]: string }>({});
+  const [shareMessage, setShareMessage] = useState<string | null>(null);
 
   // Fetch discussion details
   const {
@@ -85,8 +87,18 @@ export const ForumDiscussionPage: React.FC = () => {
     error,
   } = useQuery<Discussion>({
     queryKey: ["forum-discussion", slug],
-    queryFn: () =>
-      api.get(`/forum/discussions/${slug}/`).then((res) => res.data),
+    queryFn: async () => {
+      try {
+        const res = await api.get(`/forum/discussions/${slug}/`);
+        return res.data;
+      } catch (err: any) {
+        if (err?.response?.status === 404) {
+          console.error('Discussion not found:', slug);
+        }
+        throw err;
+      }
+    },
+    retry: false,
   });
 
   const postWithFallback = async (
@@ -123,6 +135,7 @@ export const ForumDiscussionPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["forum-discussion", slug] });
       setReplyContent("");
       setReplyingTo(null);
+      setNestedReplyContent({});
       setReplyError(null);
     },
     onError: (err: any) => {
@@ -143,9 +156,10 @@ export const ForumDiscussionPage: React.FC = () => {
     },
   });
 
-  const handleSubmitReply = (e: React.FormEvent) => {
+  const handleSubmitReply = (e: React.FormEvent, parentId?: number) => {
     e.preventDefault();
-    if (!replyContent.trim()) return;
+    const content = parentId ? nestedReplyContent[parentId] : replyContent;
+    if (!content?.trim()) return;
     if (!slug && !discussion?.slug && !discussion?.id) {
       setReplyError("Missing discussion identifier. Please refresh the page.");
       return;
@@ -153,8 +167,8 @@ export const ForumDiscussionPage: React.FC = () => {
     setReplyError(null);
 
     replyMutation.mutate({
-      content: replyContent,
-      parent: replyingTo || undefined,
+      content: content,
+      parent: parentId || undefined,
     });
   };
 
@@ -181,6 +195,32 @@ export const ForumDiscussionPage: React.FC = () => {
   const formatAuthorInitial = (author: Author) => {
     const name = formatAuthorName(author).trim();
     return name ? name[0].toUpperCase() : "?";
+  };
+
+  const handleShareDiscussion = async () => {
+    const shareUrl = `${window.location.origin}/forum/discussions/${discussion.slug}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareMessage('Link copied to clipboard!');
+      setTimeout(() => setShareMessage(null), 2000);
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = shareUrl;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setShareMessage('Link copied to clipboard!');
+        setTimeout(() => setShareMessage(null), 2000);
+      } catch (fallbackErr) {
+        setShareMessage('Failed to copy link');
+        setTimeout(() => setShareMessage(null), 2000);
+      }
+      document.body.removeChild(textArea);
+    }
   };
 
   if (isLoading) {
@@ -288,35 +328,6 @@ export const ForumDiscussionPage: React.FC = () => {
 
             {/* Discussion Content */}
             <div className="p-4 sm:p-6">
-              {/* AI Summary */}
-              {discussion.ai_summary && (
-                <div className="bg-gradient-to-r from-primary-50 to-secondary-50 border border-primary-200 rounded-xl p-4 mb-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-6 h-6 rounded-full bg-primary-100 flex items-center justify-center">
-                      <svg
-                        className="w-4 h-4 text-primary-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                        ></path>
-                      </svg>
-                    </div>
-                    <span className="text-primary-700 font-medium text-sm">
-                      AI Summary
-                    </span>
-                  </div>
-                  <p className="text-sm text-primary-800 leading-relaxed">
-                    {discussion.ai_summary}
-                  </p>
-                </div>
-              )}
-
               {/* Content */}
               <div
                 className="prose prose-neutral max-w-none mb-6"
@@ -367,11 +378,24 @@ export const ForumDiscussionPage: React.FC = () => {
                   <span className="font-medium">{discussion.views_count}</span>
                 </div>
 
-                <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-neutral-600 hover:bg-neutral-100 transition-all duration-200 sm:ml-auto">
+                <button 
+                  onClick={handleShareDiscussion}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-neutral-600 hover:bg-neutral-100 transition-all duration-200 sm:ml-auto"
+                >
                   <Share2 className="w-5 h-5" />
                   <span className="font-medium">Share</span>
                 </button>
               </div>
+              
+              {/* Share confirmation message */}
+              {shareMessage && (
+                <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
+                  <div className="bg-success-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5" />
+                    <span className="font-medium">{shareMessage}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </article>
 
@@ -430,6 +454,11 @@ export const ForumDiscussionPage: React.FC = () => {
                   reply={reply}
                   onLike={(replyId) => likeReplyMutation.mutate(replyId)}
                   onReply={(replyId) => setReplyingTo(replyId)}
+                  replyingTo={replyingTo}
+                  nestedReplyContent={nestedReplyContent}
+                  setNestedReplyContent={setNestedReplyContent}
+                  handleSubmitReply={handleSubmitReply}
+                  replyMutation={replyMutation}
                   formatTimeAgo={formatTimeAgo}
                   formatAuthorName={formatAuthorName}
                 />
@@ -456,10 +485,27 @@ const ReplyCard: React.FC<{
   reply: Reply;
   onLike: (replyId: number) => void;
   onReply: (replyId: number) => void;
+  replyingTo: number | null;
+  nestedReplyContent: { [key: number]: string };
+  setNestedReplyContent: React.Dispatch<React.SetStateAction<{ [key: number]: string }>>;
+  handleSubmitReply: (e: React.FormEvent, parentId?: number) => void;
+  replyMutation: any;
   formatTimeAgo: (date: string) => string;
   formatAuthorName: (author: Author) => string;
   depth?: number;
-}> = ({ reply, onLike, onReply, formatTimeAgo, formatAuthorName, depth = 0 }) => {
+}> = ({ 
+  reply, 
+  onLike, 
+  onReply, 
+  replyingTo,
+  nestedReplyContent,
+  setNestedReplyContent,
+  handleSubmitReply,
+  replyMutation,
+  formatTimeAgo, 
+  formatAuthorName, 
+  depth = 0 
+}) => {
   return (
     <div
       className={`p-4 sm:p-6 ${
@@ -520,6 +566,38 @@ const ReplyCard: React.FC<{
             </button>
           </div>
 
+          {/* Nested Reply Form */}
+          {replyingTo === reply.id && (
+            <div className="mt-4 bg-neutral-50 rounded-lg p-4">
+              <form onSubmit={(e) => handleSubmitReply(e, reply.id)}>
+                <textarea
+                  value={nestedReplyContent[reply.id] || ""}
+                  onChange={(e) => setNestedReplyContent(prev => ({ ...prev, [reply.id]: e.target.value }))}
+                  placeholder={`Reply to ${formatAuthorName(reply.author)}...`}
+                  className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                  rows={3}
+                  autoFocus
+                />
+                <div className="flex justify-end gap-2 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => onReply(0)}
+                    className="px-4 py-2 text-neutral-600 hover:text-neutral-900"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!nestedReplyContent[reply.id]?.trim() || replyMutation.isPending}
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {replyMutation.isPending ? "Posting..." : "Post Reply"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
           {/* Nested replies */}
           {reply.child_replies && reply.child_replies.length > 0 && (
             <div className="mt-4 space-y-4">
@@ -529,6 +607,11 @@ const ReplyCard: React.FC<{
                   reply={childReply}
                   onLike={onLike}
                   onReply={onReply}
+                  replyingTo={replyingTo}
+                  nestedReplyContent={nestedReplyContent}
+                  setNestedReplyContent={setNestedReplyContent}
+                  handleSubmitReply={handleSubmitReply}
+                  replyMutation={replyMutation}
                   formatTimeAgo={formatTimeAgo}
                   formatAuthorName={formatAuthorName}
                   depth={depth + 1}

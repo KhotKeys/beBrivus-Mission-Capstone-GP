@@ -52,12 +52,22 @@ class UserLoginSerializer(serializers.Serializer):
         
         if email and password:
             existing_user = User.objects.filter(email__iexact=email).first()
-            auth_email = existing_user.email if existing_user else email
+            
+            # If user doesn't exist, return generic error
+            if not existing_user:
+                raise serializers.ValidationError('Invalid email or password')
+            
+            # Try to authenticate
+            auth_email = existing_user.email
             user = authenticate(username=auth_email, password=password)
+            
             if not user:
-                raise serializers.ValidationError('Invalid credentials')
+                # User exists but password is wrong
+                raise serializers.ValidationError('Invalid email or password')
+            
             if not user.is_active:
                 raise serializers.ValidationError('User account is disabled')
+            
             attrs['user'] = user
         else:
             raise serializers.ValidationError('Must include email and password')

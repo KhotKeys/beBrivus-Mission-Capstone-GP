@@ -2,10 +2,12 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested.routers import NestedDefaultRouter
 from . import views
+from .moderation_views import ModerationViewSet
 
 router = DefaultRouter()
 router.register(r'categories', views.ForumCategoryViewSet, basename='forum-categories')
 router.register(r'discussions', views.DiscussionViewSet, basename='forum-discussions')
+router.register(r'moderation', ModerationViewSet, basename='moderation')
 
 # Nested router for replies under discussions
 discussions_router = NestedDefaultRouter(router, r'discussions', lookup='discussion')

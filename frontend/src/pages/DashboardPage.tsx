@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Users,
   Target,
@@ -14,10 +15,15 @@ import { useAuth } from "../contexts/AuthContext";
 import { Layout } from "../components/layout";
 import { Button, Card, CardHeader, CardBody, Badge } from "../components/ui";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../hooks/useLanguage";
 
 export const DashboardPage: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
+  
+  // Restore language on component mount
+  useLanguage();
 
   useEffect(() => {
     if (user?.user_type === "mentor") {
@@ -31,10 +37,10 @@ export const DashboardPage: React.FC = () => {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900">
-            Welcome back, {user?.first_name}!
+            {t("Welcome back")}, {user?.first_name}!
           </h1>
           <p className="text-secondary-600 mt-2 text-sm sm:text-base">
-            Here's what's happening with your opportunities today.
+            {t("Here's what's happening with your opportunities today.")}
           </p>
         </div>
 
@@ -48,7 +54,7 @@ export const DashboardPage: React.FC = () => {
                 </div>
                 <div className="ml-3 sm:ml-4 max-[360px]:ml-0">
                   <p className="text-xs sm:text-sm font-medium text-secondary-600">
-                    New Opportunities
+                    {t("New Opportunities")}
                   </p>
                   <p className="text-xl sm:text-2xl max-[360px]:text-lg font-bold text-secondary-900">
                     12
@@ -66,7 +72,7 @@ export const DashboardPage: React.FC = () => {
                 </div>
                 <div className="ml-3 sm:ml-4 max-[360px]:ml-0">
                   <p className="text-xs sm:text-sm font-medium text-secondary-600">
-                    Pending Applications
+                    {t("Pending Applications")}
                   </p>
                   <p className="text-xl sm:text-2xl max-[360px]:text-lg font-bold text-secondary-900">
                     5
@@ -84,7 +90,7 @@ export const DashboardPage: React.FC = () => {
                 </div>
                 <div className="ml-3 sm:ml-4 max-[360px]:ml-0">
                   <p className="text-xs sm:text-sm font-medium text-secondary-600">
-                    Success Rate
+                    {t("Success Rate")}
                   </p>
                   <p className="text-xl sm:text-2xl max-[360px]:text-lg font-bold text-secondary-900">
                     78%
@@ -102,7 +108,7 @@ export const DashboardPage: React.FC = () => {
                 </div>
                 <div className="ml-3 sm:ml-4 max-[360px]:ml-0">
                   <p className="text-xs sm:text-sm font-medium text-secondary-600">
-                    Achievements
+                    {t("Achievements")}
                   </p>
                   <p className="text-xl sm:text-2xl max-[360px]:text-lg font-bold text-secondary-900">
                     3
@@ -121,10 +127,10 @@ export const DashboardPage: React.FC = () => {
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <h2 className="text-base sm:text-lg font-semibold text-secondary-900">
-                    Recommended for You
+                    {t("Recommended for You")}
                   </h2>
                   <Button size="sm" variant="secondary" className="w-full sm:w-auto">
-                    View All
+                    {t("View All")}
                   </Button>
                 </div>
               </CardHeader>
@@ -153,7 +159,7 @@ export const DashboardPage: React.FC = () => {
                           </span>
                         </div>
                       </div>
-                      <Button size="sm" className="w-full sm:w-auto">Apply</Button>
+                      <Button size="sm" className="w-full sm:w-auto">{t("Apply Now")}</Button>
                     </div>
                   ))}
                 </div>
@@ -167,26 +173,26 @@ export const DashboardPage: React.FC = () => {
             <Card>
               <CardHeader>
                 <h3 className="text-base sm:text-lg font-semibold text-secondary-900">
-                  Quick Actions
+                  {t("Quick Actions")}
                 </h3>
               </CardHeader>
               <CardBody>
                 <div className="space-y-3">
                   <Button className="w-full justify-start text-sm sm:text-base" variant="secondary">
                     <Search className="w-4 h-4 mr-2" />
-                    Find Opportunities
+                    {t("Find Opportunities")}
                   </Button>
                   <Button className="w-full justify-start text-sm sm:text-base" variant="secondary">
                     <Users className="w-4 h-4 mr-2" />
-                    Find a Mentor
+                    {t("Find a Mentor")}
                   </Button>
                   <Button className="w-full justify-start text-sm sm:text-base" variant="secondary">
                     <Target className="w-4 h-4 mr-2" />
-                    Track Applications
+                    {t("Track Applications")}
                   </Button>
                   <Button className="w-full justify-start text-sm sm:text-base" variant="secondary">
                     <BookOpen className="w-4 h-4 mr-2" />
-                    Browse Resources
+                    {t("Browse Resources")}
                   </Button>
                 </div>
               </CardBody>
@@ -196,14 +202,14 @@ export const DashboardPage: React.FC = () => {
             <Card>
               <CardHeader>
                 <h3 className="text-base sm:text-lg font-semibold text-secondary-900">
-                  Recent Activity
+                  {t("Recent Activity")}
                 </h3>
               </CardHeader>
               <CardBody>
                 <div className="space-y-3">
                   <div className="text-xs sm:text-sm">
                     <p className="text-secondary-600">
-                      Applied to{" "}
+                      {t("Applied to")}{" "}
                       <span className="font-medium text-secondary-900">
                         Microsoft Internship
                       </span>
@@ -212,7 +218,7 @@ export const DashboardPage: React.FC = () => {
                   </div>
                   <div className="text-xs sm:text-sm">
                     <p className="text-secondary-600">
-                      Saved{" "}
+                      {t("Saved")}{" "}
                       <span className="font-medium text-secondary-900">
                         Tesla Engineering Role
                       </span>
@@ -221,7 +227,7 @@ export const DashboardPage: React.FC = () => {
                   </div>
                   <div className="text-xs sm:text-sm">
                     <p className="text-secondary-600">
-                      Completed profile setup
+                      {t("Completed profile setup")}
                     </p>
                     <p className="text-xs text-secondary-500">3 days ago</p>
                   </div>
@@ -233,13 +239,13 @@ export const DashboardPage: React.FC = () => {
             <Card>
               <CardHeader>
                 <h3 className="text-base sm:text-lg font-semibold text-secondary-900">
-                  Profile Completion
+                  {t("Profile Completion")}
                 </h3>
               </CardHeader>
               <CardBody>
                 <div className="space-y-3">
                   <div className="flex justify-between text-xs sm:text-sm">
-                    <span>Profile Progress</span>
+                    <span>{t("Profile Progress")}</span>
                     <span className="font-medium">75%</span>
                   </div>
                   <div className="w-full bg-secondary-200 rounded-full h-2">
@@ -249,14 +255,14 @@ export const DashboardPage: React.FC = () => {
                     ></div>
                   </div>
                   <div className="text-xs sm:text-sm text-secondary-600">
-                    <p>Add work experience to improve your profile</p>
+                    <p>{t("Add work experience to improve your profile")}</p>
                   </div>
                   <Button 
                     size="sm" 
                     className="w-full"
                     onClick={() => navigate("/profile")}
                   >
-                    Complete Profile
+                    {t("Complete Profile")}
                   </Button>
                 </div>
               </CardBody>

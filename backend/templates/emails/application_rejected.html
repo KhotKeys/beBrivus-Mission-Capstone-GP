@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Update</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Hero Section -->
+        <div style="background: linear-gradient(135deg, #064e3b 0%, #10B981 100%); width: 100%; padding: 40px 20px; text-align: center;">
+            {% if logo_base64 %}
+            <img src="{{ logo_base64 }}" alt="beBrivus" style="height: 60px; width: auto; object-fit: contain; display: block; margin: 0 auto;" />
+            {% else %}
+            <div style="font-size: 28px; font-weight: bold; color: white; letter-spacing: 2px; text-align: center;">be<span style="color: #6ee7b7;">Brivus</span></div>
+            {% endif %}
+            <h1 style="color: white; font-size: 24px; margin: 12px 0 0 0;">beBrivus</h1>
+        </div>
+
+        <!-- Content -->
+        <div style="padding: 40px 30px;">
+            <p style="font-size: 18px; color: #333333; margin-bottom: 20px; font-weight: 500;">Dear {{ user_name }},</p>
+            
+            <p style="font-size: 15px; color: #555555; line-height: 1.6; margin-bottom: 20px;">
+                Thank you sincerely for taking the time to apply for the <strong>{{ opportunity_title }}</strong> through beBrivus. We truly appreciate your interest and the effort you put into your application.
+            </p>
+
+            <p style="font-size: 15px; color: #555555; line-height: 1.6; margin-bottom: 20px;">
+                After careful consideration, we regret to inform you that your application has not been successful at this time. This decision was not made lightly, as we received many strong applications from talented candidates.
+            </p>
+
+            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                <h3 style="margin: 0 0 15px 0; color: #92400e; font-size: 16px; font-weight: 600;">We strongly encourage you to:</h3>
+                <ul style="margin: 0; padding-left: 20px; color: #78350f; line-height: 1.8;">
+                    <li>Continue exploring other opportunities on beBrivus</li>
+                    <li>Strengthen your profile with new skills and experiences</li>
+                    <li>Connect with a mentor for guidance on future applications</li>
+                    <li>Apply again when new opportunities open</li>
+                </ul>
+            </div>
+
+            <p style="font-size: 15px; color: #555555; line-height: 1.6; margin-bottom: 20px;">
+                This is not the end of your journey — every great success story includes setbacks that build resilience and character. We believe in your potential and look forward to supporting you in future applications.
+            </p>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ opportunities_url }}" style="display: inline-block; background-color: #10B981; color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">Explore Opportunities</a>
+            </div>
+
+            <p style="font-size: 15px; color: #555555; line-height: 1.6; margin-top: 30px;">
+                With encouragement,<br>
+                <strong style="color: #10B981;">The beBrivus Team</strong>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
+            <p style="font-size: 13px; color: #6c757d; margin: 8px 0;">
+                © 2026 beBrivus | All rights reserved
+            </p>
+            <p style="font-size: 12px; color: #999; margin: 8px 0;">
+                <a href="{{ frontend_url }}/unsubscribe" style="color: #10B981; text-decoration: none;">Unsubscribe</a> | 
+                <a href="{{ frontend_url }}/privacy-policy" style="color: #10B981; text-decoration: none;">Privacy Policy</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

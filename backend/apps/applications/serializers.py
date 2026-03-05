@@ -6,18 +6,83 @@ from apps.opportunities.serializers import OpportunitySerializer
 
 class ApplicationSerializer(serializers.ModelSerializer):
     """Serializer for application list and basic operations"""
-    opportunity_title = serializers.CharField(source='opportunity.title', read_only=True)
-    company_name = serializers.CharField(source='opportunity.company', read_only=True)
-    company_logo = serializers.ImageField(source='opportunity.company_logo', read_only=True)
+    applicant_name = serializers.SerializerMethodField()
+    applicant_email = serializers.SerializerMethodField()
+    applicant_username = serializers.SerializerMethodField()
+    opportunity_title = serializers.SerializerMethodField()
+    opportunity_organization = serializers.SerializerMethodField()
+    
+    # Legacy fields for compatibility
+    opportunity_title_legacy = serializers.CharField(source='opportunity.title', read_only=True)
+    company_name = serializers.CharField(source='opportunity.organization', read_only=True)
+    company_logo = serializers.ImageField(source='opportunity.organization_logo', read_only=True)
     location = serializers.CharField(source='opportunity.location', read_only=True)
-    employment_type = serializers.CharField(source='opportunity.employment_type', read_only=True)
+    employment_type = serializers.CharField(source='opportunity.difficulty_level', read_only=True)
     salary_range = serializers.SerializerMethodField()
     days_since_applied = serializers.SerializerMethodField()
     next_action_date = serializers.SerializerMethodField()
     is_upcoming_action = serializers.SerializerMethodField()
     
+    # User fields
+    user_name = serializers.SerializerMethodField()
+    user_email = serializers.SerializerMethodField()
+    user_phone = serializers.SerializerMethodField()
+    
+    # CV field
+    cv_url = serializers.SerializerMethodField()
+    
+    # Opportunity details for admin
+    opportunity_data = serializers.SerializerMethodField()
+    
+    def get_applicant_name(self, obj):
+        return obj.user.get_full_name() or obj.user.username
+
+    def get_applicant_email(self, obj):
+        return obj.user.email
+
+    def get_applicant_username(self, obj):
+        return obj.user.username
+
+    def get_opportunity_title(self, obj):
+        return obj.opportunity.title if obj.opportunity else ''
+
+    def get_opportunity_organization(self, obj):
+        return obj.opportunity.organization if obj.opportunity else ''
+    
+    def get_user_name(self, obj):
+        if obj.user:
+            full_name = f"{obj.user.first_name} {obj.user.last_name}".strip()
+            return full_name or obj.user.username
+        return 'Unknown User'
+    
+    def get_user_email(self, obj):
+        return obj.user.email if obj.user else 'No email'
+    
+    def get_user_phone(self, obj):
+        return getattr(obj.user, 'phone_number', None) if obj.user else None
+    
+    def get_cv_url(self, obj):
+        # Get CV from related documents
+        cv_doc = obj.documents.filter(document_type='cv').first()
+        if cv_doc and cv_doc.file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(cv_doc.file.url)
+            return cv_doc.file.url
+        return None
+    
+    def get_opportunity_data(self, obj):
+        if obj.opportunity:
+            return {
+                'id': obj.opportunity.id,
+                'title': obj.opportunity.title,
+                'organization': getattr(obj.opportunity, 'organization', 'Unknown'),
+                'application_type': getattr(obj.opportunity, 'application_type', 'external')
+            }
+        return None
+    
     def get_salary_range(self, obj):
-        if obj.opportunity.salary_min and obj.opportunity.salary_max:
+        if obj.opportunity and obj.opportunity.salary_min and obj.opportunity.salary_max:
             return f"{obj.opportunity.currency}{obj.opportunity.salary_min:,} - {obj.opportunity.currency}{obj.opportunity.salary_max:,}"
         return "Not specified"
     
@@ -50,9 +115,14 @@ class ApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = [
-            'id', 'opportunity', 'opportunity_title', 'company_name', 'company_logo',
-            'location', 'employment_type', 'salary_range', 'status', 
-            'submitted_at', 'interview_date', 'notes', 'cover_letter', 
+            'id',
+            'opportunity', 'opportunity_title', 'opportunity_organization', 'opportunity_title_legacy',
+            'user', 'applicant_name', 'applicant_email', 'applicant_username',
+            'user_name', 'user_email', 'user_phone',
+            'company_name', 'company_logo', 'location', 'employment_type', 'salary_range',
+            'opportunity_data', 'cv_url',
+            'cover_letter', 'status', 'submitted_at', 'interview_date', 'notes',
+            'age', 'university', 'course', 'year_of_study', 'country_of_residence', 'why_chosen', 'career_goals',
             'days_since_applied', 'next_action_date', 'is_upcoming_action',
             'created_at', 'updated_at'
         ]
@@ -62,33 +132,54 @@ class ApplicationSerializer(serializers.ModelSerializer):
 class ApplicationDetailSerializer(ApplicationSerializer):
     """Detailed serializer for application with full opportunity details"""
     opportunity = OpportunitySerializer(read_only=True)
-    interview_dates = serializers.ListField(read_only=True)
+    user = serializers.SerializerMethodField()
     status_history = serializers.SerializerMethodField()
+    feedback_data = serializers.SerializerMethodField()
+    
+    def get_user(self, obj):
+        if obj.user:
+            full_name = f"{obj.user.first_name} {obj.user.last_name}".strip()
+            return {
+                'id': obj.user.id,
+                'full_name': full_name or obj.user.username,
+                'email': obj.user.email,
+                'phone_number': getattr(obj.user, 'phone_number', None)
+            }
+        return {
+            'id': None,
+            'full_name': 'Unknown User',
+            'email': 'No email',
+            'phone_number': None
+        }
     
     def get_status_history(self, obj):
-        # This would require a separate StatusHistory model in a real app
-        # For now, return a simple history based on dates
-        history = []
-        
-        if obj.submitted_at:
-            history.append({
-                'status': 'clicked',
-                'date': obj.submitted_at.date(),
-                'note': 'Application link clicked'
-            })
-        
-        if obj.interview_date:
-            history.append({
-                'status': 'interview_scheduled',
-                'date': obj.interview_date.date() if obj.interview_date else None,
-                'note': 'Interview scheduled'
-            })
-        
-        return history
+        from .models import ApplicationStatusHistory
+        history = ApplicationStatusHistory.objects.filter(application=obj).order_by('-created_at')[:10]
+        return [{
+            'old_status': h.old_status,
+            'new_status': h.new_status,
+            'changed_by': h.changed_by.get_full_name() if h.changed_by else 'System',
+            'notes': h.notes,
+            'created_at': h.created_at
+        } for h in history]
+    
+    def get_feedback_data(self, obj):
+        from .models import ApplicationFeedback
+        try:
+            feedback = obj.feedback
+            return {
+                'general_comments': feedback.general_comments,
+                'strengths': feedback.strengths,
+                'areas_for_improvement': feedback.areas_for_improvement,
+                'overall_score': feedback.overall_score,
+                'public': feedback.public
+            }
+        except ApplicationFeedback.DoesNotExist:
+            return None
 
     class Meta(ApplicationSerializer.Meta):
         fields = ApplicationSerializer.Meta.fields + [
-            'interview_dates', 'status_history', 'feedback'
+            'user', 'status_history', 'feedback_data'
         ]
 
 

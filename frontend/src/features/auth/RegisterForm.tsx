@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
 import { Button, Input, Card, CardHeader, CardBody } from "../../components/ui";
 import {
@@ -18,6 +19,8 @@ const schema = yup.object({
   password: yup
     .string()
     .min(8, "Password must be at least 8 characters")
+    .matches(/[A-Za-z]/, "Password must include at least one letter")
+    .matches(/\d/, "Password must include at least one number")
     .required("Password is required"),
   password_confirm: yup
     .string()
@@ -30,6 +33,7 @@ const schema = yup.object({
 type RegisterFormData = yup.InferType<typeof schema>;
 
 export const RegisterForm: React.FC = () => {
+  const { t } = useTranslation();
   const { register: registerUser } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -41,11 +45,14 @@ export const RegisterForm: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
     setError: setFormError,
   } = useForm<RegisterFormData>({
     resolver: yupResolver(schema),
-    mode: "onChange",
+    mode: "onBlur",
+    defaultValues: {
+      user_type: "",
+    },
   });
 
   const onSubmit = async (data: RegisterFormData) => {
@@ -64,12 +71,24 @@ export const RegisterForm: React.FC = () => {
         });
       }
 
+      // Show success message
+      window.alert("✅ Account Created Successfully!\n\nYour account has been created. Please sign in to continue.");
+      
       // Redirect to login after successful registration
       navigate("/login", { state: { fromSignup: true } });
     } catch (err: any) {
       // Handle backend validation errors
       if (err.response?.data && typeof err.response.data === "object") {
         const errors = err.response.data;
+
+        // Handle non-field errors (like password mismatch)
+        if (errors.non_field_errors) {
+          const errorMsg = Array.isArray(errors.non_field_errors) 
+            ? errors.non_field_errors[0] 
+            : errors.non_field_errors;
+          setError(errorMsg);
+          return;
+        }
 
         // Check if it's a field-specific error object
         const hasFieldErrors = Object.keys(errors).some(
@@ -103,15 +122,16 @@ export const RegisterForm: React.FC = () => {
           setError(errorMsg);
         }
       } else if (err.response?.status === 400) {
-        setError("There were errors with your registration. Please check all fields are filled correctly.");
+        const errorMsg = "There were errors with your registration. Please check all fields are filled correctly.";
+        setError(errorMsg);
       } else if (err.code === "ERR_NETWORK") {
-        setError("Network error. Please check your connection and try again.");
+        const errorMsg = "Network error. Please check your connection and try again.";
+        setError(errorMsg);
       } else {
-        setError(
-          err.response?.data?.detail ||
+        const errorMsg = err.response?.data?.detail ||
             err.response?.data?.message ||
-            "Registration failed. Please try again."
-        );
+            "Registration failed. Please try again.";
+        setError(errorMsg);
       }
     } finally {
       setIsLoading(false);
@@ -132,15 +152,15 @@ export const RegisterForm: React.FC = () => {
                 />
               </div>
               <h2 className="text-xl font-bold text-secondary-900">
-                Join beBrivus
+                {t('Create account')}
               </h2>
               <p className="mt-2 text-sm text-secondary-600">
-                Already have an account?{" "}
+                {t('Already have an account')}{" "}
                 <Link
                   to="/login"
                   className="text-primary-600 hover:text-primary-500"
                 >
-                  Sign in
+                  {t('Sign In')}
                 </Link>
               </p>
             </div>
@@ -198,16 +218,16 @@ export const RegisterForm: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  label="First name"
+                  label={t('First Name')}
                   {...register("first_name")}
                   error={errors.first_name?.message}
-                  placeholder="First name"
+                  placeholder={t('First Name')}
                 />
                 <Input
-                  label="Last name"
+                  label={t('Last Name')}
                   {...register("last_name")}
                   error={errors.last_name?.message}
-                  placeholder="Last name"
+                  placeholder={t('Last Name')}
                 />
               </div>
 
@@ -215,15 +235,15 @@ export const RegisterForm: React.FC = () => {
                 label="Username"
                 {...register("username")}
                 error={errors.username?.message}
-                placeholder="Choose a username"
+                placeholder="Username"
               />
 
               <Input
-                label="Email address"
+                label={t('Email')}
                 type="email"
                 {...register("email")}
                 error={errors.email?.message}
-                placeholder="Enter your email"
+                placeholder={t('Email')}
               />
 
               <div className="space-y-1">
@@ -232,6 +252,8 @@ export const RegisterForm: React.FC = () => {
                   <option value="">Select your role</option>
                   <option value="student">Student</option>
                   <option value="graduate">Graduate</option>
+                  <option value="community_talent">Community Talent</option>
+                  <option value="professional">Professional</option>
                 </select>
                 {errors.user_type && (
                   <p className="text-sm text-error-600">
@@ -258,19 +280,20 @@ export const RegisterForm: React.FC = () => {
               </div>
 
               <Input
-                label="Password"
+                label={t('Password')}
                 type="password"
                 {...register("password")}
                 error={errors.password?.message}
-                placeholder="Create a password"
+                placeholder={t('Password')}
+                helperText="Use 8+ characters and avoid common passwords."
               />
 
               <Input
-                label="Confirm password"
+                label={t('Confirm Password')}
                 type="password"
                 {...register("password_confirm")}
                 error={errors.password_confirm?.message}
-                placeholder="Confirm your password"
+                placeholder={t('Confirm Password')}
               />
 
               <div className="flex items-center">
@@ -306,9 +329,9 @@ export const RegisterForm: React.FC = () => {
                 type="submit"
                 className="w-full"
                 isLoading={isLoading}
-                disabled={isLoading || !isValid}
+                disabled={isLoading}
               >
-                {!isValid ? "Please fill all fields" : "Create account"}
+                {t('Create account')}
               </Button>
               
               {Object.keys(errors).length > 0 && (

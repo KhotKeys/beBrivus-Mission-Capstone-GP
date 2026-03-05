@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Users,
   Target,
@@ -19,6 +20,7 @@ import { Button, Card, CardBody } from "../components/ui";
 
 export const HomePage: React.FC = () => {
   const { isAuthenticated } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <Layout>
@@ -53,17 +55,14 @@ export const HomePage: React.FC = () => {
             {/* Content */}
             <div className="text-center lg:text-left lg:pr-8 w-full">
               <h1 className="text-2xl xs:text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-3 sm:mb-4 lg:mb-6 leading-tight">
-                Your Gateway to
+                {t('Your Gateway to')}
                 <span className="bg-gradient-to-r from-secondary-300 to-warning-300 bg-clip-text text-transparent block">
-                  Global Excellence
+                  {t('Global Excellence')}
                 </span>
               </h1>
 
               <p className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl mb-4 sm:mb-6 lg:mb-8 text-primary-100 leading-relaxed px-2 sm:px-0">
-                Discover life-changing scholarships, internships, and career
-                opportunities worldwide. Get AI-powered recommendations, expert
-                mentorship, and comprehensive support throughout your
-                application journey.
+                {t('Discover life-changing scholarships, internships, and career opportunities worldwide. Get AI-powered recommendations, expert mentorship, and comprehensive support throughout your application journey.')}
               </p>
 
               {/* Stats Row */}
@@ -75,7 +74,7 @@ export const HomePage: React.FC = () => {
                   <div>
                     <div className="text-base xs:text-lg sm:text-xl lg:text-2xl font-bold text-white">15K+</div>
                     <div className="text-[10px] xs:text-xs sm:text-sm text-primary-200">
-                      Active Fellows
+                      {t('Active Fellows')}
                     </div>
                   </div>
                 </div>
@@ -85,7 +84,7 @@ export const HomePage: React.FC = () => {
                   </div>
                   <div>
                     <div className="text-base xs:text-lg sm:text-xl lg:text-2xl font-bold text-white">92%</div>
-                    <div className="text-[10px] xs:text-xs sm:text-sm text-primary-200">Success Rate</div>
+                    <div className="text-[10px] xs:text-xs sm:text-sm text-primary-200">{t('Success Rate')}</div>
                   </div>
                 </div>
               </div>
@@ -96,7 +95,7 @@ export const HomePage: React.FC = () => {
                   <Link to="/register" className="w-full sm:w-auto">
                     <Button className="w-full group relative px-4 py-2.5 xs:px-5 xs:py-3 sm:px-6 sm:py-3 lg:px-8 lg:py-4 bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 active:from-secondary-700 active:to-secondary-800 text-xs xs:text-sm sm:text-base lg:text-lg text-white font-semibold rounded-lg xs:rounded-xl shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-secondary-500/25 active:scale-95 active:shadow-lg cursor-pointer">
                       <span className="flex items-center justify-center">
-                        Apply Now
+                        {t('Apply Now')}
                         <ArrowRight className="ml-1.5 xs:ml-2 w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 transition-transform group-hover:translate-x-1" />
                       </span>
                       <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg xs:rounded-xl"></div>
@@ -104,7 +103,7 @@ export const HomePage: React.FC = () => {
                   </Link>
                   <Link to="/opportunities" className="w-full sm:w-auto">
                     <Button className="w-full px-4 py-2.5 xs:px-5 xs:py-3 sm:px-6 sm:py-3 lg:px-8 lg:py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 active:bg-white/30 text-xs xs:text-sm sm:text-base lg:text-lg text-white font-semibold rounded-lg xs:rounded-xl border border-white/20 hover:border-white/40 active:border-white/60 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer">
-                      Explore Opportunities
+                      {t('Explore Opportunities')}
                     </Button>
                   </Link>
                 </div>
@@ -113,7 +112,7 @@ export const HomePage: React.FC = () => {
                   <Link to="/dashboard" className="w-full sm:w-auto">
                     <Button className="w-full group px-4 py-2.5 xs:px-5 xs:py-3 sm:px-6 sm:py-3 lg:px-8 lg:py-4 bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 active:from-secondary-700 active:to-secondary-800 text-xs xs:text-sm sm:text-base lg:text-lg text-white font-semibold rounded-lg xs:rounded-xl shadow-2xl transform transition-all duration-300 hover:scale-105 active:scale-95 active:shadow-lg hover:shadow-secondary-500/25 cursor-pointer">
                       <span className="flex items-center justify-center">
-                        Go to Dashboard
+                        {t('Go to Dashboard')}
                         <ArrowRight className="ml-1.5 xs:ml-2 w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 transition-transform group-hover:translate-x-1" />
                       </span>
                     </Button>
@@ -138,15 +137,15 @@ export const HomePage: React.FC = () => {
                     <div className="flex items-center mb-6">
                       <div>
                         <h3 className="text-xl font-bold text-white">
-                          Global Network
+                          {t('Global Network')}
                         </h3>
-                        <p className="text-primary-200">Connect worldwide</p>
+                        <p className="text-primary-200">{t('Connect worldwide')}</p>
                       </div>
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
                         <span className="text-white font-medium">
-                          Scholarships
+                          {t('Scholarships')}
                         </span>
                         <span className="text-secondary-300 font-semibold">
                           2,847
@@ -154,7 +153,7 @@ export const HomePage: React.FC = () => {
                       </div>
                       <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
                         <span className="text-white font-medium">
-                          Internships
+                          {t('Internships')}
                         </span>
                         <span className="text-secondary-300 font-semibold">
                           1,923
@@ -162,7 +161,7 @@ export const HomePage: React.FC = () => {
                       </div>
                       <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
                         <span className="text-white font-medium">
-                          Fellowships
+                          {t('Fellowships')}
                         </span>
                         <span className="text-secondary-300 font-semibold">
                           456
@@ -198,20 +197,17 @@ export const HomePage: React.FC = () => {
             <div className="inline-flex items-center bg-primary-100 px-1.5 xs:px-2 sm:px-4 py-1 xs:py-1.5 sm:py-2 rounded-full mb-3 xs:mb-4 sm:mb-6 max-w-[98%] mx-auto">
               <Star className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 mr-0.5 xs:mr-1 sm:mr-2 text-primary-600 flex-shrink-0" />
               <span className="text-[8px] xs:text-[10px] sm:text-xs md:text-sm font-semibold text-primary-700 truncate">
-                Comprehensive Platform
+                {t('Comprehensive Platform')}
               </span>
             </div>
             <h2 className="text-base xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-secondary-900 mb-2 xs:mb-3 sm:mb-4 lg:mb-6 leading-tight px-1 xs:px-2">
-              Everything You Need to
+              {t('Everything You Need to')}
               <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent block">
-                Succeed Globally
+                {t('Succeed Globally')}
               </span>
             </h2>
             <p className="text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-secondary-600 max-w-4xl mx-auto leading-snug xs:leading-relaxed px-2 xs:px-4 sm:px-6">
-              From AI-powered opportunity discovery to expert mentorship, we
-              provide all the cutting-edge tools and personalized support you
-              need to unlock your potential and advance your career on the
-              global stage.
+              {t('From AI-powered opportunity discovery to expert mentorship, we provide all the cutting-edge tools and personalized support you need to unlock your potential and advance your career on the global stage.')}
             </p>
           </div>
 
@@ -222,12 +218,10 @@ export const HomePage: React.FC = () => {
                   <Zap className="w-4 h-4 xs:w-6 xs:h-6 sm:w-10 sm:h-10 text-white" />
                 </div>
                 <h3 className="text-xs xs:text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-secondary-900 mb-1 xs:mb-1.5 sm:mb-3 lg:mb-4 leading-tight">
-                  AI-Powered Discovery
+                  {t('AI-Powered Discovery')}
                 </h3>
                 <p className="text-[9px] xs:text-xs sm:text-sm md:text-base text-secondary-600 leading-snug xs:leading-relaxed">
-                  Get personalized opportunity recommendations based on your
-                  profile, skills, and career goals using advanced machine
-                  learning.
+                  {t('Get personalized opportunity recommendations based on your profile, skills, and career goals using advanced machine learning.')}
                 </p>
               </CardBody>
             </Card>
@@ -238,11 +232,10 @@ export const HomePage: React.FC = () => {
                   <Users className="w-4 h-4 xs:w-6 xs:h-6 sm:w-10 sm:h-10 text-white" />
                 </div>
                 <h3 className="text-xs xs:text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-secondary-900 mb-1 xs:mb-1.5 sm:mb-3 lg:mb-4 leading-tight">
-                  Expert Mentorship
+                  {t('Expert Mentorship')}
                 </h3>
                 <p className="text-[9px] xs:text-xs sm:text-sm md:text-base text-secondary-600 leading-snug xs:leading-relaxed">
-                  Connect with industry professionals for personalized guidance
-                  on applications, interviews, and strategic career development.
+                  {t('Connect with industry professionals for personalized guidance on applications, interviews, and strategic career development.')}
                 </p>
               </CardBody>
             </Card>
@@ -253,11 +246,10 @@ export const HomePage: React.FC = () => {
                   <Target className="w-4 h-4 xs:w-6 xs:h-6 sm:w-10 sm:h-10 text-white" />
                 </div>
                 <h3 className="text-xs xs:text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-secondary-900 mb-1 xs:mb-1.5 sm:mb-3 lg:mb-4 leading-tight">
-                  Smart Tracking
+                  {t('Smart Tracking')}
                 </h3>
                 <p className="text-[9px] xs:text-xs sm:text-sm md:text-base text-secondary-600 leading-snug xs:leading-relaxed">
-                  Never miss a deadline with intelligent application tracking,
-                  automated reminders, and comprehensive status monitoring.
+                  {t('Never miss a deadline with intelligent application tracking, automated reminders, and comprehensive status monitoring.')}
                 </p>
               </CardBody>
             </Card>
@@ -268,12 +260,10 @@ export const HomePage: React.FC = () => {
                   <BookOpen className="w-4 h-4 xs:w-6 xs:h-6 sm:w-10 sm:h-10 text-white" />
                 </div>
                 <h3 className="text-xs xs:text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-secondary-900 mb-1 xs:mb-1.5 sm:mb-3 lg:mb-4 leading-tight">
-                  Premium Resources
+                  {t('Premium Resources')}
                 </h3>
                 <p className="text-[9px] xs:text-xs sm:text-sm md:text-base text-secondary-600 leading-snug xs:leading-relaxed">
-                  Access exclusive templates, comprehensive guides, and expert
-                  tutorials to elevate your applications and interview
-                  performance.
+                  {t('Access exclusive templates, comprehensive guides, and expert tutorials to elevate your applications and interview performance.')}
                 </p>
               </CardBody>
             </Card>
@@ -284,12 +274,10 @@ export const HomePage: React.FC = () => {
                   <MessageSquare className="w-4 h-4 xs:w-6 xs:h-6 sm:w-10 sm:h-10 text-white" />
                 </div>
                 <h3 className="text-xs xs:text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-secondary-900 mb-1 xs:mb-1.5 sm:mb-3 lg:mb-4 leading-tight">
-                  Global Community
+                  {t('Global Community')}
                 </h3>
                 <p className="text-[9px] xs:text-xs sm:text-sm md:text-base text-secondary-600 leading-snug xs:leading-relaxed">
-                  Join an exclusive community of ambitious peers, share
-                  experiences, and build lasting connections with future global
-                  leaders.
+                  {t('Join an exclusive community of ambitious peers, share experiences, and build lasting connections with future global leaders.')}
                 </p>
               </CardBody>
             </Card>
@@ -300,11 +288,10 @@ export const HomePage: React.FC = () => {
                   <BarChart3 className="w-4 h-4 xs:w-6 xs:h-6 sm:w-10 sm:h-10 text-white" />
                 </div>
                 <h3 className="text-xs xs:text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-secondary-900 mb-1 xs:mb-1.5 sm:mb-3 lg:mb-4 leading-tight">
-                  Success Analytics
+                  {t('Success Analytics')}
                 </h3>
                 <p className="text-[9px] xs:text-xs sm:text-sm md:text-base text-secondary-600 leading-snug xs:leading-relaxed">
-                  Track your progress with detailed analytics, success metrics,
-                  and actionable insights to continuously improve your approach.
+                  {t('Track your progress with detailed analytics, success metrics, and actionable insights to continuously improve your approach.')}
                 </p>
               </CardBody>
             </Card>
@@ -332,19 +319,17 @@ export const HomePage: React.FC = () => {
             <div className="inline-flex items-center bg-success-500/20 backdrop-blur-sm px-3 xs:px-4 sm:px-6 py-2 xs:py-2.5 sm:py-3 rounded-full mb-4 xs:mb-5 sm:mb-6 border border-success-400/30 max-w-[95%] mx-auto">
               <Globe className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 mr-1.5 xs:mr-2 text-success-300 flex-shrink-0" />
               <span className="text-sm xs:text-base sm:text-lg font-semibold text-success-200 truncate">
-                Global Impact
+                {t('Global Impact')}
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 leading-tight">
-              Trusted by Students
+              {t('Trusted by Students')}
               <span className="bg-gradient-to-r from-secondary-300 to-primary-300 bg-clip-text text-transparent block">
-                Worldwide
+                {t('Worldwide')}
               </span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-secondary-200 max-w-3xl mx-auto leading-relaxed px-4">
-              Join a thriving community of ambitious students who have
-              transformed their futures through our comprehensive fellowship
-              platform.
+              {t('Join a thriving community of ambitious students who have transformed their futures through our comprehensive fellowship platform.')}
             </p>
           </div>
 
@@ -358,9 +343,9 @@ export const HomePage: React.FC = () => {
                   15K+
                 </div>
                 <div className="text-sm xs:text-base sm:text-lg font-semibold text-white mb-1 xs:mb-2">
-                  Active Fellows
+                  {t('Active Fellows')}
                 </div>
-                <div className="text-secondary-300 text-[10px] xs:text-xs sm:text-sm">Growing daily</div>
+                <div className="text-secondary-300 text-[10px] xs:text-xs sm:text-sm">{t('Growing daily')}</div>
               </div>
             </div>
 
@@ -373,9 +358,9 @@ export const HomePage: React.FC = () => {
                   8.5K+
                 </div>
                 <div className="text-sm xs:text-base sm:text-lg font-semibold text-white mb-1 xs:mb-2">
-                  Opportunities
+                  {t('Opportunities')}
                 </div>
-                <div className="text-secondary-300 text-[10px] xs:text-xs sm:text-sm">Updated weekly</div>
+                <div className="text-secondary-300 text-[10px] xs:text-xs sm:text-sm">{t('Updated weekly')}</div>
               </div>
             </div>
 
@@ -388,10 +373,10 @@ export const HomePage: React.FC = () => {
                   750+
                 </div>
                 <div className="text-sm xs:text-base sm:text-lg font-semibold text-white mb-1 xs:mb-2">
-                  Expert Mentors
+                  {t('Expert Mentors')}
                 </div>
                 <div className="text-secondary-300 text-[10px] xs:text-xs sm:text-sm">
-                  Industry leaders
+                  {t('Industry leaders')}
                 </div>
               </div>
             </div>
@@ -405,9 +390,9 @@ export const HomePage: React.FC = () => {
                   92%
                 </div>
                 <div className="text-sm xs:text-base sm:text-lg font-semibold text-white mb-1 xs:mb-2">
-                  Success Rate
+                  {t('Success Rate')}
                 </div>
-                <div className="text-secondary-300 text-[10px] xs:text-xs sm:text-sm">Proven results</div>
+                <div className="text-secondary-300 text-[10px] xs:text-xs sm:text-sm">{t('Proven results')}</div>
               </div>
             </div>
           </div>
@@ -446,22 +431,19 @@ export const HomePage: React.FC = () => {
               <div className="inline-flex items-center bg-secondary-500/20 backdrop-blur-sm px-6 py-3 rounded-full mb-6 border border-secondary-400/30">
                 <Trophy className="w-5 h-5 mr-2 text-secondary-300" />
                 <span className="text-lg font-semibold text-secondary-200">
-                  Limited Time Application
+                  {t('Limited Time Application')}
                 </span>
               </div>
 
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight">
-                Ready to Transform
+                {t('Ready to Transform')}
                 <span className="bg-gradient-to-r from-secondary-300 to-warning-300 bg-clip-text text-transparent block">
-                  Your Future?
+                  {t('Your Future?')}
                 </span>
               </h2>
 
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-primary-100 mb-8 sm:mb-10 lg:mb-12 max-w-4xl mx-auto leading-relaxed px-4">
-                Join thousands of ambitious students who have already unlocked
-                their potential and secured life-changing opportunities through
-                beBrivus. Your journey to global excellence starts with a single
-                click.
+                {t('Join thousands of ambitious students who have already unlocked their potential and secured life-changing opportunities through beBrivus. Your journey to global excellence starts with a single click.')}
               </p>
             </div>
 
@@ -472,10 +454,10 @@ export const HomePage: React.FC = () => {
                   <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-secondary-300" />
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
-                  Instant Matching
+                  {t('Instant Matching')}
                 </h3>
                 <p className="text-sm sm:text-base text-primary-200">
-                  AI finds your perfect opportunities in seconds
+                  {t('AI finds your perfect opportunities in seconds')}
                 </p>
               </div>
               <div className="text-center group">
@@ -483,10 +465,10 @@ export const HomePage: React.FC = () => {
                   <Users className="w-8 h-8 sm:w-10 sm:h-10 text-warning-300" />
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
-                  Expert Guidance
+                  {t('Expert Guidance')}
                 </h3>
                 <p className="text-sm sm:text-base text-primary-200">
-                  1-on-1 mentorship from industry leaders
+                  {t('1-on-1 mentorship from industry leaders')}
                 </p>
               </div>
               <div className="text-center group">
@@ -494,10 +476,10 @@ export const HomePage: React.FC = () => {
                   <Target className="w-8 h-8 sm:w-10 sm:h-10 text-success-300" />
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
-                  Guaranteed Results
+                  {t('Guaranteed Results')}
                 </h3>
                 <p className="text-sm sm:text-base text-primary-200">
-                  92% of our fellows secure their dream opportunity
+                  {t('92% of our fellows secure their dream opportunity')}
                 </p>
               </div>
             </div>
@@ -508,7 +490,7 @@ export const HomePage: React.FC = () => {
                 <Link to="/register" className="w-full sm:w-auto">
                   <Button className="w-full group relative px-8 py-4 sm:px-10 sm:py-5 lg:px-12 lg:py-6 bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 active:from-secondary-700 active:to-secondary-800 text-base sm:text-lg lg:text-xl text-white font-bold rounded-2xl shadow-2xl transform transition-all duration-300 hover:scale-110 active:scale-90 active:shadow-lg hover:shadow-secondary-500/30 cursor-pointer">
                     <span className="flex items-center justify-center">
-                      Apply Now - It's Free
+                      {t('Apply Now - It\'s Free')}
                       <ArrowRight className="ml-2 sm:ml-3 w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:translate-x-2" />
                     </span>
                     <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"></div>
@@ -532,9 +514,9 @@ export const HomePage: React.FC = () => {
                   </div>
                   <div>
                     <div className="text-sm sm:text-base font-semibold text-white">
-                      Join 15,000+ Fellows
+                      {t('Join 15,000+ Fellows')}
                     </div>
-                    <div className="text-xs sm:text-sm">Start your journey today</div>
+                    <div className="text-xs sm:text-sm">{t('Start your journey today')}</div>
                   </div>
                 </div>
               </div>
@@ -542,7 +524,7 @@ export const HomePage: React.FC = () => {
               <div className="mt-6 sm:mt-8 flex justify-center">
                 <Link to="/opportunities" className="w-full sm:w-auto">
                   <Button className="w-full px-6 py-3 sm:px-8 sm:py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 active:bg-white/30 text-sm sm:text-base text-white font-semibold rounded-xl border border-white/20 hover:border-white/40 active:border-white/60 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer">
-                    Browse Opportunities First
+                    {t('Browse Opportunities First')}
                   </Button>
                 </Link>
               </div>

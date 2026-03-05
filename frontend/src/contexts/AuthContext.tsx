@@ -53,6 +53,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     initAuth();
+
+    // Set up token refresh interval - refresh every 50 minutes (before 1 hour expiry)
+    const refreshInterval = setInterval(async () => {
+      const accessToken = tokenManager.getAccessToken();
+      const refreshToken = tokenManager.getRefreshToken();
+      
+      if (accessToken && refreshToken && !tokenManager.isTokenExpired(refreshToken)) {
+        try {
+          const response = await authApi.refreshToken();
+          const newAccessToken = response.access;
+          const newRefreshToken = (response as any).refresh || refreshToken;
+          tokenManager.setTokens(newAccessToken, newRefreshToken);
+        } catch (error) {
+          console.error('Token refresh failed:', error);
+          tokenManager.clearTokens();
+          localStorage.removeItem('user');
+          setUser(null);
+          window.location.href = '/login?session_expired=true';
+        }
+      }
+    }, 50 * 60 * 1000); // 50 minutes
+
+    return () => clearInterval(refreshInterval);
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -91,6 +114,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
+      tokenManager.clearTokens();
+      localStorage.removeItem('user');
       setUser(null);
     }
   };

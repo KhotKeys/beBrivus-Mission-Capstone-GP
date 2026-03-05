@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import {
   Plus,
   Edit,
@@ -9,6 +10,8 @@ import {
   Save,
   X,
   MessageCircle,
+  Shield,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
@@ -48,6 +51,15 @@ export const ForumManagement: React.FC = () => {
         .then((res) => res.data.results || res.data),
     refetchOnWindowFocus: true,
     refetchOnMount: "always",
+  });
+
+  // Fetch flagged discussions count
+  const { data: flaggedCount } = useQuery({
+    queryKey: ["admin-forum-flagged-count"],
+    queryFn: async () => {
+      const response = await adminApi.get("/forum/discussions/flagged/");
+      return response.data.length || 0;
+    },
   });
 
   // Create category mutation
@@ -124,22 +136,64 @@ export const ForumManagement: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="relative">
+      {/* Hero Section */}
+      <div className="absolute left-0 right-0 w-screen" style={{ marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)' }}>
+        <div className="relative w-full h-[150px] md:h-[180px] lg:h-[220px]">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: 'url(/moderation-forum.jpeg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{
+              backdropFilter: 'blur(2px)',
+              backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            }}
+          >
+            <div className="text-center text-white px-4">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">Forum Management</h1>
+              <p className="text-sm md:text-base lg:text-lg">Monitor, moderate and manage all community discussions</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-[150px] md:pt-[180px] lg:pt-[220px]">
+      <div className="space-y-6 px-2 sm:px-4 md:px-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Forum Management</h1>
-          <p className="text-gray-600">Manage forum categories and settings</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Forum Management</h1>
+          <p className="text-sm sm:text-base text-gray-600">Manage forum categories and settings</p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Category
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Link to="/admin/forum/moderation" className="w-full sm:w-auto">
+            <Button variant="outline" className="w-full sm:w-auto">
+              <Shield className="h-4 w-4 mr-2" />
+              Moderation
+              {flaggedCount > 0 && (
+                <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  {flaggedCount}
+                </span>
+              )}
+            </Button>
+          </Link>
+          <Button onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Category
+          </Button>
+        </div>
       </div>
 
       {/* Categories Grid */}
       {categories && categories.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {categories.map((category) => (
             <CategoryCard
               key={category.id}
@@ -152,7 +206,7 @@ export const ForumManagement: React.FC = () => {
           ))}
         </div>
       ) : (
-        <Card className="p-8 text-center text-gray-600">
+        <Card className="p-6 sm:p-8 text-center text-gray-600">
           <p className="text-sm">No categories yet. Create your first forum category.</p>
         </Card>
       )}
@@ -177,6 +231,8 @@ export const ForumManagement: React.FC = () => {
           isLoading={updateMutation.status === "pending"}
         />
       )}
+      </div>
+      </div>
     </div>
   );
 };
@@ -197,21 +253,21 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   isUpdating,
 }) => {
   return (
-    <Card className="p-6">
+    <Card className="p-4 sm:p-6">
       <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
           <div
-            className="w-10 h-10 rounded-lg flex items-center justify-center"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0"
             style={{ backgroundColor: category.color }}
           >
-            <MessageCircle className="h-5 w-5 text-white" />
+            <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
-          <div>
-            <h3 className="font-semibold text-gray-900">{category.name}</h3>
-            <p className="text-sm text-gray-500">Order: {category.order}</p>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold text-sm sm:text-base text-gray-900 truncate">{category.name}</h3>
+            <p className="text-xs sm:text-sm text-gray-500">Order: {category.order}</p>
           </div>
         </div>
-        <div className="flex space-x-1">
+        <div className="flex space-x-1 flex-shrink-0 ml-2">
           <Button
             variant="ghost"
             size="sm"
@@ -219,13 +275,13 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             disabled={isUpdating}
           >
             {category.is_active ? (
-              <Eye className="h-4 w-4" />
+              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
             ) : (
-              <EyeOff className="h-4 w-4" />
+              <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" />
             )}
           </Button>
           <Button variant="ghost" size="sm" onClick={() => onEdit(category)}>
-            <Edit className="h-4 w-4" />
+            <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
           <Button
             variant="ghost"
@@ -233,20 +289,20 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             onClick={() => onDelete(category)}
             disabled={category.discussions_count > 0}
           >
-            <Trash2 className="h-4 w-4 text-red-500" />
+            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
           </Button>
         </div>
       </div>
 
-      <p className="text-sm text-gray-600 mb-4">{category.description}</p>
+      <p className="text-xs sm:text-sm text-gray-600 mb-4">{category.description}</p>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex space-x-2">
           <Badge variant={category.is_active ? "success" : "secondary"}>
             {category.is_active ? "Active" : "Inactive"}
           </Badge>
         </div>
-        <div className="text-sm text-gray-500">
+        <div className="text-xs sm:text-sm text-gray-500">
           {category.discussions_count} discussions
         </div>
       </div>
@@ -283,9 +339,9 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+      <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">
+          <h2 className="text-lg sm:text-xl font-semibold">
             {category ? "Edit Category" : "Create Category"}
           </h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
@@ -298,7 +354,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
             <label className="block text-sm font-medium mb-1">Name</label>
             <input
               type="text"
-              className="w-full border border-gray-300 rounded-md px-3 py-2"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
@@ -312,7 +368,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
               Description
             </label>
             <textarea
-              className="w-full border border-gray-300 rounded-md px-3 py-2"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
               rows={3}
               value={formData.description}
               onChange={(e) =>
@@ -321,12 +377,12 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Color</label>
               <input
                 type="color"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 h-10"
+                className="w-full border border-gray-300 rounded-md px-2 py-2 h-10"
                 value={formData.color}
                 onChange={(e) =>
                   setFormData({ ...formData, color: e.target.value })
@@ -337,7 +393,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
               <label className="block text-sm font-medium mb-1">Order</label>
               <input
                 type="number"
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                 value={formData.order}
                 onChange={(e) =>
                   setFormData({
@@ -353,7 +409,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
             <label className="block text-sm font-medium mb-1">Icon</label>
             <input
               type="text"
-              className="w-full border border-gray-300 rounded-md px-3 py-2"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
               value={formData.icon}
               onChange={(e) =>
                 setFormData({ ...formData, icon: e.target.value })
@@ -376,11 +432,11 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
             </label>
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
               {isLoading ? "Saving..." : "Save"}
             </Button>
           </div>

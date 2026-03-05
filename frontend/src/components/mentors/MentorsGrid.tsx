@@ -18,14 +18,21 @@ import {
 } from "../../api/mentors";
 
 const MentorCard: React.FC<{ mentor: Mentor }> = ({ mentor }) => {
+  const [isBooking, setIsBooking] = useState(false);
+  
   const handleMessage = () => {
     // TODO: Implement messaging functionality
     console.log("Message mentor:", mentor.id);
   };
 
   const handleBookSession = () => {
+    setIsBooking(true);
     // TODO: Implement booking functionality
     console.log("Book session with:", mentor.id);
+    // Simulate booking delay
+    setTimeout(() => {
+      setIsBooking(false);
+    }, 2000);
   };
 
   return (
@@ -125,9 +132,9 @@ const MentorCard: React.FC<{ mentor: Mentor }> = ({ mentor }) => {
           <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
           Message
         </Button>
-        <Button onClick={handleBookSession} size="sm" className="flex-1 text-xs sm:text-sm justify-center">
+        <Button onClick={handleBookSession} size="sm" className="flex-1 text-xs sm:text-sm justify-center" disabled={isBooking}>
           <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
-          Book Session
+          {isBooking ? "Booking..." : "Book Session"}
         </Button>
       </div>
     </Card>

@@ -94,6 +94,7 @@ export interface AdminOpportunity {
   applications_count: number;
   match_score: number;
   days_remaining: number;
+  posted_by_type: 'admin' | 'institution';
   created_at: string;
   updated_at: string;
 }

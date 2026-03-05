@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useTranslation } from "react-i18next";
 import { Button, Input, Card, CardHeader, CardBody } from "../components/ui";
 import apiClient from "../api/client";
 
@@ -13,6 +14,7 @@ const schema = yup.object({
 type ForgotPasswordFormData = yup.InferType<typeof schema>;
 
 export const ForgotPasswordPage: React.FC = () => {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -51,16 +53,21 @@ export const ForgotPasswordPage: React.FC = () => {
             <div className="text-center">
               <div className="mx-auto my-4 rounded-lg flex items-center justify-center mb-4">
                 <img
-                  className="max-w-20"
                   src="/beBivus.png"
                   alt="beBrivus Logo"
+                  style={{
+                    height: '40px',
+                    width: 'auto',
+                    maxHeight: '40px',
+                    objectFit: 'contain'
+                  }}
                 />
               </div>
               <h2 className="text-xl md:text-2xl font-bold text-secondary-900">
-                Reset your password
+                {t('Reset your password')}
               </h2>
               <p className="mt-2 text-sm text-secondary-600">
-                Enter your email address and we'll send you a link to reset your password.
+                {t('Reset password description')}
               </p>
             </div>
           </CardHeader>
@@ -91,11 +98,11 @@ export const ForgotPasswordPage: React.FC = () => {
                 )}
 
                 <Input
-                  label="Email address"
+                  label={t('Email address')}
                   type="email"
                   {...register("email")}
                   error={errors.email?.message}
-                  placeholder="Enter your email"
+                  placeholder={t('Enter your email')}
                 />
 
                 <Button
@@ -104,7 +111,7 @@ export const ForgotPasswordPage: React.FC = () => {
                   isLoading={isLoading}
                   disabled={isLoading}
                 >
-                  Send reset link
+                  {t('Send reset link')}
                 </Button>
 
                 <div className="text-center">
@@ -112,7 +119,7 @@ export const ForgotPasswordPage: React.FC = () => {
                     to="/login"
                     className="text-primary-600 hover:text-primary-500 text-sm"
                   >
-                    Back to sign in
+                    {t('Back to sign in')}
                   </Link>
                 </div>
               </form>

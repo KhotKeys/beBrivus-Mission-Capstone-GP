@@ -1,730 +1,248 @@
-import React, { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import {
-  TrendingUp,
-  Users,
-  Target,
-  Calendar,
-  Download,
-  RefreshCw,
-  ArrowUpRight,
-  ArrowDownRight,
-  Eye,
-  MousePointer,
-  Clock,
-  Globe,
-  Activity,
-  Server,
-} from "lucide-react";
-import { Card, CardBody } from "../../components/ui";
-import { adminApi } from "../../services/adminApi";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
+import { api } from '../../api';
 
-export const AnalyticsDashboardPage: React.FC = () => {
-  const [timeRange, setTimeRange] = useState("7d");
+const AdminAnalyticsPage = () => {
+  const [period, setPeriod] = useState('7days');
+  const [aiInsights, setAiInsights] = useState([]);
+  const [loadingInsights, setLoadingInsights] = useState(false);
 
-  const {
-    data: dashboardStats,
-    isLoading: isStatsLoading,
-    isFetching: isStatsFetching,
-    refetch: refetchStats,
-  } = useQuery({
-    queryKey: ["admin-analytics-stats"],
-    queryFn: () => adminApi.getDashboardStats(),
-    refetchOnWindowFocus: true,
-    refetchOnMount: "always",
+  // Fetch real analytics data
+  const { data: analytics, isLoading, refetch, error } = useQuery({
+    queryKey: ['admin-analytics', period],
+    queryFn: async () => {
+      const token = localStorage.getItem('token') || localStorage.getItem('access_token');
+      console.log('TOKEN BEING SENT:', token?.substring(0, 50));
+      console.log('Making request to:', `/api/admin/analytics/?period=${period}`);
+      const response = await api.get(`/admin/analytics/?period=${period}`);
+      return response.data;
+    },
+    refetchInterval: 15000, // Changed from 60000 to 15000 (15 seconds)
+    staleTime: 10000,       // Changed from 30000 to 10000
+    refetchOnWindowFocus: true, // ADD — refresh when admin returns to tab
   });
 
-  const {
-    data: analyticsData,
-    isFetching: isAnalyticsFetching,
-    refetch: refetchAnalytics,
-  } = useQuery({
-    queryKey: ["admin-analytics-data"],
-    queryFn: () => adminApi.getAnalytics(),
-    refetchOnWindowFocus: true,
-    refetchOnMount: "always",
-  });
+  // Log errors
+  if (error) {
+    console.error('Analytics error:', error?.response?.status, error?.response?.data);
+  }
 
-  const isRefreshing = isStatsFetching || isAnalyticsFetching;
-
-  const handleRefresh = () => {
-    void Promise.all([refetchStats(), refetchAnalytics()]);
+  // Get AI insights
+  const getAIInsights = async () => {
+    if (!analytics) return;
+    setLoadingInsights(true);
+    try {
+      const response = await api.post('/admin/analytics/ai-insights/', {
+        analytics_data: analytics
+      });
+      setAiInsights(response.data.insights || []);
+    } catch (err) {
+      console.error('AI insights failed:', err);
+    } finally {
+      setLoadingInsights(false);
+    }
   };
 
-  const handleExport = () => {
-    const escapeCsvValue = (value: string | number | null | undefined) =>
-      `"${String(value ?? "").replace(/"/g, '""')}"`;
-
-    const timeRangeLabel =
-      {
-        "24h": "Last 24 Hours",
-        "7d": "Last 7 Days",
-        "30d": "Last 30 Days",
-        "90d": "Last 90 Days",
-        "1y": "Last Year",
-      }[timeRange] || "Last 7 Days";
-
-    const submittedTotal =
-      dashboardStats?.applications.submitted ?? dashboardStats?.applications.total ?? 0;
-    const submittedDelta =
-      dashboardStats?.applications.submitted_30d ??
-      dashboardStats?.applications.new_30d ??
-      0;
-
-    const overviewRows = [
-      ["Metric", "Value", "Change", "Notes"],
-      [
-        "Active Users",
-        dashboardStats?.users.active ?? "Not tracked",
-        dashboardStats?.users.new_30d ?? "",
-        "New users in last 30 days",
-      ],
-      [
-        "Tracked Applications (Submitted)",
-        submittedTotal,
-        submittedDelta,
-        "In-platform submissions only",
-      ],
-      [
-        "Opportunities (Active)",
-        dashboardStats?.opportunities.active ?? "Not tracked",
-        dashboardStats?.opportunities.new_30d ?? "",
-        "New opportunities in last 30 days",
-      ],
-      [
-        "Resources (Total)",
-        dashboardStats?.resources.total ?? "Not tracked",
-        dashboardStats?.resources.new_30d ?? "",
-        "New resources in last 30 days",
-      ],
-    ];
-
-    const monthlyUsersRows = [
-      ["Month", "Users"],
-      ...(analyticsData?.monthly_users || []).map((item) => [
-        item.month,
-        item.users,
-      ]),
-    ];
-
-    const monthlyApplicationsRows = [
-      ["Month", "Applications"],
-      ...(analyticsData?.monthly_applications || []).map((item) => [
-        item.month,
-        item.applications,
-      ]),
-    ];
-
-    const sections = [
-      ["Analytics Export"],
-      ["Generated At", new Date().toISOString()],
-      ["Time Range", timeRangeLabel],
-      [],
-      ["Overview Stats"],
-      ...overviewRows,
-      [],
-      ["Monthly Users"],
-      ...monthlyUsersRows,
-      [],
-      ["Monthly Applications"],
-      ...monthlyApplicationsRows,
-    ];
-
-    const csvContent = sections
-      .map((row) => row.map(escapeCsvValue).join(","))
-      .join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `analytics-export-${new Date()
-      .toISOString()
-      .slice(0, 10)}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  // Color map for insight types
+  const insightColors = {
+    positive: { bg: '#f0fdf4', border: '#10B981', icon: '✅' },
+    warning: { bg: '#fefce8', border: '#f59e0b', icon: '⚠️' },
+    neutral: { bg: '#eff6ff', border: '#3b82f6', icon: '💡' },
   };
-
-  const formatCount = (value?: number) => {
-    if (isStatsLoading) return "Loading...";
-    if (typeof value !== "number") return "Not tracked";
-    return value.toLocaleString();
-  };
-
-  const formatDelta = (value?: number) => {
-    if (typeof value !== "number") return undefined;
-    const sign = value >= 0 ? "+" : "";
-    return `${sign}${value.toLocaleString()}`;
-  };
-
-  const submittedApplications =
-    dashboardStats?.applications.submitted ??
-    dashboardStats?.applications.total;
-  const submittedDelta =
-    dashboardStats?.applications.submitted_30d ??
-    dashboardStats?.applications.new_30d;
-
-  const overviewStats = useMemo(
-    () => [
-      {
-        title: "Total Page Views",
-        value: "Not tracked",
-        icon: Eye,
-        color: "primary",
-      },
-      {
-        title: "Active Users",
-        value: formatCount(dashboardStats?.users.active),
-        change: formatDelta(dashboardStats?.users.new_30d),
-        trend: (dashboardStats?.users.new_30d || 0) > 0 ? "up" : "down",
-        changeLabel: "new in last 30 days",
-        icon: Users,
-        color: "success",
-      },
-      {
-        title: "Tracked Applications",
-        value: formatCount(submittedApplications),
-        change: formatDelta(submittedDelta),
-        trend: (submittedDelta || 0) > 0 ? "up" : "down",
-        changeLabel: "clicked in last 30 days",
-        note: "In-platform submissions only",
-        icon: Target,
-        color: "warning",
-      },
-      {
-        title: "Avg. Session Duration",
-        value: "Not tracked",
-        icon: Clock,
-        color: "secondary",
-      },
-    ],
-    [
-      dashboardStats?.users.active,
-      dashboardStats?.users.new_30d,
-      submittedApplications,
-      submittedDelta,
-      isStatsLoading,
-    ]
-  );
-
-  const trafficSources = [
-    { name: "Direct", value: 45, color: "bg-primary-500" },
-    { name: "Organic Search", value: 30, color: "bg-success-500" },
-    { name: "Social Media", value: 15, color: "bg-warning-500" },
-    { name: "Referral", value: 10, color: "bg-secondary-500" },
-  ];
-
-  const topPages = [
-    { path: "/opportunities", views: 45234, unique: 32156, avgTime: "5m 23s" },
-    { path: "/dashboard", views: 38912, unique: 28456, avgTime: "8m 45s" },
-    { path: "/mentors", views: 28456, unique: 19234, avgTime: "4m 12s" },
-    { path: "/resources", views: 23145, unique: 16789, avgTime: "6m 34s" },
-    { path: "/forum", views: 19823, unique: 14567, avgTime: "7m 56s" },
-  ];
-
-  const userEngagement = [
-    { metric: "Bounce Rate", value: "32.4%", change: "-5.2%", trend: "down" },
-    {
-      metric: "Pages per Session",
-      value: "4.8",
-      change: "+12.3%",
-      trend: "up",
-    },
-    {
-      metric: "New vs Returning",
-      value: "65/35",
-      change: "+2.1%",
-      trend: "up",
-    },
-    { metric: "Conversion Rate", value: "8.9%", change: "+15.7%", trend: "up" },
-  ];
-
-  const geographicData = [
-    { country: "South Sudan", users: 680, percentage: 8.5 },
-    { country: "Uganda", users: 500, percentage: 7.3 },
-    { country: "Rwanda", users: 370, percentage: 6.6 },
-    { country: "Kenya", users: 367, percentage: 5.7 },
-    { country: "Others", users: 1090, percentage: 12.9 },
-  ];
-
-  const deviceStats = [
-    { device: "Desktop", users: 234, percentage: 4.1 },
-    { device: "Mobile", users: 2456, percentage: 29.1 },
-    { device: "Tablet", users: 142, percentage: 2.8 },
-  ];
-
-  const funnelSteps = [
-    { label: "Visits", value: 128340, rate: "100%" },
-    { label: "Signups", value: 18420, rate: "14.3%" },
-    { label: "Applications", value: 6230, rate: "4.9%" },
-    { label: "Accepted", value: 980, rate: "0.8%" },
-  ];
-
-  const realtimeSignals = [
-    { label: "Live Users", value: "312", icon: Activity },
-    { label: "New Signups (1h)", value: "42", icon: Users },
-    { label: "Applications (1h)", value: "18", icon: Target },
-  ];
-
-  const systemHealth = [
-    { label: "API Uptime", value: "99.98%", trend: "up", change: "+0.02%" },
-    { label: "Avg. Response", value: "210ms", trend: "down", change: "-18ms" },
-    { label: "Error Rate", value: "0.12%", trend: "down", change: "-0.04%" },
-  ];
-
-  const statClass = {
-    primary: { bg: "bg-primary-100", text: "text-primary-600" },
-    success: { bg: "bg-success-100", text: "text-success-600" },
-    warning: { bg: "bg-warning-100", text: "text-warning-600" },
-    secondary: { bg: "bg-secondary-100", text: "text-secondary-600" },
-  } as const;
 
   return (
-    <div className="space-y-6">
+    <div style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 className="text-3xl font-bold text-secondary-900">
-            Analytics Dashboard
-          </h1>
-          <p className="text-secondary-600 mt-1">
-            Track platform performance and user behavior
+          <h1 style={{ fontSize: '28px', fontWeight: '700', margin: 0 }}>Analytics Dashboard</h1>
+          <p style={{ color: '#6b7280', margin: '4px 0 0 0' }}>
+            Real-time platform data • Auto-refreshes every 60s
+            {analytics?.generated_at && (
+              <span style={{ marginLeft: '8px', fontSize: '12px' }}>
+                Last updated: {new Date(analytics.generated_at).toLocaleTimeString()}
+              </span>
+            )}
           </p>
         </div>
-
-        <div className="flex items-center gap-3">
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            value={period}
+            onChange={e => setPeriod(e.target.value)}
+            style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '14px' }}
           >
-            <option value="24h">Last 24 Hours</option>
-            <option value="7d">Last 7 Days</option>
-            <option value="30d">Last 30 Days</option>
-            <option value="90d">Last 90 Days</option>
-            <option value="1y">Last Year</option>
+            <option value="24hours">Last 24 Hours</option>
+            <option value="7days">Last 7 Days</option>
+            <option value="30days">Last 30 Days</option>
+            <option value="90days">Last 90 Days</option>
+            <option value="1year">Last Year</option>
           </select>
-
           <button
-            onClick={handleRefresh}
-            className="p-2 border border-secondary-300 rounded-lg hover:bg-secondary-50 transition-colors"
-            disabled={isRefreshing}
+            onClick={() => refetch()}
+            style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e5e7eb', background: 'white', cursor: 'pointer' }}
           >
-            <RefreshCw
-              className={`w-5 h-5 text-secondary-600 ${
-                isRefreshing ? "animate-spin" : ""
-              }`}
-            />
+            🔄 Refresh
           </button>
-
           <button
-            onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            onClick={getAIInsights}
+            disabled={loadingInsights || !analytics}
+            style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#10B981', color: 'white', cursor: 'pointer', fontWeight: '600' }}
           >
-            <Download className="w-4 h-4" />
-            Export
+            {loadingInsights ? '🤖 Analysing...' : '🤖 Get AI Insights'}
           </button>
         </div>
       </div>
 
-      {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {overviewStats.map((stat, index) => {
-          const Icon = stat.icon;
-          const color = statClass[stat.color as keyof typeof statClass];
-          return (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
-              <CardBody>
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="text-sm text-secondary-600 mb-1">
-                      {stat.title}
-                    </p>
-                    <p className="text-2xl font-bold text-secondary-900 mb-2">
-                      {stat.value}
-                    </p>
-                    {stat.change && stat.trend && (
-                      <div
-                        className={`flex items-center text-sm ${
-                          stat.trend === "up"
-                            ? "text-success-600"
-                            : "text-error-600"
-                        }`}
-                      >
-                        {stat.trend === "up" ? (
-                          <ArrowUpRight className="w-4 h-4 mr-1" />
-                        ) : (
-                          <ArrowDownRight className="w-4 h-4 mr-1" />
-                        )}
-                        <span className="font-medium">{stat.change}</span>
-                        <span className="text-secondary-500 ml-1">
-                          {stat.changeLabel || "vs last period"}
-                        </span>
-                      </div>
-                    )}
-                    {stat.note && (
-                      <p className="text-xs text-secondary-500 mt-2">
-                        {stat.note}
-                      </p>
-                    )}
-                  </div>
-                  <div
-                    className={`w-12 h-12 rounded-lg ${color.bg} flex items-center justify-center`}
-                  >
-                    <Icon className={`w-6 h-6 ${color.text}`} />
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Realtime Signals */}
-      <Card>
-        <CardBody>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-secondary-900">
-              Realtime Signals
-            </h3>
-            <Activity className="w-5 h-5 text-secondary-400" />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {realtimeSignals.map((signal) => {
-              const Icon = signal.icon;
-              return (
-                <div
-                  key={signal.label}
-                  className="rounded-xl border border-secondary-200 p-4 flex items-center justify-between"
-                >
-                  <div>
-                    <p className="text-sm text-secondary-600">{signal.label}</p>
-                    <p className="text-2xl font-bold text-secondary-900 mt-1">
-                      {signal.value}
-                    </p>
-                  </div>
-                  <Icon className="w-6 h-6 text-primary-600" />
-                </div>
-              );
-            })}
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Traffic Sources */}
-        <Card>
-          <CardBody>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-secondary-900">
-                Traffic Sources
-              </h3>
-              <Globe className="w-5 h-5 text-secondary-400" />
-            </div>
-
-            <div className="space-y-4">
-              {trafficSources.map((source, index) => (
-                <div key={index}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-secondary-900">
-                      {source.name}
-                    </span>
-                    <span className="text-sm font-semibold text-secondary-900">
-                      {source.value}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-secondary-100 rounded-full h-2">
-                    <div
-                      className={`${source.color} h-2 rounded-full transition-all duration-500`}
-                      style={{ width: `${source.value}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* User Engagement Metrics */}
-        <Card>
-          <CardBody>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-secondary-900">
-                User Engagement
-              </h3>
-              <MousePointer className="w-5 h-5 text-secondary-400" />
-            </div>
-
-            <div className="space-y-4">
-              {userEngagement.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-secondary-50 rounded-lg"
-                >
-                  <div>
-                    <p className="text-sm text-secondary-600">{item.metric}</p>
-                    <p className="text-xl font-bold text-secondary-900">
-                      {item.value}
-                    </p>
-                  </div>
-                  <div
-                    className={`flex items-center text-sm font-medium ${
-                      item.trend === "up"
-                        ? "text-success-600"
-                        : "text-error-600"
-                    }`}
-                  >
-                    {item.trend === "up" ? (
-                      <ArrowUpRight className="w-4 h-4 mr-1" />
-                    ) : (
-                      <ArrowDownRight className="w-4 h-4 mr-1" />
-                    )}
-                    {item.change}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardBody>
-        </Card>
-      </div>
-
-      {/* Conversion Funnel */}
-      <Card>
-        <CardBody>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-secondary-900">
-              Conversion Funnel
-            </h3>
-            <TrendingUp className="w-5 h-5 text-secondary-400" />
-          </div>
-          <div className="space-y-4">
-            {funnelSteps.map((step, index) => {
-              const width = Math.max(8, Math.round((step.value / funnelSteps[0].value) * 100));
-              return (
-                <div key={step.label} className="rounded-lg border border-secondary-200 p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-secondary-900">
-                      {step.label}
-                    </span>
-                    <span className="text-sm text-secondary-600">
-                      {step.value.toLocaleString()} ({step.rate})
-                    </span>
-                  </div>
-                  <div className="w-full bg-secondary-100 rounded-full h-2">
-                    <div
-                      className="bg-primary-500 h-2 rounded-full"
-                      style={{ width: `${width}%` }}
-                    />
-                  </div>
-                  {index < funnelSteps.length - 1 && (
-                    <p className="text-xs text-secondary-500 mt-2">
-                      Drop-off from previous step: {(
-                        100 -
-                        Math.round(
-                          (funnelSteps[index + 1].value / step.value) * 100
-                        )
-                      ).toString()}%
-                    </p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* Top Pages Table */}
-      <Card>
-        <CardBody>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-secondary-900">
-              Top Pages
-            </h3>
-            <TrendingUp className="w-5 h-5 text-secondary-400" />
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-secondary-200">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-secondary-700">
-                    Page Path
-                  </th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-secondary-700">
-                    Page Views
-                  </th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-secondary-700">
-                    Unique Views
-                  </th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-secondary-700">
-                    Avg. Time
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {topPages.map((page, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-secondary-100 hover:bg-secondary-50 transition-colors"
-                  >
-                    <td className="py-3 px-4">
-                      <span className="text-sm font-medium text-primary-600">
-                        {page.path}
-                      </span>
-                    </td>
-                    <td className="text-right py-3 px-4">
-                      <span className="text-sm text-secondary-900">
-                        {page.views.toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="text-right py-3 px-4">
-                      <span className="text-sm text-secondary-900">
-                        {page.unique.toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="text-right py-3 px-4">
-                      <span className="text-sm text-secondary-600">
-                        {page.avgTime}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* Geographic Distribution & Device Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Geographic Data */}
-        <Card>
-          <CardBody>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-secondary-900">
-                Geographic Distribution
-              </h3>
-              <Globe className="w-5 h-5 text-secondary-400" />
-            </div>
-
-            <div className="space-y-3">
-              {geographicData.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 hover:bg-secondary-50 rounded-lg transition-colors"
-                >
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-secondary-900">
-                      {item.country}
-                    </p>
-                    <p className="text-xs text-secondary-600">
-                      {item.users.toLocaleString()} users
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-24 bg-secondary-100 rounded-full h-2">
-                      <div
-                        className="bg-primary-500 h-2 rounded-full"
-                        style={{ width: `${item.percentage}%` }}
-                      />
-                    </div>
-                    <span className="text-sm font-semibold text-secondary-900 w-12 text-right">
-                      {item.percentage}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Device Stats */}
-        <Card>
-          <CardBody>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-secondary-900">
-                Device Distribution
-              </h3>
-              <Calendar className="w-5 h-5 text-secondary-400" />
-            </div>
-
-            <div className="space-y-6">
-              {deviceStats.map((item, index) => (
-                <div key={index}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-secondary-900">
-                      {item.device}
-                    </span>
-                    <span className="text-sm font-semibold text-secondary-900">
-                      {item.users.toLocaleString()} users
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 bg-secondary-100 rounded-full h-3">
-                      <div
-                        className="bg-gradient-to-r from-primary-500 to-primary-600 h-3 rounded-full transition-all duration-500"
-                        style={{ width: `${item.percentage}%` }}
-                      />
-                    </div>
-                    <span className="text-sm font-semibold text-secondary-900 w-12">
-                      {item.percentage}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 p-4 bg-primary-50 rounded-lg">
-              <p className="text-sm text-primary-900 font-medium">
-                Most users access from desktop devices
-              </p>
-              <p className="text-xs text-primary-700 mt-1">
-                Consider optimizing mobile experience to increase mobile
-                engagement
-              </p>
-            </div>
-          </CardBody>
-        </Card>
-      </div>
-
-      {/* System Health */}
-      <Card>
-        <CardBody>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-secondary-900">
-              System Health
-            </h3>
-            <Server className="w-5 h-5 text-secondary-400" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {systemHealth.map((item) => (
-              <div key={item.label} className="rounded-xl border border-secondary-200 p-4">
-                <p className="text-sm text-secondary-600">{item.label}</p>
-                <p className="text-2xl font-bold text-secondary-900 mt-2">
-                  {item.value}
+      {/* Key Metrics Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+        {[
+          { label: 'Total Users', value: analytics?.total_users || 0, sub: `+${analytics?.new_users_period || 0} this period`, icon: '👥', color: '#3b82f6' },
+          { label: 'Active Users', value: analytics?.active_users || 0, sub: 'logged in this period', icon: '🟢', color: '#10B981' },
+          { label: 'Total Applications', value: analytics?.total_applications || 0, sub: `+${analytics?.applications_period || 0} this period`, icon: '📋', color: '#8b5cf6' },
+          { label: 'Accepted', value: analytics?.application_status?.accepted || 0, sub: `${analytics?.total_applications ? Math.round((analytics.application_status.accepted / analytics.total_applications) * 100) : 0}% acceptance rate`, icon: '✅', color: '#10B981' },
+          { label: 'Opportunities', value: analytics?.total_opportunities || 0, sub: `${analytics?.active_opportunities || 0} active`, icon: '🎯', color: '#f59e0b' },
+          { label: 'Forum Discussions', value: analytics?.total_discussions || 0, sub: `+${analytics?.new_discussions_period || 0} this period`, icon: '💬', color: '#ec4899' },
+          { label: 'Mentor Bookings', value: analytics?.total_bookings || 0, sub: `${analytics?.confirmed_bookings || 0} confirmed • ${analytics?.pending_bookings || 0} pending`, icon: '📅', color: '#06b6d4' },
+          { label: 'New Signups (1h)', value: analytics?.new_users_1h || 0, sub: 'in last hour', icon: '⚡', color: '#f97316' },
+        ].map(metric => (
+          <div key={metric.label} style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #e5e7eb', borderTop: `4px solid ${metric.color}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <p style={{ margin: 0, fontSize: '13px', color: '#6b7280', fontWeight: '500' }}>{metric.label}</p>
+                <p style={{ margin: '4px 0', fontSize: '28px', fontWeight: '700', color: '#111827' }}>
+                  {isLoading ? '...' : metric.value.toLocaleString()}
                 </p>
-                <div
-                  className={`flex items-center text-sm mt-2 ${
-                    item.trend === "up"
-                      ? "text-success-600"
-                      : "text-error-600"
-                  }`}
-                >
-                  {item.trend === "up" ? (
-                    <ArrowUpRight className="w-4 h-4 mr-1" />
-                  ) : (
-                    <ArrowDownRight className="w-4 h-4 mr-1" />
-                  )}
-                  {item.change}
+                <p style={{ margin: 0, fontSize: '12px', color: '#6b7280' }}>{metric.sub}</p>
+              </div>
+              <span style={{ fontSize: '28px' }}>{metric.icon}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* AI Insights Section */}
+      {aiInsights.length > 0 && (
+        <div style={{ background: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #e5e7eb', marginBottom: '24px' }}>
+          <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            🤖 AI-Powered Insights
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+            {aiInsights.map((insight, i) => {
+              const colors = insightColors[insight.type] || insightColors.neutral;
+              return (
+                <div key={i} style={{ background: colors.bg, border: `1px solid ${colors.border}`, borderRadius: '10px', padding: '16px' }}>
+                  <div style={{ fontWeight: '700', marginBottom: '6px', fontSize: '15px' }}>
+                    {colors.icon} {insight.title}
+                  </div>
+                  <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#374151' }}>{insight.insight}</p>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#10B981', fontWeight: '500' }}>
+                    → {insight.recommendation}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Application Status Distribution */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+        <div style={{ background: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #e5e7eb' }}>
+          <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '700' }}>📊 Application Status</h2>
+          {analytics?.application_status && Object.entries(analytics.application_status).map(([status, count]) => {
+            const total = analytics.total_applications || 1;
+            const pct = Math.round((count / total) * 100);
+            const colors = {
+              pending: '#f59e0b',
+              under_review: '#3b82f6',
+              interview_scheduled: '#8b5cf6',
+              accepted: '#10B981',
+              rejected: '#ef4444',
+            };
+            return (
+              <div key={status} style={{ marginBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '13px', textTransform: 'capitalize' }}>{status.replace('_', ' ')}</span>
+                  <span style={{ fontWeight: '700', fontSize: '13px' }}>{count} ({pct}%)</span>
+                </div>
+                <div style={{ background: '#f3f4f6', borderRadius: '4px', height: '8px' }}>
+                  <div style={{ background: colors[status] || '#6b7280', width: `${pct}%`, height: '100%', borderRadius: '4px', transition: 'width 0.5s' }} />
                 </div>
               </div>
+            );
+          })}
+        </div>
+
+        {/* Conversion Funnel */}
+        <div style={{ background: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #e5e7eb' }}>
+          <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '700' }}>🔄 Conversion Funnel</h2>
+          {analytics?.conversion_funnel?.map((stage, i) => {
+            const first = analytics.conversion_funnel[0]?.count || 1;
+            const pct = Math.round((stage.count / first) * 100);
+            return (
+              <div key={i} style={{ marginBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '13px' }}>{stage.stage}</span>
+                  <span style={{ fontWeight: '700', fontSize: '13px' }}>{stage.count.toLocaleString()} ({pct}%)</span>
+                </div>
+                <div style={{ background: '#f3f4f6', borderRadius: '4px', height: '8px' }}>
+                  <div style={{ background: `hsl(${160 - i * 30}, 70%, 50%)`, width: `${pct}%`, height: '100%', borderRadius: '4px' }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Top Opportunities */}
+      <div style={{ background: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #e5e7eb', marginBottom: '24px' }}>
+        <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '700' }}>🏆 Top Opportunities by Applications</h2>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
+              <th style={{ textAlign: 'left', padding: '8px', fontSize: '13px', color: '#6b7280' }}>Opportunity</th>
+              <th style={{ textAlign: 'left', padding: '8px', fontSize: '13px', color: '#6b7280' }}>Organization</th>
+              <th style={{ textAlign: 'right', padding: '8px', fontSize: '13px', color: '#6b7280' }}>Applications</th>
+            </tr>
+          </thead>
+          <tbody>
+            {analytics?.top_opportunities?.map((opp, i) => (
+              <tr key={i} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                <td style={{ padding: '10px 8px', fontSize: '14px', fontWeight: '500' }}>{opp.opportunity__title}</td>
+                <td style={{ padding: '10px 8px', fontSize: '13px', color: '#6b7280' }}>{opp.opportunity__organization}</td>
+                <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: '700', color: '#10B981' }}>{opp.application_count}</td>
+              </tr>
             ))}
-          </div>
-        </CardBody>
-      </Card>
+            {(!analytics?.top_opportunities || analytics.top_opportunities.length === 0) && (
+              <tr><td colSpan={3} style={{ padding: '20px', textAlign: 'center', color: '#6b7280' }}>No applications yet</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Registration Trend */}
+      <div style={{ background: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #e5e7eb' }}>
+        <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '700' }}>📈 Daily Registration Trend (Last 7 Days)</h2>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '120px' }}>
+          {analytics?.registration_trend?.slice().reverse().map((day, i) => {
+            const max = Math.max(...analytics.registration_trend.map(d => d.count), 1);
+            const height = Math.max((day.count / max) * 100, 4);
+            return (
+              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '11px', fontWeight: '700', color: '#374151' }}>{day.count}</span>
+                <div style={{ width: '100%', height: `${height}px`, background: '#10B981', borderRadius: '4px 4px 0 0', transition: 'height 0.5s' }} />
+                <span style={{ fontSize: '10px', color: '#9ca3af' }}>
+                  {new Date(day.date).toLocaleDateString('en', { weekday: 'short' })}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
     </div>
   );
 };
+
+export { AdminAnalyticsPage as AnalyticsDashboardPage };

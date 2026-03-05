@@ -16,7 +16,11 @@ urlpatterns = [
     # Dashboard endpoints
     path('dashboard/stats/', admin_views.DashboardStatsView.as_view(), name='dashboard-stats'),
     path('dashboard/recent-activity/', admin_views.RecentActivityView.as_view(), name='recent-activity'),
-    path('dashboard/analytics/', admin_views.AnalyticsView.as_view(), name='analytics'),
+    path('analytics/', admin_views.AnalyticsDashboardView.as_view(), name='analytics'),
+    path('analytics/ai-insights/', admin_views.AIAnalyticsInsightView.as_view(), name='ai-insights'),
+    
+    # Search
+    path('search/', admin_views.AdminSearchView.as_view(), name='admin-search'),
     
     # User management
     path('users/bulk-actions/', admin_views.UserBulkActionsView.as_view(), name='user-bulk-actions'),

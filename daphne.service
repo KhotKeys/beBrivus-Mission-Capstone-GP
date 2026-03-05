@@ -1,0 +1,20 @@
+[Unit]
+Description=Daphne ASGI server for beBrivus WebSocket
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/bebrivus/backend
+Environment="PATH=/var/www/bebrivus/backend/.venv/bin"
+EnvironmentFile=/var/www/bebrivus/backend/.env
+ExecStart=/var/www/bebrivus/backend/.venv/bin/daphne \
+    -b 127.0.0.1 \
+    -p 8002 \
+    core.asgi:application
+
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

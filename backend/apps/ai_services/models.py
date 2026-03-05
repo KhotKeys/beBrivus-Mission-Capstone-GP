@@ -53,6 +53,7 @@ class ChatSession(models.Model):
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='chat_sessions')
     title = models.CharField(max_length=200)
+    is_starred = models.BooleanField(default=False)
     
     # Context
     opportunity = models.ForeignKey(Opportunity, on_delete=models.SET_NULL, blank=True, null=True)
@@ -72,7 +73,7 @@ class ChatSession(models.Model):
     
     class Meta:
         db_table = 'chat_sessions'
-        ordering = ['-updated_at']
+        ordering = ['-is_starred', '-updated_at']
     
     def __str__(self):
         return f"{self.user.email} - {self.title}"
@@ -177,3 +178,83 @@ class AIFeedback(models.Model):
     
     def __str__(self):
         return f"{self.user.email} - Rating: {self.rating}"
+
+
+class UserMemoryProfile(models.Model):
+    """
+    AI Coach personalized memory for each user
+    """
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ai_memory')
+    
+    # Extracted information
+    preferred_name = models.CharField(max_length=100, blank=True)
+    skills_mentioned = models.JSONField(default=list)
+    career_goals = models.TextField(blank=True)
+    interests = models.JSONField(default=list)
+    past_topics = models.JSONField(default=list)  # List of topics discussed
+    
+    # Metadata
+    last_conversation_summary = models.TextField(blank=True)
+    conversation_count = models.PositiveIntegerField(default=0)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'user_memory_profiles'
+    
+    def __str__(self):
+        return f"Memory for {self.user.email}"
+
+
+class ContentModerationFlag(models.Model):
+    """
+    Flags for content that needs moderation review
+    """
+    CONTENT_TYPES = [
+        ('forum_post', 'Forum Post'),
+        ('chat_message', 'Chat Message'),
+        ('application', 'Application'),
+        ('profile', 'User Profile'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending Review'),
+        ('approved', 'Approved'),
+        ('removed', 'Removed'),
+        ('dismissed', 'Dismissed'),
+    ]
+    
+    content_type = models.CharField(max_length=20, choices=CONTENT_TYPES)
+    content_id = models.PositiveIntegerField()
+    content_text = models.TextField()
+    
+    # Moderation details
+    violation_category = models.CharField(max_length=100)
+    confidence_score = models.FloatField()
+    reason = models.TextField()
+    
+    # User who created the content
+    flagged_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='moderation_flags')
+    
+    # Review status
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_flags')
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    admin_notes = models.TextField(blank=True)
+    
+    # Email notification sent
+    admin_notified = models.BooleanField(default=False)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'content_moderation_flags'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['flagged_user']),
+        ]
+    
+    def __str__(self):
+        return f"{self.content_type} - {self.violation_category} ({self.status})"

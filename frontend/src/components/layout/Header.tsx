@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { useTranslation } from "react-i18next";
 import {
   User,
   LogOut,
@@ -18,13 +19,19 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { Button } from "../ui";
+import { useLanguage } from "../../hooks/useLanguage";
+import { LanguageSelectorCompact } from "../LanguageSelector";
 
 export const Header: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMentor = user?.user_type === "mentor";
   const isInstitution = user?.user_type === "institution";
+  
+  // Restore language on component mount
+  useLanguage();
 
   const handleLogout = async () => {
     await logout();
@@ -63,14 +70,14 @@ export const Header: React.FC = () => {
                 className="flex items-center space-x-1 text-secondary-700 hover:text-primary-600 transition-colors"
               >
                 <Search className="w-4 h-4" />
-                <span>Opportunities</span>
+                <span>{t('Opportunities')}</span>
               </Link>
               <Link
                 to="/mentors"
                 className="flex items-center space-x-1 text-secondary-700 hover:text-primary-600 transition-colors"
               >
                 <Users className="w-4 h-4" />
-                <span>Mentors</span>
+                <span>{t('Mentors')}</span>
               </Link>
               <Link
                 to="/tracker"
@@ -84,21 +91,21 @@ export const Header: React.FC = () => {
                 className="flex items-center space-x-1 text-secondary-700 hover:text-primary-600 transition-colors"
               >
                 <BookOpen className="w-4 h-4" />
-                <span>Resources</span>
+                <span>{t('Resources')}</span>
               </Link>
               <Link
                 to="/forum"
                 className="flex items-center space-x-1 text-secondary-700 hover:text-primary-600 transition-colors"
               >
                 <Users className="w-4 h-4" />
-                <span>Forum</span>
+                <span>{t('Forum')}</span>
               </Link>
               <Link
                 to="/ai-coach"
                 className="flex items-center space-x-1 text-secondary-700 hover:text-primary-600 transition-colors"
               >
                 <Bot className="w-4 h-4" />
-                <span>AI Coach</span>
+                <span>{t('AI Coach')}</span>
               </Link>
             </nav>
           )}
@@ -137,6 +144,11 @@ export const Header: React.FC = () => {
 
           {/* Right side */}
           <div className="flex items-center space-x-2 md:space-x-4">
+            {/* Language Selector - Always visible */}
+            <div className="hidden md:block">
+              <LanguageSelectorCompact />
+            </div>
+            
             <button
               onClick={() => setMobileOpen((prev) => !prev)}
               className="md:hidden inline-flex items-center justify-center p-2 rounded-lg text-secondary-600 hover:text-primary-600 hover:bg-secondary-100"
@@ -175,7 +187,7 @@ export const Header: React.FC = () => {
                           } flex items-center space-x-2 px-4 py-2 text-sm text-secondary-700`}
                         >
                           <User className="w-4 h-4" />
-                          <span>Profile</span>
+                          <span>{t('Profile')}</span>
                         </Link>
                       )}
                     </MenuItem>
@@ -189,7 +201,7 @@ export const Header: React.FC = () => {
                           } flex items-center space-x-2 px-4 py-2 text-sm text-error-600 w-full text-left`}
                         >
                           <LogOut className="w-4 h-4" />
-                          <span>Sign out</span>
+                          <span>{t('Sign Out')}</span>
                         </button>
                       )}
                     </MenuItem>
@@ -203,14 +215,14 @@ export const Header: React.FC = () => {
                   size="sm"
                   onClick={() => navigate("/login")}
                 >
-                  Sign In
+                  {t('Sign In')}
                 </Button>
                 <Button
                   variant="primary"
                   size="sm"
                   onClick={() => navigate("/register")}
                 >
-                  Sign Up
+                  {t('Sign Up')}
                 </Button>
               </div>
             )}
@@ -306,12 +318,60 @@ export const Header: React.FC = () => {
                   </Link>
                 </>
               )}
+              
+              {/* Language selector at bottom of mobile menu */}
+              <div style={{
+                padding: '12px 16px',
+                borderTop: '1px solid #e5e7eb',
+                marginTop: '8px',
+              }}>
+                <p style={{
+                  fontSize: '12px',
+                  color: '#6b7280',
+                  marginBottom: '8px',
+                  fontWeight: '600',
+                }}>
+                  🌍 {t('Language')}
+                </p>
+                <select
+                  value={i18n.language}
+                  onChange={(e) => {
+                    const lang = e.target.value;
+                    i18n.changeLanguage(lang);
+                    localStorage.setItem('bebrivus_language', lang);
+                    document.dir = lang === 'ar' ? 'rtl' : 'ltr';
+                    document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+                    document.documentElement.setAttribute('lang', lang);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #e5e7eb',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    background: 'white',
+                    minHeight: '44px',
+                  }}
+                >
+                  <option value="en">🇬🇧 English</option>
+                  <option value="fr">🇫🇷 Français</option>
+                  <option value="sw">🇰🇪 Kiswahili</option>
+                  <option value="am">🇪🇹 አማርኛ</option>
+                  <option value="ha">🇳🇬 Hausa</option>
+                  <option value="yo">🇳🇬 Yorùbá</option>
+                  <option value="zu">🇿🇦 isiZulu</option>
+                  <option value="ar">🇪🇬 العربية</option>
+                  <option value="pt">🇦🇴 Português</option>
+                  <option value="dinka">🇸🇸 Dinka</option>
+                </select>
+              </div>
             </nav>
           </div>
         ) : (
           <div
             className={`md:hidden transition-all duration-200 overflow-hidden ${
-              mobileOpen ? "max-h-40 pb-4" : "max-h-0"
+              mobileOpen ? "max-h-96 pb-4" : "max-h-0"
             }`}
           >
             <div className="flex flex-col gap-2 pt-2">
@@ -335,6 +395,54 @@ export const Header: React.FC = () => {
               >
                 Sign Up
               </Button>
+              
+              {/* Language selector for non-authenticated mobile */}
+              <div style={{
+                padding: '12px 16px',
+                borderTop: '1px solid #e5e7eb',
+                marginTop: '8px',
+              }}>
+                <p style={{
+                  fontSize: '12px',
+                  color: '#6b7280',
+                  marginBottom: '8px',
+                  fontWeight: '600',
+                }}>
+                  🌍 {t('Language')}
+                </p>
+                <select
+                  value={i18n.language}
+                  onChange={(e) => {
+                    const lang = e.target.value;
+                    i18n.changeLanguage(lang);
+                    localStorage.setItem('bebrivus_language', lang);
+                    document.dir = lang === 'ar' ? 'rtl' : 'ltr';
+                    document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+                    document.documentElement.setAttribute('lang', lang);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #e5e7eb',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    background: 'white',
+                    minHeight: '44px',
+                  }}
+                >
+                  <option value="en">🇬🇧 English</option>
+                  <option value="fr">🇫🇷 Français</option>
+                  <option value="sw">🇰🇪 Kiswahili</option>
+                  <option value="am">🇪🇹 አማርኛ</option>
+                  <option value="ha">🇳🇬 Hausa</option>
+                  <option value="yo">🇳🇬 Yorùbá</option>
+                  <option value="zu">🇿🇦 isiZulu</option>
+                  <option value="ar">🇪🇬 العربية</option>
+                  <option value="pt">🇦🇴 Português</option>
+                  <option value="dinka">🇸🇸 Dinka</option>
+                </select>
+              </div>
             </div>
           </div>
         )}

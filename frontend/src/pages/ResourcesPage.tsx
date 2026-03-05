@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Search,
   Filter,
@@ -33,6 +34,7 @@ import {
 } from "../api/resources";
 
 export const ResourcesPage: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [resources, setResources] = useState<Resource[]>([]);
   const [categories, setCategories] = useState<ResourceCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -227,75 +229,75 @@ export const ResourcesPage: React.FC = () => {
   };
 
   const ResourceCard: React.FC<{ resource: Resource }> = ({ resource }) => (
-    <Card className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
-      <CardBody className="p-6">
-        <div className="flex items-start gap-4">
+    <Card className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group h-full flex flex-col overflow-hidden">
+      <CardBody className="p-6 flex flex-col h-full">
+        <div className="flex items-start gap-4 flex-1 min-h-0">
           <div className="flex-shrink-0">
             {getFileIcon(resource.resource_type)}
           </div>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-lg font-semibold text-neutral-900 truncate group-hover:text-primary-600 transition-colors">
+          <div className="flex-1 min-w-0 flex flex-col h-full">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 className="text-lg font-semibold text-neutral-900 truncate group-hover:text-primary-600 transition-colors break-words max-w-full">
                 {resource.title}
               </h3>
               {resource.is_featured && (
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-warning-100 text-warning-800">
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-warning-100 text-warning-800 flex-shrink-0">
                   <Star className="w-3 h-3 mr-1" />
                   Featured
                 </span>
               )}
             </div>
 
-            <div className="flex items-center gap-3 mb-3 text-sm text-neutral-600">
+            <div className="flex items-center gap-3 mb-3 text-sm text-neutral-600 flex-wrap">
               <div
-                className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(
+                className={`px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${getTypeColor(
                   resource.resource_type
                 )}`}
               >
                 {resource.resource_type.toUpperCase()}
               </div>
-              <span>{resource.category?.name}</span>
-              <div className="flex items-center">
-                <User className="w-4 h-4 mr-1" />
-                {getAuthorName(resource)}
+              <span className="truncate">{resource.category?.name}</span>
+              <div className="flex items-center truncate">
+                <User className="w-4 h-4 mr-1 flex-shrink-0" />
+                <span className="truncate">{getAuthorName(resource)}</span>
               </div>
             </div>
 
-            <p className="text-sm text-neutral-700 mb-4 line-clamp-2">
+            <p className="text-sm text-neutral-700 mb-4 line-clamp-2 break-words overflow-wrap-break-word">
               {resource.description}
             </p>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 text-xs text-neutral-500">
-                <div className="flex items-center">
+            <div className="mt-auto pt-3 border-t border-neutral-100">
+              <div className="flex items-center gap-4 text-xs text-neutral-500 mb-3 flex-wrap">
+                <div className="flex items-center flex-shrink-0">
                   <Eye className="w-4 h-4 mr-1" />
                   {resource.view_count}
                 </div>
                 {resource.download_count > 0 && (
-                  <div className="flex items-center">
+                  <div className="flex items-center flex-shrink-0">
                     <Download className="w-4 h-4 mr-1" />
                     {resource.download_count}
                   </div>
                 )}
-                <div className="flex items-center">
+                <div className="flex items-center flex-shrink-0">
                   <Calendar className="w-4 h-4 mr-1" />
                   {formatDate(resource.published_at || resource.created_at)}
                 </div>
                 {resource.estimated_duration_minutes && (
-                  <div className="flex items-center">
+                  <div className="flex items-center flex-shrink-0">
                     <Clock className="w-4 h-4 mr-1" />
                     {resource.estimated_duration_minutes} min
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Button
                   variant="secondary"
                   size="sm"
                   onClick={() => handleBookmark(resource.id)}
-                  className={resource.is_bookmarked ? "text-error-600" : ""}
+                  className={`flex-shrink-0 ${resource.is_bookmarked ? "text-error-600" : ""}`}
                 >
                   <Heart
                     className={`w-4 h-4 ${
@@ -303,18 +305,18 @@ export const ResourcesPage: React.FC = () => {
                     }`}
                   />
                 </Button>
-                <Button variant="secondary" size="sm">
+                <Button variant="secondary" size="sm" className="flex-shrink-0">
                   <Share2 className="w-4 h-4" />
                 </Button>
                 {resource.file ? (
-                  <Button size="sm" onClick={() => handleDownload(resource)}>
-                    <Download className="w-4 h-4 mr-2" />
-                    Download
+                  <Button size="sm" onClick={() => handleDownload(resource)} className="flex-1 min-w-0">
+                    <Download className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">{t("Download")}</span>
                   </Button>
                 ) : (
-                  <Button size="sm" onClick={() => handleOpenLink(resource)}>
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Open
+                  <Button size="sm" onClick={() => handleOpenLink(resource)} className="flex-1 min-w-0">
+                    <ExternalLink className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">{t("Open")}</span>
                   </Button>
                 )}
               </div>
@@ -397,12 +399,12 @@ export const ResourcesPage: React.FC = () => {
             {resource.file ? (
               <Button size="sm" onClick={() => handleDownload(resource)}>
                 <Download className="w-4 h-4 mr-2" />
-                Download
+                {t("Download")}
               </Button>
             ) : (
               <Button size="sm" onClick={() => handleOpenLink(resource)}>
                 <ExternalLink className="w-4 h-4 mr-2" />
-                Open
+                {t("Open")}
               </Button>
             )}
           </div>
@@ -414,24 +416,25 @@ export const ResourcesPage: React.FC = () => {
   return (
     <Layout>
       <HeroSection
-        title="Resource Library"
-        subtitle="Access comprehensive guides, tools, and materials to support your academic and career journey. Everything you need to succeed, all in one place."
+        key={i18n.language}
+        title={t('Resource Library')}
+        subtitle={t('Resources hero description')}
       />
 
       <div className="bg-white border-b border-neutral-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold text-primary-600">New uploads</p>
+              <p className="text-sm font-semibold text-primary-600">{t('New uploads')}</p>
               <h2 className="text-xl font-bold text-neutral-900">
-                Explore the latest resources uploaded by our team
+                {t('Explore latest resources')}
               </h2>
               <p className="text-sm text-neutral-600 mt-1">
-                Find new guides, videos, and templates curated for students.
+                {t('Resources subtitle')}
               </p>
             </div>
             <Link to="/resources/uploads" className="w-full md:w-auto">
-              <Button className="w-full md:w-auto">View Uploaded Resources</Button>
+              <Button className="w-full md:w-auto">{t('View Uploaded Resources')}</Button>
             </Link>
           </div>
         </div>
@@ -449,7 +452,7 @@ export const ResourcesPage: React.FC = () => {
                   <input
                     type="text"
                     className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="Search resources..."
+                    placeholder={t("Search resources")}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -460,7 +463,7 @@ export const ResourcesPage: React.FC = () => {
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                 >
-                  <option value="">All Categories</option>
+                  <option value="">{t("All Categories")}</option>
                   {categories.map((category) => (
                     <option key={category.id} value={category.slug}>
                       {category.name}
@@ -473,13 +476,13 @@ export const ResourcesPage: React.FC = () => {
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value)}
                 >
-                  <option value="">All Types</option>
-                  <option value="pdf">PDF</option>
-                  <option value="video">Video</option>
-                  <option value="document">Document</option>
-                  <option value="link">Link</option>
-                  <option value="course">Course</option>
-                  <option value="image">Image</option>
+                  <option value="">{t("All Types")}</option>
+                  <option value="pdf">{t("PDF")}</option>
+                  <option value="video">{t("Video")}</option>
+                  <option value="document">{t("Document")}</option>
+                  <option value="link">{t("Link")}</option>
+                  <option value="course">{t("Course")}</option>
+                  <option value="image">{t("Image")}</option>
                 </select>
 
                 <select
@@ -487,12 +490,12 @@ export const ResourcesPage: React.FC = () => {
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                 >
-                  <option value="newest">Newest First</option>
-                  <option value="oldest">Oldest First</option>
-                  <option value="popular">Most Popular</option>
-                  <option value="downloads">Most Downloaded</option>
-                  <option value="rating">Highest Rated</option>
-                  <option value="title">Alphabetical</option>
+                  <option value="newest">{t("Newest First")}</option>
+                  <option value="oldest">{t("Oldest First")}</option>
+                  <option value="popular">{t("Most Popular")}</option>
+                  <option value="downloads">{t("Most Downloaded")}</option>
+                  <option value="rating">{t("Highest Rated")}</option>
+                  <option value="title">{t("Alphabetical")}</option>
                 </select>
               </div>
 
@@ -503,7 +506,7 @@ export const ResourcesPage: React.FC = () => {
                     className="flex items-center w-full sm:w-auto justify-center"
                   >
                     <Filter className="w-4 h-4 mr-2" />
-                    More Filters
+                    {t("More Filters")}
                   </Button>
                 </div>
 
@@ -547,10 +550,10 @@ export const ResourcesPage: React.FC = () => {
 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-6 text-center sm:text-left">
             <h2 className="text-lg sm:text-xl font-semibold text-neutral-900">
-              {filteredResources.length} resources found
+              {filteredResources.length} {t("resources found")}
             </h2>
             <div className="text-xs sm:text-sm text-neutral-600">
-              Showing {viewMode} view • Sorted by {sortBy}
+              {t("Showing")} {viewMode} {t("view")} • {t("Sorted by")} {sortBy}
             </div>
           </div>
 
@@ -575,11 +578,10 @@ export const ResourcesPage: React.FC = () => {
                   <Search className="w-9 h-9 sm:w-12 sm:h-12 text-neutral-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-neutral-900 mb-3">
-                  No resources found
+                  {t("No resources found")}
                 </h3>
                 <p className="text-neutral-600 mb-6 max-w-md mx-auto">
-                  Try adjusting your search criteria or browse different
-                  categories.
+                  {t("Try adjusting your search criteria or browse different categories.")}
                 </p>
                 <Button
                   onClick={() => {
@@ -589,7 +591,7 @@ export const ResourcesPage: React.FC = () => {
                   }}
                   variant="secondary"
                 >
-                  Clear Filters
+                  {t("Clear Filters")}
                 </Button>
               </CardBody>
             </Card>

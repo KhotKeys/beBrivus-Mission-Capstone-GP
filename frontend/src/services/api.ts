@@ -32,10 +32,13 @@ class ApiService {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          // Token expired or invalid
-          localStorage.removeItem('adminToken');
-          localStorage.removeItem('adminUser');
-          window.location.href = '/admin/login';
+          // Only redirect to admin login if we're on an admin route
+          const currentPath = window.location.pathname;
+          if (currentPath.startsWith('/admin')) {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUser');
+            window.location.href = '/admin/login';
+          }
         }
         return Promise.reject(error);
       }

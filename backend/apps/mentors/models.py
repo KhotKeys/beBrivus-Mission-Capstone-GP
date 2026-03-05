@@ -108,10 +108,17 @@ class MentorshipSession(models.Model):
     Individual mentoring sessions
     """
     SESSION_TYPES = [
+        ('career_guidance', 'Career Guidance'),
+        ('interview_prep', 'Interview Preparation'),
+        ('skill_development', 'Skill Development'),
+        ('portfolio_review', 'Portfolio Review'),
+        ('networking', 'Networking'),
+        ('general', 'General Mentoring'),
         ('video', 'Video Call'),
         ('chat', 'Text Chat'),
         ('email', 'Email'),
         ('in_person', 'In Person'),
+        ('other', 'Other'),
     ]
     
     STATUS_CHOICES = [

@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 import uuid
 from .models import MentorProfile, MentorshipSession, MentorAvailability, MentorSpecificAvailability
-from .notifications import notify_booking_created, notify_booking_cancelled
+from .notifications import notify_booking_created, notify_booking_cancelled, notify_session_confirmed, notify_session_rejected, notify_session_start_time_updated
 from .serializers import (
     MentorProfileSerializer, 
     MentorSearchSerializer,
@@ -262,47 +262,66 @@ class BookMentorSessionView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, mentor_id):
+        import logging
+        logger = logging.getLogger(__name__)
+        
         try:
-            mentor_profile = MentorProfile.objects.get(id=mentor_id)
-        except MentorProfile.DoesNotExist:
-            return Response(
-                {'error': 'Mentor not found'}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+            # Log request
+            logger.info(f"=== BOOKING REQUEST ===")
+            logger.info(f"User: {request.user.email}")
+            logger.info(f"Mentor ID: {mentor_id}")
+            logger.info(f"Data: {request.data}")
+            
+            # Get mentor
+            try:
+                mentor_profile = MentorProfile.objects.get(id=mentor_id)
+                logger.info(f"Mentor found: {mentor_profile.user.get_full_name()}")
+            except MentorProfile.DoesNotExist:
+                logger.error(f"Mentor {mentor_id} not found")
+                return Response(
+                    {'error': 'Mentor not found'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
 
-        serializer = BookSessionSerializer(data=request.data)
-        if serializer.is_valid():
+            # Validate data
+            serializer = BookSessionSerializer(data=request.data)
+            if not serializer.is_valid():
+                logger.error(f"Validation errors: {serializer.errors}")
+                return Response(
+                    {'error': 'Invalid data', 'details': serializer.errors}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            logger.info(f"Validated data: {serializer.validated_data}")
+            
+            # Extract data
             session_date = serializer.validated_data['session_date']
             start_time = serializer.validated_data['start_time']
             duration = serializer.validated_data.get('duration', 60)
+            session_type = serializer.validated_data.get('session_type', 'general')
+            notes = serializer.validated_data.get('notes', '')
+            
+            # Create datetime
             scheduled_start = timezone.make_aware(
                 timezone.datetime.combine(session_date, start_time)
             )
             scheduled_end = scheduled_start + timezone.timedelta(minutes=duration)
+            
+            logger.info(f"Scheduled: {scheduled_start} to {scheduled_end}")
 
-            # Ensure no conflicting sessions
+            # Check conflicts - exclude cancelled/rejected sessions
             has_conflict = MentorshipSession.objects.filter(
                 mentor=mentor_profile,
                 scheduled_start__lt=scheduled_end,
-                scheduled_end__gt=scheduled_start,
-                status__in=['scheduled', 'confirmed', 'in_progress']
+                scheduled_end__gt=scheduled_start
+            ).exclude(
+                status__in=['cancelled', 'rejected', 'no_show', 'completed']
             ).exists()
+            
             if has_conflict:
+                logger.warning("Time slot conflict")
                 return Response(
                     {'error': 'This time slot is already booked'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            has_unavailable_override = MentorSpecificAvailability.objects.filter(
-                mentor=mentor_profile,
-                date=session_date,
-                is_available=False,
-                start_time__lt=scheduled_end.time(),
-                end_time__gt=start_time
-            ).exists()
-            if has_unavailable_override:
-                return Response(
-                    {'error': 'Time slot not available'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
@@ -312,32 +331,46 @@ class BookMentorSessionView(APIView):
                 mentor=mentor_profile,
                 scheduled_start=scheduled_start,
                 scheduled_end=scheduled_end,
-                session_type=serializer.validated_data['session_type'],
-                notes=serializer.validated_data.get('notes', ''),
+                session_type=session_type,
+                notes=notes,
                 status='scheduled'
             )
+            
+            logger.info(f"Session created: ID={session.id}")
 
-            # Mark this specific time as unavailable for the date
-            MentorSpecificAvailability.objects.update_or_create(
-                mentor=mentor_profile,
-                date=session_date,
-                start_time=start_time,
-                defaults={
-                    'end_time': scheduled_end.time(),
-                    'timezone': mentor_profile.time_zone,
-                    'is_available': False,
-                    'reason': 'Booked session'
-                }
-            )
+            # Mark time unavailable
+            try:
+                MentorSpecificAvailability.objects.update_or_create(
+                    mentor=mentor_profile,
+                    date=session_date,
+                    start_time=start_time,
+                    defaults={
+                        'end_time': scheduled_end.time(),
+                        'timezone': mentor_profile.time_zone,
+                        'is_available': False,
+                        'reason': 'Booked session'
+                    }
+                )
+            except Exception as e:
+                logger.warning(f"Failed to mark unavailable: {e}")
 
-            notify_booking_created(session)
+            # Send notification
+            try:
+                notify_booking_created(session)
+            except Exception as e:
+                logger.warning(f"Notification failed: {e}")
 
             return Response(
                 MentorSessionSerializer(session).data, 
                 status=status.HTTP_201_CREATED
             )
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            logger.exception(f"Booking failed: {str(e)}")
+            return Response(
+                {'error': f'Booking failed: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class BookingViewSet(viewsets.ModelViewSet):
@@ -448,11 +481,10 @@ class BookingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Generate meeting link if not exists
-        if not session.meeting_link:
+        # Generate meeting ID if not exists
+        if not session.meeting_id:
             import uuid
             session.meeting_id = str(uuid.uuid4())
-            session.meeting_link = f"/video-call/{session.meeting_id}"
             session.save()
         
         # Mark session as in progress
@@ -513,24 +545,41 @@ class BookingViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         """Delete/cancel a booking session"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
         instance = self.get_object()
-        if instance.scheduled_start <= timezone.now():
+        logger.info(f"Cancel request - Session ID: {instance.id}, Status: {instance.status}, Scheduled: {instance.scheduled_start}")
+        
+        # Allow cancellation for future sessions or very recent past sessions (within 1 hour)
+        time_diff = (timezone.now() - instance.scheduled_start).total_seconds() / 3600
+        logger.info(f"Time difference: {time_diff} hours")
+        
+        if time_diff > 1:  # More than 1 hour past
+            error_msg = f'Cannot cancel sessions that started more than 1 hour ago (started {abs(time_diff):.1f} hours ago)'
+            logger.error(error_msg)
             return Response(
-                {'error': 'Cannot cancel past sessions'}, 
+                {'error': error_msg}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        if instance.status in ['completed', 'cancelled', 'no_show']:
+        if instance.status in ['completed', 'no_show']:
+            error_msg = f'Cannot cancel sessions with status: {instance.status}'
+            logger.error(error_msg)
             return Response(
-                {'error': f'Cannot cancel sessions with status: {instance.status}'}, 
+                {'error': error_msg}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         # Update status instead of deleting
         instance.status = 'cancelled'
         instance.save()
+        logger.info(f"Session {instance.id} cancelled successfully")
 
-        notify_booking_cancelled(instance, request.user)
+        try:
+            notify_booking_cancelled(instance, request.user)
+        except Exception as e:
+            logger.warning(f"Notification failed: {e}")
         
         return Response({'message': 'Booking cancelled successfully'})
 
@@ -699,6 +748,10 @@ class MentorDashboardViewSet(viewsets.GenericViewSet):
             sessions = sessions.filter(status=session_status)
         if session_type:
             sessions = sessions.filter(session_type=session_type)
+        
+        # Exclude cancelled sessions by default unless specifically requested
+        if not session_status:
+            sessions = sessions.exclude(status='cancelled')
             
         serializer = MentorSessionSerializer(sessions, many=True)
         return Response(serializer.data)
@@ -821,6 +874,13 @@ class MentorDashboardViewSet(viewsets.GenericViewSet):
             session.meeting_link = meeting_link
         session.save()
         
+        # Notify user
+        try:
+            notify_session_confirmed(session)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Notification failed: {e}")
+        
         serializer = MentorSessionSerializer(session)
         return Response(serializer.data)
     
@@ -853,6 +913,13 @@ class MentorDashboardViewSet(viewsets.GenericViewSet):
         session.status = 'rejected'
         session.mentor_notes = mentor_notes
         session.save()
+        
+        # Notify user
+        try:
+            notify_session_rejected(session)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Notification failed: {e}")
         
         serializer = MentorSessionSerializer(session)
         return Response(serializer.data)
@@ -900,6 +967,13 @@ class MentorDashboardViewSet(viewsets.GenericViewSet):
             session.meeting_id = str(uuid.uuid4())[:8]
         
         session.save()
+        
+        # Notify user about start time
+        try:
+            notify_session_start_time_updated(session)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Notification failed: {e}")
         
         serializer = MentorSessionSerializer(session)
         return Response(serializer.data)

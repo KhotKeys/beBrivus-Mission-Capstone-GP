@@ -36,6 +36,31 @@ class OpportunityViewSet(viewsets.ReadOnlyModelViewSet):
     ordering = ['-published_at']
 
     def get_queryset(self):
+        user = self.request.user
+
+        # Admin sees ALL opportunities from everyone for monitoring
+        if user.is_staff:
+            return Opportunity.objects.filter(status='published').select_related('category').annotate(
+                match_score=Case(
+                    When(featured=True, then=90),
+                    default=75,
+                    output_field=IntegerField()
+                )
+            ).distinct()
+
+        # Institution sees only their own posted opportunities
+        if hasattr(user, 'institution_profile') or getattr(user, 'user_type', '') == 'institution':
+            return Opportunity.objects.filter(
+                posted_by=user, status='published'
+            ).select_related('category').annotate(
+                match_score=Case(
+                    When(featured=True, then=90),
+                    default=75,
+                    output_field=IntegerField()
+                )
+            ).distinct()
+
+        # Students see all active/approved opportunities
         queryset = Opportunity.objects.filter(status='published').select_related('category')
         
         # Add match score calculation - simplified for now
@@ -54,26 +79,61 @@ class OpportunityViewSet(viewsets.ReadOnlyModelViewSet):
         """Apply to an opportunity"""
         opportunity = self.get_object()
 
-        if not opportunity.is_active:
-            return Response(
-                {'error': 'Opportunity not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        if Application.objects.filter(user=request.user, opportunity=opportunity).exists():
+        # Check if already applied
+        existing = Application.objects.filter(
+            user=request.user, 
+            opportunity=opportunity
+        ).first()
+        
+        if existing:
             return Response(
                 {'error': 'You have already applied to this opportunity'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Get application data
+        cover_letter = request.data.get('cover_letter', '')
+        full_name = request.data.get('full_name', request.user.get_full_name())
+        email = request.data.get('email', request.user.email)
+        phone = request.data.get('phone', '')
+        location = request.data.get('location', '')
+        resume = request.FILES.get('resume')
+        
+        # Get new form fields
+        age = request.data.get('age')
+        university = request.data.get('university', '')
+        course = request.data.get('course', '')
+        year_of_study = request.data.get('year_of_study', '')
+        country_of_residence = request.data.get('country_of_residence', '')
+        why_chosen = request.data.get('why_chosen', '')
+        career_goals = request.data.get('career_goals', '')
+
+        # Create application
         application = Application.objects.create(
             user=request.user,
             opportunity=opportunity,
-            status='clicked',
+            status='submitted',
             submitted_at=timezone.now(),
-            cover_letter=request.data.get('cover_letter', ''),
-            notes=request.data.get('notes', '')
+            cover_letter=cover_letter,
+            age=int(age) if age else None,
+            university=university,
+            course=course,
+            year_of_study=year_of_study,
+            country_of_residence=country_of_residence,
+            why_chosen=why_chosen,
+            career_goals=career_goals,
+            additional_info=f"Name: {full_name}\nEmail: {email}\nPhone: {phone}\nLocation: {location}"
         )
+        
+        # Handle resume upload
+        if resume:
+            from apps.applications.models import ApplicationDocument
+            ApplicationDocument.objects.create(
+                application=application,
+                document_type='cv',
+                title=f"Resume - {full_name}",
+                file=resume
+            )
 
         return Response(
             ApplicationSerializer(application).data,
@@ -141,7 +201,17 @@ class InstitutionOpportunityViewSet(viewsets.ModelViewSet):
         ).order_by('-created_at')
 
     def perform_create(self, serializer):
-        opportunity = serializer.save(created_by=self.request.user)
+        user = self.request.user
+        posted_by_type = 'institution' if (
+            hasattr(user, 'institution_profile') or
+            getattr(user, 'user_type', '') == 'institution'
+        ) else 'admin'
+
+        opportunity = serializer.save(
+            created_by=user,
+            posted_by=user,
+            posted_by_type=posted_by_type
+        )
         self._handle_publish(opportunity, created=True)
 
     def perform_update(self, serializer):

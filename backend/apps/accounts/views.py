@@ -162,8 +162,38 @@ class UserSkillViewSet(generics.ListCreateAPIView):
     def get_queryset(self):
         return UserSkill.objects.filter(user=self.request.user)
     
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    def create(self, request, *args, **kwargs):
+        skill_name = request.data.get('name', '').strip()
+        skill_level = request.data.get('level', 'beginner')
+        
+        if not skill_name:
+            return Response(
+                {'error': 'Skill name is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get or create skill - update level if exists
+        skill, created = UserSkill.objects.get_or_create(
+            user=request.user,
+            name=skill_name,
+            defaults={'level': skill_level, 'verified': False}
+        )
+        
+        if not created:
+            # Skill exists - update level
+            skill.level = skill_level
+            skill.save()
+            serializer = self.get_serializer(skill)
+            return Response(
+                {
+                    **serializer.data,
+                    'message': 'Skill already exists - level updated'
+                },
+                status=status.HTTP_200_OK
+            )
+        
+        serializer = self.get_serializer(skill)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class UserSkillDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -181,8 +211,44 @@ class UserEducationViewSet(generics.ListCreateAPIView):
     def get_queryset(self):
         return UserEducation.objects.filter(user=self.request.user)
     
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    def create(self, request, *args, **kwargs):
+        institution = request.data.get('institution', '').strip()
+        degree = request.data.get('degree', '').strip()
+        field_of_study = request.data.get('field_of_study', '').strip()
+        start_date = request.data.get('start_date')
+        
+        if not all([institution, degree, field_of_study, start_date]):
+            return Response(
+                {'error': 'Institution, degree, field of study, and start date are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if similar education exists
+        existing = UserEducation.objects.filter(
+            user=request.user,
+            institution=institution,
+            degree=degree,
+            field_of_study=field_of_study
+        ).first()
+        
+        if existing:
+            # Update existing education
+            serializer = self.get_serializer(existing, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(
+                {
+                    **serializer.data,
+                    'message': 'Education entry already exists - updated'
+                },
+                status=status.HTTP_200_OK
+            )
+        
+        # Create new education
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class UserEducationDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -200,8 +266,42 @@ class UserExperienceViewSet(generics.ListCreateAPIView):
     def get_queryset(self):
         return UserExperience.objects.filter(user=self.request.user)
     
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    def create(self, request, *args, **kwargs):
+        company = request.data.get('company', '').strip()
+        position = request.data.get('position', '').strip()
+        start_date = request.data.get('start_date')
+        
+        if not all([company, position, start_date]):
+            return Response(
+                {'error': 'Company, position, and start date are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if similar experience exists
+        existing = UserExperience.objects.filter(
+            user=request.user,
+            company=company,
+            position=position
+        ).first()
+        
+        if existing:
+            # Update existing experience
+            serializer = self.get_serializer(existing, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(
+                {
+                    **serializer.data,
+                    'message': 'Experience entry already exists - updated'
+                },
+                status=status.HTTP_200_OK
+            )
+        
+        # Create new experience
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class UserExperienceDetailView(generics.RetrieveUpdateDestroyAPIView):

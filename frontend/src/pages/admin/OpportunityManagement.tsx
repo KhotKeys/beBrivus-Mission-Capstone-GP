@@ -31,6 +31,8 @@ export const OpportunityManagement: React.FC = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] =
     useState<AdminOpportunity | null>(null);
+  const [visibleCount, setVisibleCount] = useState(5);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     fetchOpportunities();
@@ -98,13 +100,11 @@ export const OpportunityManagement: React.FC = () => {
   ) => {
     try {
       if (selectedOpportunity) {
-        // Update existing opportunity
         await adminApi.updateOpportunity(
           selectedOpportunity.id,
           opportunityData
         );
       } else {
-        // Create new opportunity
         await adminApi.createOpportunity(opportunityData);
       }
       fetchOpportunities();
@@ -113,6 +113,16 @@ export const OpportunityManagement: React.FC = () => {
     } catch (err) {
       console.error("Error saving opportunity:", err);
     }
+  };
+
+  const handleShowMore = () => {
+    setVisibleCount(prev => prev + 5);
+    setIsExpanded(true);
+  };
+
+  const handleShowLess = () => {
+    setVisibleCount(5);
+    setIsExpanded(false);
   };
 
   if (loading) {
@@ -172,6 +182,16 @@ export const OpportunityManagement: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-neutral-900">
             Opportunity Management
+            <span style={{
+              background: '#10B981',
+              color: 'white',
+              borderRadius: '12px',
+              padding: '2px 10px',
+              fontSize: '12px',
+              marginLeft: '8px',
+            }}>
+              {totalOpportunities}
+            </span>
           </h1>
           <p className="text-neutral-600 mt-1">
             Manage scholarships, internships, fellowships, and job opportunities
@@ -288,8 +308,9 @@ export const OpportunityManagement: React.FC = () => {
       </Card>
 
       {/* Opportunities List */}
-      <div className="space-y-4">
-        {opportunities.map((opportunity) => (
+      <div style={{ maxHeight: '500px', overflowY: 'auto', scrollBehavior: 'smooth' }}>
+        <div className="space-y-4">
+          {opportunities.slice(0, visibleCount).map((opportunity) => (
           <Card
             key={opportunity.id}
             className="hover:shadow-lg transition-shadow"
@@ -370,25 +391,29 @@ export const OpportunityManagement: React.FC = () => {
                     <Eye className="w-4 h-4 mr-1" />
                     View
                   </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="w-full sm:w-auto"
-                    onClick={() => handleEditOpportunity(opportunity)}
-                  >
-                    <Edit className="w-4 h-4 mr-1" />
-                    Edit
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="w-full sm:w-auto"
-                    onClick={() =>
-                      handleToggleOpportunityStatus(opportunity.id)
-                    }
-                  >
-                    {opportunity.is_active ? "Deactivate" : "Activate"}
-                  </Button>
+                  {opportunity.posted_by_type === 'admin' && (
+                    <>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full sm:w-auto"
+                        onClick={() => handleEditOpportunity(opportunity)}
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full sm:w-auto"
+                        onClick={() =>
+                          handleToggleOpportunityStatus(opportunity.id)
+                        }
+                      >
+                        {opportunity.is_active ? "Deactivate" : "Activate"}
+                      </Button>
+                    </>
+                  )}
                   <Button
                     variant="secondary"
                     size="sm"
@@ -403,7 +428,41 @@ export const OpportunityManagement: React.FC = () => {
             </CardBody>
           </Card>
         ))}
+        </div>
       </div>
+
+      {/* Show More / Show Less */}
+      {opportunities.length > 5 && (
+        <div style={{ textAlign: 'center', marginTop: '12px' }}>
+          {visibleCount < opportunities.length ? (
+            <button onClick={handleShowMore}
+              style={{
+                color: '#10B981',
+                background: 'none',
+                border: '1px solid #10B981',
+                borderRadius: '8px',
+                padding: '8px 20px',
+                cursor: 'pointer',
+                fontSize: '14px',
+              }}>
+              Show More ({opportunities.length - visibleCount} remaining)
+            </button>
+          ) : (
+            <button onClick={handleShowLess}
+              style={{
+                color: '#6b7280',
+                background: 'none',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                padding: '8px 20px',
+                cursor: 'pointer',
+                fontSize: '14px',
+              }}>
+              Show Less
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Empty State */}
       {opportunities.length === 0 && (

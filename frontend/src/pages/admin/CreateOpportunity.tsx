@@ -28,6 +28,7 @@ interface OpportunityForm {
   applicationProcess: string;
   contactEmail: string;
   externalUrl: string;
+  application_type: 'internal' | 'external';
   featured: boolean;
   status: "draft" | "active";
   tags: string[];
@@ -62,6 +63,7 @@ export const CreateOpportunity: React.FC = () => {
     applicationProcess: "",
     contactEmail: "",
     externalUrl: "",
+    application_type: "internal",
     featured: false,
     status: "draft",
     tags: [],
@@ -152,6 +154,7 @@ export const CreateOpportunity: React.FC = () => {
         benefits: formData.benefits,
         application_process: formData.applicationProcess,
         external_url: formData.externalUrl,
+        application_type: formData.application_type,
         difficulty_level: "intermediate",
       });
 
@@ -191,6 +194,7 @@ export const CreateOpportunity: React.FC = () => {
         benefits: draftData.benefits,
         application_process: draftData.applicationProcess,
         external_url: draftData.externalUrl,
+        application_type: draftData.application_type,
         difficulty_level: "intermediate",
       });
       navigate("/admin/opportunities");
@@ -298,18 +302,39 @@ export const CreateOpportunity: React.FC = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-neutral-700 mb-2">
-                        Organization *
+                        Application Type *
                       </label>
-                      <input
-                        type="text"
-                        name="organization"
-                        value={formData.organization}
+                      <select
+                        name="application_type"
+                        value={formData.application_type}
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        placeholder="e.g., Rhodes Trust"
                         required
-                      />
+                      >
+                        <option value="internal">Internal (Platform)</option>
+                        <option value="external">External (Link)</option>
+                      </select>
+                      <p className="text-xs text-neutral-500 mt-1">
+                        {formData.application_type === 'internal' 
+                          ? 'Applications submitted through platform' 
+                          : 'Redirects to external URL'}
+                      </p>
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Organization *
+                    </label>
+                    <input
+                      type="text"
+                      name="organization"
+                      value={formData.organization}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      placeholder="e.g., Rhodes Trust"
+                      required
+                    />
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">

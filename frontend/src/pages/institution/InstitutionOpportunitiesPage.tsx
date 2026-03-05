@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Layout } from "../../components/layout";
 import { Button, Card, CardBody, Input } from "../../components/ui";
 import { X } from "lucide-react";
+import { Link } from "react-router-dom";
 import {
   institutionApi,
   type InstitutionOpportunity,
@@ -18,6 +19,7 @@ interface OpportunityFormState {
   requirements: string;
   benefits: string;
   application_process: string;
+  application_type: 'internal' | 'external';
   external_url: string;
   remote_allowed: boolean;
   status: "draft" | "published";
@@ -43,6 +45,7 @@ export const InstitutionOpportunitiesPage: React.FC = () => {
     requirements: "",
     benefits: "",
     application_process: "",
+    application_type: 'internal',
     external_url: "",
     remote_allowed: false,
     status: "draft",
@@ -104,6 +107,7 @@ export const InstitutionOpportunitiesPage: React.FC = () => {
           requirements: form.requirements || undefined,
           benefits: form.benefits || undefined,
           application_process: form.application_process || undefined,
+          application_type: form.application_type,
           external_url: form.external_url || undefined,
           remote_allowed: form.remote_allowed,
           status: form.status,
@@ -125,6 +129,7 @@ export const InstitutionOpportunitiesPage: React.FC = () => {
           requirements: form.requirements || undefined,
           benefits: form.benefits || undefined,
           application_process: form.application_process || undefined,
+          application_type: form.application_type,
           external_url: form.external_url || undefined,
           remote_allowed: form.remote_allowed,
           status: form.status,
@@ -143,6 +148,7 @@ export const InstitutionOpportunitiesPage: React.FC = () => {
         requirements: "",
         benefits: "",
         application_process: "",
+        application_type: 'internal',
         external_url: "",
         remote_allowed: false,
         status: "draft",
@@ -277,6 +283,22 @@ export const InstitutionOpportunitiesPage: React.FC = () => {
         </section>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-4 sm:space-y-6">
+          {/* Navigation Tabs */}
+          <div className="flex gap-2 border-b border-neutral-200">
+            <Link
+              to="/institution/opportunities"
+              className="px-4 py-2 text-sm font-medium border-b-2 border-primary-600 text-primary-600"
+            >
+              Opportunities
+            </Link>
+            <Link
+              to="/institution/applications"
+              className="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-neutral-600 hover:text-neutral-900 hover:border-neutral-300"
+            >
+              Applications
+            </Link>
+          </div>
+
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="space-y-1 sm:space-y-2">
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-secondary-900">
@@ -309,6 +331,24 @@ export const InstitutionOpportunitiesPage: React.FC = () => {
                 Create Opportunity
               </h2>
               <form className="space-y-3 sm:space-y-4" onSubmit={handleSubmit}>
+                <div className="space-y-1">
+                  <label className="label text-xs sm:text-sm">Application Type *</label>
+                  <select
+                    name="application_type"
+                    className="input text-sm sm:text-base px-3 py-2 sm:px-4 sm:py-2.5"
+                    value={form.application_type}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="internal">Internal (Platform)</option>
+                    <option value="external">External (Link)</option>
+                  </select>
+                  <p className="text-xs text-secondary-500">
+                    {form.application_type === 'internal' 
+                      ? 'Applications submitted through platform' 
+                      : 'Requires external URL below'}
+                  </p>
+                </div>
                 <Input
                   label="Title"
                   name="title"
@@ -401,13 +441,16 @@ export const InstitutionOpportunitiesPage: React.FC = () => {
                     placeholder="How applicants should apply"
                   />
                 </div>
-                <Input
-                  label="External URL"
-                  name="external_url"
-                  value={form.external_url}
-                  onChange={handleChange}
-                  placeholder="https://"
-                />
+                {form.application_type === 'external' && (
+                  <Input
+                    label="External URL *"
+                    name="external_url"
+                    value={form.external_url}
+                    onChange={handleChange}
+                    placeholder="https://"
+                    required
+                  />
+                )}
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"

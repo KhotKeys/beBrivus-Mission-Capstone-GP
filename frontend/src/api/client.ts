@@ -62,18 +62,21 @@ apiClient.interceptors.response.use(
             refresh: refreshToken,
           });
 
-          const { access } = response.data;
-          tokenManager.setTokens(access, refreshToken);
+          const { access, refresh: newRefresh } = response.data;
+          tokenManager.setTokens(access, newRefresh || refreshToken);
 
           original.headers.Authorization = `Bearer ${access}`;
           return apiClient(original);
         } catch (refreshError) {
           tokenManager.clearTokens();
-          window.location.href = '/login';
+          localStorage.removeItem('user');
+          window.location.href = '/login?session_expired=true';
+          return Promise.reject(refreshError);
         }
       } else {
         tokenManager.clearTokens();
-        window.location.href = '/login';
+        localStorage.removeItem('user');
+        window.location.href = '/login?session_expired=true';
       }
     }
 

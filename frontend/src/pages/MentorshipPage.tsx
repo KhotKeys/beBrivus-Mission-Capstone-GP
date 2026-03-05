@@ -1,17 +1,15 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { mentorsApi, type Mentor } from "../api/mentors";
-import { messagingApi, bookingApi } from "../api/messaging";
-import { MessagingWindow } from "../components/messaging/MessagingWindow";
+import { bookingApi } from "../api/messaging";
 import { BookingModal } from "../components/messaging/BookingModal";
 import { VideoCall } from "../components/messaging/VideoCall";
 import BookingsTab from "../components/mentors/BookingsTab";
 import { Layout } from "../components/layout";
 import { HeroSection } from "../components/HeroSection";
 import { Button } from "../components/ui";
-import { useAuth } from "../contexts/AuthContext";
 import {
-  MessageCircle,
   Calendar,
   User,
   Star,
@@ -20,11 +18,11 @@ import {
 } from "lucide-react";
 
 const MentorshipPage: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<
-    "mentors" | "messages" | "bookings"
+    "mentors" | "bookings"
   >("mentors");
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
-  const [showMessaging, setShowMessaging] = useState(false);
   const [showBooking, setShowBooking] = useState(false);
   const [showVideoCall, setShowVideoCall] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState<number | null>(
@@ -32,8 +30,6 @@ const MentorshipPage: React.FC = () => {
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedExpertise, setSelectedExpertise] = useState("");
-  const { user } = useAuth();
-
   // Fetch mentors using your existing API
   const { data: mentorsData, isLoading: mentorsLoading } = useQuery({
     queryKey: ["mentors", { search: searchTerm, expertise: selectedExpertise }],
@@ -44,32 +40,21 @@ const MentorshipPage: React.FC = () => {
       }),
   });
 
-  // Fetch conversations
-  const { data: conversationsData } = useQuery({
-    queryKey: ["conversations"],
-    queryFn: () => messagingApi.getConversations(),
-    enabled: activeTab === "messages",
-  });
-
-  // Fetch bookings
+  // Fetch bookings - always enabled, refetch on mount
   const { data: bookingsData } = useQuery({
     queryKey: ["my-bookings"],
     queryFn: () => bookingApi.getMyBookings(),
-    enabled: activeTab === "bookings",
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   const mentors = mentorsData?.results || [];
-  const conversations = conversationsData?.data?.results || [];
   const bookings = bookingsData?.data?.results || [];
 
   const allExpertise = [
     ...new Set(mentors.flatMap((mentor: Mentor) => mentor.expertise_list)),
   ];
-
-  const handleMessageMentor = (mentor: Mentor) => {
-    setSelectedMentor(mentor);
-    setShowMessaging(true);
-  };
 
   const handleBookSession = (mentor: Mentor) => {
     setSelectedMentor(mentor);
@@ -90,7 +75,7 @@ const MentorshipPage: React.FC = () => {
             <Search className="w-4 h-4 sm:w-5 sm:h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search mentors by name or expertise..."
+              placeholder={t('Search mentors placeholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -103,7 +88,7 @@ const MentorshipPage: React.FC = () => {
               onChange={(e) => setSelectedExpertise(e.target.value)}
               className="border border-gray-300 rounded-md px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary-500 focus:border-transparent w-full sm:w-auto"
             >
-              <option value="">All Expertise</option>
+              <option value="">{t('All Expertise')}</option>
               {allExpertise.map((skill) => (
                 <option key={skill} value={skill}>
                   {skill}
@@ -185,7 +170,7 @@ const MentorshipPage: React.FC = () => {
                       : "bg-gray-100 text-gray-800"
                   }`}
                 >
-                  {mentor.availability}
+                  {mentor.availability === "Available" ? t('Available') : mentor.availability}
                 </span>
                 <span className="text-xs text-gray-500">
                   Responds in {mentor.response_time_hours}h
@@ -200,7 +185,7 @@ const MentorshipPage: React.FC = () => {
                   disabled={mentor.availability !== "Available"}
                 >
                   <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
-                  Book
+                  {t('Book Session')}
                 </Button>
               </div>
             </div>
@@ -210,86 +195,22 @@ const MentorshipPage: React.FC = () => {
     </div>
   );
 
-  const renderMessagesTab = () => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-      <div className="p-3 sm:p-6 border-b border-gray-200 text-center sm:text-left">
-        <h3 className="text-base sm:text-lg font-semibold">Your Conversations</h3>
-      </div>
-      <div className="divide-y divide-gray-200">
-        {conversations.length === 0 ? (
-          <div className="p-4 sm:p-8 text-center text-gray-500">
-            <MessageCircle className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-300" />
-            <p className="text-xs sm:text-sm leading-relaxed max-w-[220px] sm:max-w-none mx-auto">
-              No conversations yet. Start by messaging a mentor!
-            </p>
-          </div>
-        ) : (
-          conversations.map((conversation: any) => (
-            <div
-              key={conversation.id}
-              className="p-3 sm:p-4 hover:bg-gray-50 cursor-pointer"
-              onClick={() => {
-                // Find the mentor from the conversation participants
-                const otherParticipant =
-                  conversation.other_participant ||
-                  conversation.participants.find(
-                    (p: any) => p.id !== user?.id
-                  );
-                if (otherParticipant) {
-                  setSelectedMentor({
-                    id: otherParticipant.id,
-                    user: otherParticipant,
-                    name: `${otherParticipant.first_name} ${otherParticipant.last_name}`,
-                    expertise_list: otherParticipant.expertise || [],
-                  } as any);
-                  setShowMessaging(true);
-                }
-              }}
-            >
-              <div className="flex items-center space-x-3">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm sm:text-base font-medium text-gray-900">
-                    {conversation.other_participant
-                      ? `${conversation.other_participant.first_name} ${conversation.other_participant.last_name}`
-                      : conversation.participants
-                          .filter((p: any) => p.id !== user?.id)
-                          .map((p: any) => `${p.first_name} ${p.last_name}`)
-                          .join(", ")}
-                  </div>
-                  <div className="text-xs sm:text-sm text-gray-500 truncate">
-                    {conversation.last_message?.content || "No messages yet"}
-                  </div>
-                </div>
-                <div className="text-[10px] sm:text-xs text-gray-400">
-                  {conversation.updated_at &&
-                    new Date(conversation.updated_at).toLocaleDateString()}
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
 
   return (
     <Layout>
       <HeroSection
-        title="Mentorship Hub"
-        subtitle="Message mentors, book sessions, and manage your mentorship journey."
+        title={t('Your Mentorship Workspace')}
+        subtitle={t('Mentors hero description')}
         backgroundImage="/mentor.png"
         showZigZag
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="mb-6 sm:mb-8 text-center sm:text-left">
           <h2 className="text-xl sm:text-3xl font-semibold text-gray-900 mb-2">
-            Your Mentorship Workspace
+            {t('Your Mentorship Workspace')}
           </h2>
           <p className="text-sm sm:text-base text-gray-600">
-            Connect with expert mentors to advance your career.
+            {t('Mentors page description')}
           </p>
         </div>
 
@@ -297,9 +218,8 @@ const MentorshipPage: React.FC = () => {
         <div className="border-b border-gray-200 mb-6 sm:mb-8">
           <nav className="-mb-px flex flex-wrap justify-center sm:justify-start gap-3 sm:gap-8">
             {[
-              { key: "mentors", label: "Find Mentors", icon: User },
-              { key: "messages", label: "Messages", icon: MessageCircle },
-              { key: "bookings", label: "My Bookings", icon: Calendar },
+              { key: "mentors", label: t('Find Mentors'), icon: User },
+              { key: "bookings", label: t('My Bookings'), icon: Calendar },
             ].map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
@@ -319,7 +239,6 @@ const MentorshipPage: React.FC = () => {
 
         {/* Tab Content */}
         {activeTab === "mentors" && renderMentorsTab()}
-        {activeTab === "messages" && renderMessagesTab()}
         {activeTab === "bookings" && (
           <BookingsTab
             bookings={bookings}
@@ -328,24 +247,6 @@ const MentorshipPage: React.FC = () => {
         )}
 
         {/* Modals */}
-        {showMessaging && selectedMentor && (
-          <MessagingWindow
-            mentorUserId={selectedMentor.user?.id || selectedMentor.id}
-            mentorName={
-              selectedMentor.name ||
-              `${selectedMentor.user?.first_name || ""} ${
-                selectedMentor.user?.last_name || ""
-              }`.trim() ||
-              "Mentor"
-            }
-            onClose={() => setShowMessaging(false)}
-            onBookSession={() => {
-              setShowMessaging(false);
-              setShowBooking(true);
-            }}
-          />
-        )}
-
         {showBooking && selectedMentor && (
           <BookingModal
             mentorId={selectedMentor.id}

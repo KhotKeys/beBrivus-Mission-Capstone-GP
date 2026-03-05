@@ -10,12 +10,14 @@ class User(AbstractUser):
     USER_TYPES = [
         ('student', 'Student'),
         ('graduate', 'Graduate'),
+        ('community_talent', 'Community Talent'),
+        ('professional', 'Professional'),
         ('mentor', 'Mentor'),
         ('admin', 'Admin'),
         ('institution', 'Institution'),
     ]
     
-    user_type = models.CharField(max_length=20, choices=USER_TYPES, default='student')
+    user_type = models.CharField(max_length=40, choices=USER_TYPES, default='student')
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     country = models.CharField(max_length=100, blank=True)
@@ -128,3 +130,28 @@ class UserExperience(models.Model):
     
     def __str__(self):
         return f"{self.user.email} - {self.position} at {self.company}"
+
+
+class ActivityLog(models.Model):
+    """
+    Activity log for admin dashboard recent activity feed
+    """
+    ACTIVITY_TYPES = [
+        ('user_registration', 'User Registration'),
+        ('application', 'Application'),
+        ('opportunity', 'Opportunity'),
+        ('booking', 'Booking'),
+    ]
+    
+    activity_type = models.CharField(max_length=50, choices=ACTIVITY_TYPES)
+    message = models.TextField()
+    icon = models.CharField(max_length=50, default='activity')
+    user = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'activity_logs'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.activity_type} - {self.message[:50]}"

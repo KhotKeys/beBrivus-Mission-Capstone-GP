@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>beBrivus — Offline</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #f0fdf4;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+    }
+    .logo { height: 60px; margin-bottom: 24px; }
+    h1 { color: #064e3b; font-size: 24px; margin: 0 0 16px 0; }
+    p { color: #6b7280; max-width: 400px; line-height: 1.6; margin: 0 0 12px 0; }
+    .badge {
+      background: #10B981;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      margin-top: 16px;
+      font-size: 14px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <img src="/beBivus.png" class="logo" alt="beBrivus" />
+  <h1>You are currently offline</h1>
+  <p>
+    Don't worry — beBrivus has saved your recently viewed
+    opportunities, resources, and forum posts so you can
+    still access them without internet.
+  </p>
+  <p>
+    Any actions you take while offline will sync
+    automatically when your connection is restored.
+  </p>
+  <div class="badge">📡 Reconnecting automatically...</div>
+  <script>
+    let reconnectInterval;
+    let hasReconnected = false;
+
+    // Check connection every 3 seconds
+    reconnectInterval = setInterval(() => {
+      if (hasReconnected) {
+        clearInterval(reconnectInterval);
+        return;
+      }
+      fetch('/api/auth/profile/', { method: 'HEAD' })
+        .then(() => {
+          if (!hasReconnected) {
+            hasReconnected = true;
+            clearInterval(reconnectInterval);
+            window.location.reload();
+          }
+        })
+        .catch(() => {
+          console.log('Still offline...');
+        });
+    }, 3000);
+
+    // Also listen for online event as backup
+    window.addEventListener('online', () => {
+      if (!hasReconnected) {
+        hasReconnected = true;
+        clearInterval(reconnectInterval);
+        setTimeout(() => window.location.reload(), 500);
+      }
+    });
+  </script>
+</body>
+</html>

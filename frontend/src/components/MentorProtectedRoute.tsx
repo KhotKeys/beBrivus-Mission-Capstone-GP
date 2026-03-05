@@ -25,6 +25,7 @@ const MentorProtectedRoute: React.FC<MentorProtectedRouteProps> = ({
         return;
       }
 
+      // Redirect non-mentors to user dashboard
       if (user.user_type !== "mentor") {
         setNeedsOnboarding(false);
         setIsChecking(false);
@@ -34,7 +35,7 @@ const MentorProtectedRoute: React.FC<MentorProtectedRouteProps> = ({
       try {
         const token = localStorage.getItem("access_token");
         const response = await fetch(
-          "http://localhost:8000/api/mentors/onboarding/",
+          "http://localhost:8001/api/mentors/profile/",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -43,16 +44,15 @@ const MentorProtectedRoute: React.FC<MentorProtectedRouteProps> = ({
         );
 
         if (response.ok) {
-          const data = await response.json();
-          setNeedsOnboarding(data.needs_onboarding);
+          // User has mentor profile, allow access
+          setNeedsOnboarding(false);
         } else {
-          // If check fails, assume onboarding is needed
-          setNeedsOnboarding(true);
+          // No mentor profile, redirect to user dashboard
+          setNeedsOnboarding(false);
         }
       } catch (error) {
-        console.error("Failed to check onboarding status:", error);
-        // If check fails, assume onboarding is needed
-        setNeedsOnboarding(true);
+        console.error("Failed to check mentor profile:", error);
+        setNeedsOnboarding(false);
       }
 
       setIsChecking(false);
@@ -81,9 +81,10 @@ const MentorProtectedRoute: React.FC<MentorProtectedRouteProps> = ({
     );
   }
 
-//   if (needsOnboarding && user?.user_type === "mentor") {
-//     return <Navigate to="/mentor/onboarding" />;
-//   }
+  // Redirect non-mentors to user dashboard
+  if (user?.user_type !== 'mentor') {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return <>{children}</>;
 };

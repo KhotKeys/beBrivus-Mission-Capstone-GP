@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -8,6 +8,8 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { AdminAuthProvider } from "./contexts/AdminAuthContext";
+import ErrorBoundary from "./components/ErrorBoundary";
+import i18n from './i18n';
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
@@ -15,6 +17,7 @@ import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { OpportunitiesPage } from "./pages/OpportunitiesPage";
+import { ApplicationFormPage } from "./pages/ApplicationFormPage";
 import { TrackerPage } from "./pages/TrackerPage";
 import { ResourcesPage } from "./pages/ResourcesPage";
 import { ForumPage } from "./pages/ForumPage";
@@ -26,7 +29,9 @@ import VideoCallPage from "./pages/VideoCallPage";
 import MentorOnboarding from "./components/MentorOnboarding";
 import MentorProtectedRoute from "./components/MentorProtectedRoute";
 import InstitutionProtectedRoute from "./components/InstitutionProtectedRoute";
+import { RoleGuard } from "./components/RoleGuard";
 import InstitutionOpportunitiesPage from "./pages/institution/InstitutionOpportunitiesPage";
+import { InstitutionApplicationResponsesPage } from "./pages/institution/InstitutionApplicationResponsesPage";
 
 // Admin imports
 import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
@@ -39,6 +44,9 @@ import { ForumManagement } from "./pages/admin/ForumManagement";
 import { AnalyticsDashboardPage } from "./pages/admin/AnalyticsDashboardPage";
 import { WeeklyAnalyticsReportPage } from "./pages/admin/WeeklyAnalyticsReportPage";
 import { ResourceUploadPage } from "./pages/admin/ResourceUploadPage";
+import { AdminApplicationResponsesPage } from "./pages/admin/AdminApplicationResponsesPage";
+import AdminForumModerationPage from "./pages/admin/AdminForumModerationPage";
+import { AdminActivityPage } from "./pages/admin/AdminActivityPage";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import { AdminProtectedRoute } from "./components/admin/AdminProtectedRoute";
 import { ForumNewPostPage } from "./pages/ForumNewPostPage";
@@ -89,9 +97,9 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };
 
-// Public Route Component (redirect to dashboard if authenticated)
+// Public Route Component (redirect to appropriate dashboard if authenticated)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
     return (
@@ -101,7 +109,19 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     );
   }
 
-  return !isAuthenticated ? <>{children}</> : <Navigate to="/dashboard" />;
+  if (isAuthenticated && user) {
+    // Redirect to role-specific dashboard
+    if (user.user_type === 'admin') {
+      return <Navigate to="/admin/dashboard" replace />;
+    } else if (user.user_type === 'mentor') {
+      return <Navigate to="/mentor-dashboard" replace />;
+    } else if (user.user_type === 'institution') {
+      return <Navigate to="/institution/opportunities" replace />;
+    }
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
 };
 
 // Profile Route Wrapper (shows appropriate profile based on user type)
@@ -151,6 +171,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <OpportunitiesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/opportunities/:opportunityId/apply"
+        element={
+          <ProtectedRoute>
+            <ApplicationFormPage />
           </ProtectedRoute>
         }
       />
@@ -287,6 +315,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/institution/applications"
+        element={
+          <InstitutionProtectedRoute>
+            <InstitutionApplicationResponsesPage />
+          </InstitutionProtectedRoute>
+        }
+      />
+      <Route
         path="/video-call/:sessionId"
         element={
           <ProtectedRoute>
@@ -334,8 +370,11 @@ function AppRoutes() {
         <Route path="resources/:id/edit" element={<ResourceUploadPage />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="forum" element={<ForumManagement />} />
+        <Route path="forum/moderation" element={<AdminForumModerationPage />} />
         <Route path="analytics" element={<AnalyticsDashboardPage />} />
         <Route path="analytics/weekly" element={<WeeklyAnalyticsReportPage />} />
+        <Route path="activity" element={<AdminActivityPage />} />
+        <Route path="applications" element={<AdminApplicationResponsesPage />} />
         <Route
           path="content"
           element={
@@ -358,18 +397,29 @@ function AppRoutes() {
 }
 
 function App() {
+  // Load saved language on app startup
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('bebrivus_language') || 'en';
+    i18n.changeLanguage(savedLanguage);
+    document.documentElement.dir = savedLanguage === 'ar' ? 'rtl' : 'ltr';
+  }, []);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AdminAuthProvider>
-          <Router>
-            <div className="App">
-              <AppRoutes />
-            </div>
-          </Router>
-        </AdminAuthProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <AdminAuthProvider>
+            <Router>
+              <RoleGuard>
+                <div className="App">
+                  <AppRoutes />
+                </div>
+              </RoleGuard>
+            </Router>
+          </AdminAuthProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

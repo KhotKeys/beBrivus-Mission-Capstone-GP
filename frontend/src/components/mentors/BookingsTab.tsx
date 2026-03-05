@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Calendar, Video, MessageCircle, User, Clock, ExternalLink } from "lucide-react";
 import { Button } from "../ui/Button";
+import { bookingApi } from "../../api/messaging";
 import type { BookingSession } from "../../api/messaging";
 
 interface BookingsTabProps {
@@ -12,6 +14,21 @@ export default function BookingsTab({
   bookings,
   handleJoinSession,
 }: BookingsTabProps) {
+  const queryClient = useQueryClient();
+  const [cancellingId, setCancellingId] = useState<number | null>(null);
+
+  const cancelBookingMutation = useMutation({
+    mutationFn: (bookingId: number) => bookingApi.cancelBooking(bookingId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-bookings"] });
+    },
+    onError: () => {
+      alert("Failed to cancel the session. Please try again.");
+    },
+    onSettled: () => {
+      setCancellingId(null);
+    },
+  });
   // Check if link is external (starts with http/https)
   const isExternalLink = (link?: string) => {
     if (!link) return false;
@@ -30,6 +47,22 @@ export default function BookingsTab({
       // No link available yet, ask mentor for link
       alert('Meeting link will be provided by the mentor. Please wait.');
     }
+  };
+
+  const handleCancelClick = (booking: BookingSession) => {
+    if (cancellingId || cancelBookingMutation.isPending) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Cancel this scheduled session? This action cannot be undone."
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    setCancellingId(booking.id);
+    cancelBookingMutation.mutate(booking.id);
   };
   return (
     <div className="space-y-6">
@@ -223,8 +256,10 @@ export default function BookingsTab({
                           variant="outline"
                           size="sm"
                           className="text-error-600 border-error-200 hover:bg-error-50 text-xs sm:text-sm"
+                          isLoading={cancellingId === booking.id}
+                          onClick={() => handleCancelClick(booking)}
                         >
-                          Cancel
+                          {cancellingId === booking.id ? "Cancelling..." : "Cancel"}
                         </Button>
                       )}
 

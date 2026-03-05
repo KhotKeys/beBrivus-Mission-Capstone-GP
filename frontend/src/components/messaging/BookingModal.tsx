@@ -23,9 +23,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   onSuccess,
 }) => {
   const [selectedDate, setSelectedDate] = useState(() => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split("T")[0];
+    const today = new Date();
+    return today.toISOString().split("T")[0];
   });
 
   const [bookingData, setBookingData] = useState<BookSessionData>({
@@ -87,7 +86,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       // Send notes as a message to mentor if notes exist
       if (data.notes && data.notes.trim()) {
         try {
-          await messagingApi.sendMessageToMentor(mentorId, `Session notes: ${data.notes}`);
+          void messagingApi.sendMessageToMentor(
+            mentorId,
+            `Session notes: ${data.notes}`
+          );
         } catch (error) {
           console.warn("Failed to send notes as message:", error);
           // Don't fail the booking if message send fails
@@ -100,6 +102,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       queryClient.invalidateQueries({ queryKey: ["my-bookings"] });
       onSuccess();
       onClose();
+    },
+    onError: (error: any) => {
+      console.error("Booking error details:", error.response?.data);
+      alert(`Booking failed: ${error.response?.data?.error || error.message}`);
     },
   });
 

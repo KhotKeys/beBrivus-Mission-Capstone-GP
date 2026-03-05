@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { api } from "../api";
 import { Layout } from "../components/layout";
 import { HeroSection } from "../components/HeroSection";
@@ -47,10 +48,33 @@ interface ForumCategory {
 }
 
 export const ForumPage: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("-last_activity");
+  const [menuOpen, setMenuOpen] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editContent, setEditContent] = useState('');
+  const [editingReplyId, setEditingReplyId] = useState<number | null>(null);
+  const [editReplyContent, setEditReplyContent] = useState('');
+  const [replyMenuOpen, setReplyMenuOpen] = useState<number | null>(null);
+  const [replyFlagModal, setReplyFlagModal] = useState<number | null>(null);
+  const [replyFlagReason, setReplyFlagReason] = useState('inappropriate');
+  const [replyFlagDetails, setReplyFlagDetails] = useState('');
   const queryClient = useQueryClient();
+
+  // Get current user from context or API
+  const { data: currentUser } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: () => api.get('/auth/profile/').then(res => res.data),
+  });
+
+  // Close menu on outside click
+  useEffect(() => {
+    const close = () => setMenuOpen(null);
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
+  }, []);
 
   // Fetch categories
   const { data: categoriesData } = useQuery<{ results: ForumCategory[] }>({
@@ -128,11 +152,66 @@ export const ForumPage: React.FC = () => {
     },
   });
 
+  // Edit discussion mutation
+  const editMutation = useMutation({
+    mutationFn: ({ slug, content }: { slug: string; content: string }) =>
+      api.patch(`/forum/discussions/${slug}/`, { content }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['forum-discussions']);
+    },
+    onError: () => alert('Failed to update post.'),
+  });
+
+  // Delete discussion mutation
+  const deleteMutation = useMutation({
+    mutationFn: (slug: string) => api.delete(`/forum/discussions/${slug}/`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['forum-discussions']);
+    },
+    onError: () => alert('Failed to delete post.'),
+  });
+
+  // Reply mutations
+  const editReplyMutation = useMutation({
+    mutationFn: ({ id, content }: { id: number; content: string }) =>
+      api.patch(`/forum/replies/${id}/`, { content }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['forum-replies']);
+      queryClient.invalidateQueries(['forum-discussions']);
+      setEditingReplyId(null);
+    },
+    onError: () => alert('Failed to update reply.'),
+  });
+
+  const deleteReplyMutation = useMutation({
+    mutationFn: (id: number) => api.delete(`/forum/replies/${id}/`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['forum-replies']);
+      queryClient.invalidateQueries(['forum-discussions']);
+    },
+    onError: () => alert('Failed to delete reply.'),
+  });
+
+  const flagReplyMutation = useMutation({
+    mutationFn: ({ id, reason, details }: { id: number; reason: string; details: string }) =>
+      api.post(`/forum/replies/${id}/flag/`, { reason, details }),
+    onSuccess: () => {
+      setReplyFlagModal(null);
+      setReplyFlagReason('inappropriate');
+      setReplyFlagDetails('');
+      alert('Reply reported. Our team will review it.');
+    },
+    onError: (error: any) => {
+      alert(error?.response?.data?.error || 'Failed to flag reply.');
+    },
+  });
+
   return (
     <Layout>
       <HeroSection
-        title="Community Forum"
-        subtitle="Ask questions, share insights, and learn with the BeBrivus community."
+        key={i18n.language}
+        title={t('Community Forum')}
+        subtitle={t('Forum hero description')}
         backgroundVideo="/forum.mp4"
       />
       <div className="container mx-auto px-4 py-8">
@@ -158,7 +237,7 @@ export const ForumPage: React.FC = () => {
             <input
               type="text"
               className="w-full pl-12 pr-4 py-3 bg-white border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent placeholder-neutral-500"
-              placeholder="Search discussions..."
+              placeholder={t("Search discussions")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -171,7 +250,7 @@ export const ForumPage: React.FC = () => {
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
             >
-              <option value="">All Categories</option>
+              <option value="">{t("All Categories")}</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -202,11 +281,11 @@ export const ForumPage: React.FC = () => {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
-              <option value="-last_activity">Recent Activity</option>
-              <option value="-created_at">Latest</option>
-              <option value="-like_count">Most Liked</option>
-              <option value="-reply_count">Most Discussed</option>
-              <option value="-view_count">Most Viewed</option>
+              <option value="-last_activity">{t("Recent Activity")}</option>
+              <option value="-created_at">{t("Latest")}</option>
+              <option value="-like_count">{t("Most Liked")}</option>
+              <option value="-reply_count">{t("Most Discussed")}</option>
+              <option value="-view_count">{t("Most Viewed")}</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
               <svg
@@ -243,7 +322,7 @@ export const ForumPage: React.FC = () => {
                 d="M12 4v16m8-8H4"
               ></path>
             </svg>
-            New Post
+            {t("New Post")}
           </Link>
         </div>
 
@@ -288,7 +367,7 @@ export const ForumPage: React.FC = () => {
           </div>
         ) : error ? (
           <div className="text-center py-12">
-            <p className="text-error-600 text-lg">Failed to load discussions</p>
+            <p className="text-error-600 text-lg">{t("Failed to load discussions")}</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -296,6 +375,7 @@ export const ForumPage: React.FC = () => {
               <article
                 key={discussion.id}
                 className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-neutral-100 overflow-hidden"
+                style={{ position: 'relative' }}
               >
                 {/* Post Header */}
                 <div className="p-4 sm:p-6 pb-4 text-center sm:text-left">
@@ -352,6 +432,158 @@ export const ForumPage: React.FC = () => {
                           {discussion.content.length > 200 && "..."}
                         </div>
                       </Link>
+
+                      {/* Image display — handles all URL formats */}
+                      {((discussion as any).image || (discussion as any).image_url) && (() => {
+                        const rawSrc = (discussion as any).image || (discussion as any).image_url;
+                        const src = typeof rawSrc === 'string'
+                          ? (rawSrc.startsWith('http') ? rawSrc : `http://127.0.0.1:8001${rawSrc.startsWith('/') ? '' : '/'}${rawSrc}`)
+                          : null;
+                        if (!src) return null;
+                        return (
+                          <div style={{ marginTop: '12px', marginBottom: '8px' }}>
+                            <img
+                              src={src}
+                              alt="Post image"
+                              style={{
+                                width: '100%',
+                                maxHeight: '500px',
+                                objectFit: 'cover',
+                                borderRadius: '12px',
+                                border: '1px solid #e5e7eb',
+                                cursor: 'pointer',
+                                display: 'block',
+                              }}
+                              onClick={e => { e.stopPropagation(); window.open(src, '_blank'); }}
+                              onError={e => {
+                                console.error('Image failed to load:', src);
+                                e.currentTarget.style.display = 'none';
+                              }}
+                              onLoad={() => console.log('Image loaded successfully:', src)}
+                            />
+                          </div>
+                        );
+                      })()}
+
+                      {/* Author menu */}
+                      {(() => {
+                        if (!currentUser || !discussion.author) return null;
+
+                        // discussion.author is a full object with id field
+                        const authorId = String(
+                          discussion.author?.id ||
+                          discussion.author?.pk ||
+                          discussion.author || ''
+                        );
+                        const userId = String(
+                          currentUser?.id ||
+                          currentUser?.pk ||
+                          currentUser?.user_id || ''
+                        );
+                        const authorUsername = discussion.author?.username || discussion.author?.email || '';
+                        const userUsername = currentUser?.username || currentUser?.email || '';
+
+                        const isOwner = (authorId && userId && authorId === userId) ||
+                                       (authorUsername && userUsername && authorUsername === userUsername);
+
+                        return isOwner ? (
+                          <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 50 }}>
+                            <button
+                              onClick={e => {
+                                e.stopPropagation();
+                                setMenuOpen(menuOpen === discussion.id ? null : discussion.id);
+                              }}
+                              style={{
+                                background: '#f3f4f6', border: 'none', borderRadius: '6px',
+                                cursor: 'pointer', fontSize: '18px', fontWeight: 'bold',
+                                padding: '2px 10px', color: '#374151', lineHeight: '1.8'
+                              }}
+                            >⋮</button>
+
+                            {menuOpen === discussion.id && (
+                              <div style={{
+                                position: 'absolute', right: 0, top: '110%',
+                                background: 'white', border: '1px solid #e5e7eb',
+                                borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                                zIndex: 9999, minWidth: '150px', overflow: 'hidden'
+                              }}>
+                                <button
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    setEditingId(discussion.id);
+                                    setEditContent(discussion.content);
+                                    setMenuOpen(null);
+                                  }}
+                                  style={{
+                                    display: 'block', width: '100%', padding: '10px 16px',
+                                    background: 'none', border: 'none', textAlign: 'left',
+                                    cursor: 'pointer', fontSize: '14px', color: '#374151'
+                                  }}
+                                  onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                                >✏️ Edit</button>
+                                <button
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    if (window.confirm('Delete this post?')) {
+                                      deleteMutation.mutate(discussion.slug);
+                                    }
+                                    setMenuOpen(null);
+                                  }}
+                                  style={{
+                                    display: 'block', width: '100%', padding: '10px 16px',
+                                    background: 'none', border: 'none', textAlign: 'left',
+                                    cursor: 'pointer', fontSize: '14px', color: '#ef4444'
+                                  }}
+                                  onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                                >🗑️ Delete</button>
+                              </div>
+                            )}
+                          </div>
+                        ) : null;
+                      })()}
+
+                      {/* Inline edit form */}
+                      {editingId === discussion.id && (
+                        <div style={{
+                          marginTop: '12px', padding: '12px',
+                          background: '#f9fafb', borderRadius: '8px',
+                          border: '1px solid #e5e7eb'
+                        }}>
+                          <textarea
+                            value={editContent}
+                            onChange={e => setEditContent(e.target.value)}
+                            rows={4}
+                            style={{
+                              width: '100%', padding: '10px', borderRadius: '6px',
+                              border: '1px solid #d1d5db', fontSize: '14px',
+                              boxSizing: 'border-box', resize: 'vertical'
+                            }}
+                          />
+                          <div style={{ display: 'flex', gap: '8px', marginTop: '8px', justifyContent: 'flex-end' }}>
+                            <button
+                              onClick={() => setEditingId(null)}
+                              style={{
+                                padding: '8px 16px', borderRadius: '6px',
+                                border: '1px solid #e5e7eb', background: 'white', cursor: 'pointer'
+                              }}
+                            >Cancel</button>
+                            <button
+                              onClick={() => {
+                                if (!editContent.trim()) return;
+                                editMutation.mutate({ slug: discussion.slug, content: editContent });
+                                setEditingId(null);
+                              }}
+                              style={{
+                                padding: '8px 16px', borderRadius: '6px', border: 'none',
+                                background: '#10B981', color: 'white',
+                                cursor: 'pointer', fontWeight: '600'
+                              }}
+                            >Save Changes</button>
+                          </div>
+                        </div>
+                      )}
 
                       {/* tag_list */}
                       {discussion.tag_list.length > 0 && (
@@ -490,21 +722,39 @@ export const ForumPage: React.FC = () => {
                     </div>
 
                     {/* Share Button */}
-                    <button className="flex items-center gap-2 px-3 py-2 rounded-lg text-neutral-600 hover:bg-neutral-200 hover:text-primary-600 transition-all duration-200 justify-center">
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
-                        ></path>
-                      </svg>
-                      <span className="font-medium text-sm">Share</span>
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        const shareUrl = `${window.location.origin}/forum/${discussion.slug}`;
+                        const shareData = {
+                          title: discussion.title,
+                          text: discussion.content?.substring(0, 100) + '...',
+                          url: shareUrl,
+                        };
+                        try {
+                          // Use native share on mobile if available
+                          if (navigator.share) {
+                            await navigator.share(shareData);
+                          } else {
+                            // Desktop — copy link to clipboard
+                            await navigator.clipboard.writeText(shareUrl);
+                            alert('Link copied to clipboard!');
+                          }
+                        } catch (err) {
+                          // Fallback — copy URL
+                          try {
+                            await navigator.clipboard.writeText(shareUrl);
+                            alert('Link copied to clipboard!');
+                          } catch {
+                            prompt('Copy this link:', shareUrl);
+                          }
+                        }
+                      }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '14px', padding: '4px 8px', borderRadius: '6px' }}
+                      onMouseEnter={e => e.currentTarget.style.background='#f3f4f6'}
+                      onMouseLeave={e => e.currentTarget.style.background='none'}
+                    >
+                      🔗 Share
                     </button>
                   </div>
                 </div>
@@ -547,7 +797,7 @@ export const ForumPage: React.FC = () => {
                     d="M12 4v16m8-8H4"
                   ></path>
                 </svg>
-                Create First Post
+                {t("Create First Post")}
               </Link>
               {(searchQuery || selectedCategory) && (
                 <button
@@ -557,13 +807,57 @@ export const ForumPage: React.FC = () => {
                   }}
                   className="bg-white border border-neutral-300 hover:bg-neutral-50 text-neutral-700 px-8 py-3 rounded-full font-medium transition-all duration-200"
                 >
-                  Clear Filters
+                  {t("Clear Filters")}
                 </button>
               )}
             </div>
           </div>
         )}
       </div>
+
+      {/* Reply Flag Modal - Global */}
+      {replyFlagModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999 }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: '28px', maxWidth: '440px', width: '90%' }}>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '700' }}>🚩 Report Reply</h3>
+            <p style={{ margin: '0 0 16px 0', color: '#6b7280', fontSize: '13px' }}>Our team will review this within 24 hours.</p>
+
+            <select
+              value={replyFlagReason}
+              onChange={e => setReplyFlagReason(e.target.value)}
+              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' }}
+            >
+              <option value="spam">Spam</option>
+              <option value="hate_speech">Hate Speech</option>
+              <option value="harassment">Harassment</option>
+              <option value="misinformation">Misinformation</option>
+              <option value="inappropriate">Inappropriate Content</option>
+              <option value="violence">Violence or Threats</option>
+              <option value="other">Other</option>
+            </select>
+
+            <textarea
+              value={replyFlagDetails}
+              onChange={e => setReplyFlagDetails(e.target.value)}
+              placeholder="Additional details (optional)..."
+              rows={3}
+              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '14px', marginBottom: '16px', boxSizing: 'border-box', resize: 'vertical' }}
+            />
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => { setReplyFlagModal(null); setReplyFlagReason('inappropriate'); setReplyFlagDetails(''); }}
+                style={{ padding: '8px 18px', borderRadius: '8px', border: '1px solid #e5e7eb', background: 'white', cursor: 'pointer', fontSize: '14px' }}
+              >Cancel</button>
+              <button
+                onClick={() => flagReplyMutation.mutate({ id: replyFlagModal, reason: replyFlagReason, details: replyFlagDetails })}
+                disabled={flagReplyMutation.isPending}
+                style={{ padding: '8px 18px', borderRadius: '8px', border: 'none', background: '#ef4444', color: 'white', cursor: 'pointer', fontWeight: '600', fontSize: '14px' }}
+              >{flagReplyMutation.isPending ? 'Submitting...' : '🚩 Report'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };

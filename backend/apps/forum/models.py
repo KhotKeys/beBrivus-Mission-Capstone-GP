@@ -56,6 +56,9 @@ class Discussion(models.Model):
     category = models.ForeignKey(ForumCategory, on_delete=models.CASCADE, related_name='discussions')
     tags = TaggableManager()
     
+    # Media
+    image = models.ImageField(upload_to='forum/images/', blank=True, null=True)
+    
     # Engagement
     views_count = models.PositiveIntegerField(default=0)
     likes_count = models.PositiveIntegerField(default=0)
@@ -69,6 +72,17 @@ class Discussion(models.Model):
     # AI features
     ai_summary = models.TextField(blank=True)
     ai_keywords = models.JSONField(default=list)
+    
+    # Content moderation
+    is_flagged = models.BooleanField(default=False)
+    flag_reason = models.TextField(blank=True)
+    ai_moderation_score = models.FloatField(default=0.0)  # 0-1 toxicity score
+    moderation_status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending Review'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('auto_flagged', 'Auto Flagged by AI')
+    ], default='approved')
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -115,6 +129,17 @@ class Reply(models.Model):
     is_solution = models.BooleanField(default=False)  # For marking best answer
     is_edited = models.BooleanField(default=False)
     
+    # Content moderation
+    is_flagged = models.BooleanField(default=False)
+    flag_reason = models.TextField(blank=True)
+    ai_moderation_score = models.FloatField(default=0.0)
+    moderation_status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending Review'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('auto_flagged', 'Auto Flagged by AI')
+    ], default='approved')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -157,12 +182,6 @@ class DiscussionLike(models.Model):
             ['user', 'discussion'],
             ['user', 'reply'],
         ]
-        constraints = [
-            models.CheckConstraint(
-                condition=models.Q(discussion__isnull=False) | models.Q(reply__isnull=False),
-                name='like_either_discussion_or_reply'
-            )
-        ]
     
     def __str__(self):
         if self.discussion:
@@ -185,6 +204,8 @@ class ForumModerationLog(models.Model):
         ('mark_solution', 'Mark as Solution'),
         ('unmark_solution', 'Unmark as Solution'),
         ('ai_flag', 'AI Flagged Content'),
+        ('approve', 'Approve Content'),
+        ('reject', 'Reject Content'),
     ]
     
     moderator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='moderation_actions')

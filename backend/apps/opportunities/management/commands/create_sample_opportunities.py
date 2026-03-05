@@ -13,7 +13,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Get or create admin user for creating opportunities
         admin_user, created = User.objects.get_or_create(
-            email='admin@bebrivus.com',
+            email='kkhotmachil@gmail.com',
             defaults={'username': 'admin', 'is_staff': True, 'is_superuser': True}
         )
 

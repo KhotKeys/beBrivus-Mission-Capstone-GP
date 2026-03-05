@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Plus,
   Search,
@@ -71,24 +72,17 @@ const getStatusIcon = (status: Application["status"]) => {
 };
 
 const getStatusLabel = (status: Application["status"]) => {
-  switch (status) {
-    case "draft":
-      return "Draft";
-    case "clicked":
-      return "Clicked";
-    case "under_review":
-      return "Under Review";
-    case "interview_scheduled":
-      return "Interview Scheduled";
-    case "accepted":
-      return "Accepted";
-    case "rejected":
-      return "Rejected";
-    case "withdrawn":
-      return "Withdrawn";
-    default:
-      return status;
-  }
+  const labels: Record<string, string> = {
+    'draft': 'Draft',
+    'clicked': 'Clicked',
+    'submitted': 'Submitted',
+    'under_review': 'Under Review',
+    'interview_scheduled': 'Interview Scheduled',
+    'accepted': 'Accepted',
+    'rejected': 'Rejected',
+    'withdrawn': 'Withdrawn'
+  };
+  return labels[status] || status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
 };
 
 const ApplicationCard: React.FC<{
@@ -461,10 +455,12 @@ const ViewApplicationModal: React.FC<{
           {/* Notes */}
           {application.notes && (
             <div>
-              <h4 className="text-sm font-medium text-gray-900 mb-2">Notes</h4>
-              <p className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg">
-                {application.notes}
-              </p>
+              <h4 className="text-sm font-medium text-gray-900 mb-2">Admin Feedback</h4>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-gray-700 whitespace-pre-wrap">
+                  {application.notes}
+                </p>
+              </div>
             </div>
           )}
 
@@ -654,6 +650,7 @@ const EditApplicationModal: React.FC<{
 };
 
 export const TrackerPage: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -670,6 +667,13 @@ export const TrackerPage: React.FC = () => {
   // Load applications on component mount
   useEffect(() => {
     loadApplications();
+    
+    // Auto-refresh every 30 seconds to catch status updates
+    const interval = setInterval(() => {
+      loadApplications();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const loadApplications = async () => {
@@ -682,7 +686,9 @@ export const TrackerPage: React.FC = () => {
       setApplications(response.results || []);
     } catch (err) {
       console.error("Failed to load applications:", err);
-      setError("Failed to load applications. Please try again.");
+      if (!applications.length) { // Only show error if no cached data
+        setError("Failed to load applications. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -780,8 +786,9 @@ export const TrackerPage: React.FC = () => {
     return (
       <Layout>
         <HeroSection
-          title="Application Tracker"
-          subtitle="Track every application, milestone, and next step in one place."
+          key={i18n.language}
+          title={t('Application Tracker')}
+          subtitle={t('Tracker hero description')}
           backgroundImage="/tracker.jpeg"
           showZigZag
         />
@@ -801,8 +808,9 @@ export const TrackerPage: React.FC = () => {
     return (
       <Layout>
         <HeroSection
-          title="Application Tracker"
-          subtitle="Track every application, milestone, and next step in one place."
+          key={i18n.language}
+          title={t('Application Tracker')}
+          subtitle={t('Tracker hero description')}
           backgroundImage="/tracker.jpeg"
           showZigZag
         />
@@ -822,8 +830,9 @@ export const TrackerPage: React.FC = () => {
   return (
     <Layout>
       <HeroSection
-        title="Application Tracker"
-        subtitle="Track every application, milestone, and next step in one place."
+        key={i18n.language}
+        title={t('Application Tracker')}
+        subtitle={t('Tracker hero description')}
         backgroundImage="/tracker.jpeg"
         showZigZag
       />

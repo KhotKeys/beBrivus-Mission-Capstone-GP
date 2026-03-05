@@ -331,3 +331,88 @@ body {
     background-position: 20px 20px;
   }
 }
+
+/* RTL Support for Arabic */
+[dir="rtl"] body {
+  direction: rtl;
+}
+
+/* Text alignment only */
+[dir="rtl"] p,
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] h4,
+[dir="rtl"] h5,
+[dir="rtl"] span,
+[dir="rtl"] label,
+[dir="rtl"] a {
+  text-align: right;
+}
+
+/* Navbar — keep horizontal layout, just reverse order */
+[dir="rtl"] nav,
+[dir="rtl"] header {
+  direction: rtl;
+}
+
+/* CRITICAL — Do NOT reverse flex direction on these */
+[dir="rtl"] main,
+[dir="rtl"] .container,
+[dir="rtl"] section,
+[dir="rtl"] .hero,
+[dir="rtl"] .hero-section {
+  direction: rtl;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Cards stay in normal grid flow */
+[dir="rtl"] .card,
+[dir="rtl"] [class*="card"] {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Input text alignment */
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
+}
+
+/* Prevent horizontal overflow */
+[dir="rtl"] body {
+  overflow-x: hidden;
+}
+
+/* Language Selector Dropdown Fix */
+select[id="language-selector"],
+select[title="Select Language"],
+.language-selector select,
+[class*="language"] select,
+[class*="Language"] select {
+  position: relative !important;
+  z-index: 9999 !important;
+}
+
+select[id="language-selector"]:focus,
+select[title="Select Language"]:focus {
+  z-index: 10000 !important;
+}
+
+@media (max-width: 768px) {
+  select[id="language-selector"],
+  select[title="Select Language"] {
+    max-height: 300px !important;
+    overflow-y: auto !important;
+  }
+  
+  select[id="language-selector"] option,
+  select[title="Select Language"] option {
+    min-height: 44px !important;
+    padding: 12px 8px !important;
+  }
+}

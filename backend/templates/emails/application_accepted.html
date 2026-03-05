@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Accepted</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Hero Section -->
+        <div style="background: linear-gradient(135deg, #064e3b 0%, #10B981 100%); width: 100%; padding: 40px 20px; text-align: center;">
+            {% if logo_base64 %}
+            <img src="{{ logo_base64 }}" alt="beBrivus" style="height: 60px; width: auto; object-fit: contain; display: block; margin: 0 auto;" />
+            {% else %}
+            <div style="font-size: 28px; font-weight: bold; color: white; letter-spacing: 2px; text-align: center;">be<span style="color: #6ee7b7;">Brivus</span></div>
+            {% endif %}
+            <h1 style="color: white; font-size: 24px; margin: 12px 0 0 0;">beBrivus</h1>
+        </div>
+
+        <!-- Content -->
+        <div style="padding: 40px 30px;">
+            <p style="font-size: 18px; color: #333333; margin-bottom: 20px; font-weight: 500;">Dear {{ user_name }},</p>
+            
+            <div style="background-color: #d1fae5; border-left: 4px solid #10B981; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                <p style="margin: 0; color: #065f46; font-size: 16px; font-weight: 600;">🎉 Congratulations! Your Application Has Been Accepted</p>
+            </div>
+
+            <p style="font-size: 15px; color: #555555; line-height: 1.6; margin-bottom: 20px;">
+                We are thrilled to inform you that your application for the <strong style="color: #10B981;">{{ opportunity_title }}</strong> has been reviewed and successfully accepted.
+            </p>
+
+            <p style="font-size: 15px; color: #555555; line-height: 1.6; margin-bottom: 20px;">
+                This is a significant achievement and a testament to your dedication, hard work, and exceptional qualities. The selection committee was impressed by your profile and believes you are an outstanding candidate for this opportunity.
+            </p>
+
+            <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                <h3 style="margin: 0 0 15px 0; color: #333333; font-size: 16px; font-weight: 600;">What happens next:</h3>
+                <ul style="margin: 0; padding-left: 20px; color: #555555; line-height: 1.8;">
+                    <li>You will be contacted shortly with further details</li>
+                    <li>Please log in to your beBrivus dashboard to view updates</li>
+                    <li>Ensure your profile and contact details are up to date</li>
+                </ul>
+            </div>
+
+            <p style="font-size: 15px; color: #555555; line-height: 1.6; margin-bottom: 30px;">
+                We wish you every success on this exciting journey ahead.
+            </p>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ dashboard_url }}" style="display: inline-block; background-color: #10B981; color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">View Dashboard</a>
+            </div>
+
+            <p style="font-size: 15px; color: #555555; line-height: 1.6; margin-top: 30px;">
+                Warm regards,<br>
+                <strong style="color: #10B981;">The beBrivus Team</strong>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
+            <p style="font-size: 13px; color: #6c757d; margin: 8px 0;">
+                © 2026 beBrivus | All rights reserved
+            </p>
+            <p style="font-size: 12px; color: #999; margin: 8px 0;">
+                <a href="{{ frontend_url }}/unsubscribe" style="color: #10B981; text-decoration: none;">Unsubscribe</a> | 
+                <a href="{{ frontend_url }}/privacy-policy" style="color: #10B981; text-decoration: none;">Privacy Policy</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -7,6 +7,7 @@ export interface NotificationItem {
   body: string;
   notification_type: string;
   data?: Record<string, unknown> | null;
+  link?: string | null;
   read_at: string | null;
   created_at: string;
 }

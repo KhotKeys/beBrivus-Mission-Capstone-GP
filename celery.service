@@ -1,0 +1,21 @@
+[Unit]
+Description=Celery worker for beBrivus
+After=network.target redis.service
+
+[Service]
+Type=forking
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/bebrivus/backend
+Environment="PATH=/var/www/bebrivus/backend/.venv/bin"
+EnvironmentFile=/var/www/bebrivus/backend/.env
+ExecStart=/var/www/bebrivus/backend/.venv/bin/celery -A core worker \
+    --loglevel=info \
+    --logfile=/var/log/celery/worker.log \
+    --pidfile=/var/run/celery/worker.pid
+
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

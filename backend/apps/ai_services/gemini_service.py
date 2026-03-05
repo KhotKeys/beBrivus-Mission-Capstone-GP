@@ -1,10 +1,18 @@
 import os
-import google.generativeai as genai
 from typing import Dict, List, Optional, Any
 import json
 from django.conf import settings
 from django.core.cache import cache
 import logging
+
+try:
+    from google import genai
+    from google.genai import types
+    GENAI_AVAILABLE = True
+except ImportError:
+    GENAI_AVAILABLE = False
+    logger = logging.getLogger(__name__)
+    logger.warning("google-genai package not installed. Install with: pip install google-genai")
 
 logger = logging.getLogger(__name__)
 
@@ -16,21 +24,25 @@ class GeminiService:
     
     def __init__(self):
         self.api_key = getattr(settings, 'GEMINI_API_KEY', os.getenv('GEMINI_API_KEY'))
-        if self.api_key:
-            genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-2.0-flash')
+        if self.api_key and GENAI_AVAILABLE:
+            self.client = genai.Client(api_key=self.api_key)
+            self.model = 'gemini-2.5-flash'
         else:
-            logger.warning("GEMINI_API_KEY not found - AI features will be disabled")
+            if not GENAI_AVAILABLE:
+                logger.warning("google-genai package not available - AI features will be disabled")
+            else:
+                logger.warning("GEMINI_API_KEY not found - AI features will be disabled")
+            self.client = None
             self.model = None
     
     def _check_api_key(self):
         """Check if API key is available"""
-        if not self.api_key or not self.model:
+        if not self.api_key or not self.client:
             raise ValueError("GEMINI_API_KEY not configured - AI features are disabled")
 
     def is_available(self) -> bool:
         """Return True when the Gemini client is configured."""
-        return bool(self.api_key and self.model)
+        return bool(self.api_key and self.client and GENAI_AVAILABLE)
     
     def generate_content(self, prompt: str, **kwargs) -> str:
         """
@@ -39,7 +51,11 @@ class GeminiService:
         self._check_api_key()
         
         try:
-            response = self.model.generate_content(prompt, **kwargs)
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt,
+                config=types.GenerateContentConfig(**kwargs) if kwargs else None
+            )
             return response.text
         except Exception as e:
             logger.error(f"Gemini API error: {str(e)}")
@@ -339,6 +355,118 @@ class GeminiService:
                 "networking_suggestions": [],
                 "confidence_score": 50
             }
+    
+    def moderate_content(self, content: str, content_type: str = "discussion") -> Dict:
+        """
+        Analyze content for hate speech, toxicity, and inappropriate content
+        Returns moderation score and flags
+        """
+        try:
+            self._check_api_key()
+        except ValueError:
+            return {
+                "is_safe": True,
+                "toxicity_score": 0.0,
+                "categories": [],
+                "reason": "Moderation unavailable",
+                "should_flag": False
+            }
+        
+        prompt = f"""
+        You are a strict content moderation system. Analyze this {content_type} content for:
+        - Hate speech, discrimination, or racism
+        - Harassment, bullying, or threats
+        - Violence or graphic content
+        - Sexual or explicit content
+        - Spam or misleading information
+        - Misinformation or harmful advice
+        - Profanity or offensive language
+        
+        Content:
+        {content}
+        
+        Provide response in JSON format:
+        {{
+            "is_safe": <true/false>,
+            "toxicity_score": <number between 0.0-1.0>,
+            "categories": ["<category1>", "<category2>"],
+            "reason": "<detailed explanation of why content is flagged or safe>",
+            "should_flag": <true/false>,
+            "confidence_score": <number between 0.0-1.0>
+        }}
+        """
+        
+        try:
+            response = self.generate_content(prompt)
+            response = response.strip()
+            if response.startswith('```json'):
+                response = response[7:-3].strip()
+            elif response.startswith('```'):
+                response = response[3:-3].strip()
+            
+            result = json.loads(response)
+            return result
+        except (json.JSONDecodeError, Exception) as e:
+            logger.error(f"Error moderating content: {str(e)}")
+            return {
+                "is_safe": True,
+                "toxicity_score": 0.0,
+                "categories": [],
+                "reason": "Unable to analyze",
+                "should_flag": False,
+                "confidence_score": 0.0
+            }
+    
+    def extract_user_memory(self, conversation_history: str, existing_memory: Dict = None) -> Dict:
+        """
+        Extract and update user information from conversation
+        """
+        try:
+            self._check_api_key()
+        except ValueError:
+            return existing_memory or {}
+        
+        prompt = f"""
+        Extract user information from this conversation to build a personalized memory profile.
+        
+        Existing Memory:
+        {json.dumps(existing_memory) if existing_memory else "None"}
+        
+        Recent Conversation:
+        {conversation_history}
+        
+        Extract and update:
+        - preferred_name: User's name if mentioned
+        - skills_mentioned: List of skills they mention
+        - career_goals: Their career aspirations
+        - interests: Topics they're interested in
+        - past_topics: What they discussed (brief summary)
+        
+        Provide response in JSON format:
+        {{
+            "preferred_name": "<name or empty string>",
+            "skills_mentioned": ["<skill1>", "<skill2>"],
+            "career_goals": "<goals or empty string>",
+            "interests": ["<interest1>", "<interest2>"],
+            "past_topics": ["<topic1>", "<topic2>"],
+            "last_conversation_summary": "<brief summary of what was discussed>"
+        }}
+        
+        Merge with existing memory - don't remove information, only add or update.
+        """
+        
+        try:
+            response = self.generate_content(prompt)
+            response = response.strip()
+            if response.startswith('```json'):
+                response = response[7:-3].strip()
+            elif response.startswith('```'):
+                response = response[3:-3].strip()
+            
+            return json.loads(response)
+        except (json.JSONDecodeError, Exception) as e:
+            logger.error(f"Error extracting user memory: {str(e)}")
+            return existing_memory or {}
 
 # Singleton instance
 gemini_service = GeminiService()

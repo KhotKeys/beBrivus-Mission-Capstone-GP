@@ -1,9 +1,10 @@
+// @refresh reset
 import React, {
   createContext,
   useContext,
   useState,
   useEffect,
-  ReactNode,
+  type ReactNode,
 } from "react";
 import { adminApi } from "../services/adminApi";
 
@@ -56,6 +57,13 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({
   useEffect(() => {
     const checkAdminAuth = async () => {
       try {
+        // Only check admin auth if we're on an admin route
+        const currentPath = window.location.pathname;
+        if (!currentPath.startsWith('/admin')) {
+          setIsLoading(false);
+          return;
+        }
+        
         const token = localStorage.getItem("adminToken");
         if (token) {
           const response = await adminApi.get("/auth/profile/");

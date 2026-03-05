@@ -10,8 +10,8 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             '--email',
-            default='admin@bebrivus.com',
-            help='Admin email address (default: admin@bebrivus.com)'
+            default='kkhotmachil@gmail.com',
+            help='Admin email address (default: kkhotmachil@gmail.com)'
         )
         parser.add_argument(
             '--reset',

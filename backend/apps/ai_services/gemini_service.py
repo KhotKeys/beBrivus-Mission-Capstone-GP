@@ -6,13 +6,12 @@ from django.core.cache import cache
 import logging
 
 try:
-    from google import genai
-    from google.genai import types
+    import google.generativeai as genai
     GENAI_AVAILABLE = True
 except ImportError:
     GENAI_AVAILABLE = False
     logger = logging.getLogger(__name__)
-    logger.warning("google-genai package not installed. Install with: pip install google-genai")
+    logger.warning("google-generativeai package not installed. Install with: pip install google-generativeai")
 
 logger = logging.getLogger(__name__)
 
@@ -25,11 +24,12 @@ class GeminiService:
     def __init__(self):
         self.api_key = getattr(settings, 'GEMINI_API_KEY', os.getenv('GEMINI_API_KEY'))
         if self.api_key and GENAI_AVAILABLE:
-            self.client = genai.Client(api_key=self.api_key)
+            genai.configure(api_key=self.api_key)
+            self.client = True  # Flag to indicate API is configured
             self.model = 'gemini-2.5-flash'
         else:
             if not GENAI_AVAILABLE:
-                logger.warning("google-genai package not available - AI features will be disabled")
+                logger.warning("google-generativeai package not available - AI features will be disabled")
             else:
                 logger.warning("GEMINI_API_KEY not found - AI features will be disabled")
             self.client = None
@@ -51,11 +51,8 @@ class GeminiService:
         self._check_api_key()
         
         try:
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=prompt,
-                config=types.GenerateContentConfig(**kwargs) if kwargs else None
-            )
+            model = genai.GenerativeModel(self.model)
+            response = model.generate_content(prompt)
             return response.text
         except Exception as e:
             logger.error(f"Gemini API error: {str(e)}")

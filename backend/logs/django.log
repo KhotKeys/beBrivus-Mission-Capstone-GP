@@ -41960,3 +41960,68 @@ Watching for file changes with StatReloader
 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
 Configuring endpoint tcp:port=8001:interface=127.0.0.1
 Listening on TCP address 127.0.0.1:8001
+Watching for file changes with StatReloader
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8001:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8001
+[mHTTP OPTIONS /api/auth/logout/ 200 [0.08, 127.0.0.1:63780][0m
+Unauthorized: /api/auth/logout/
+[31;1mHTTP POST /api/auth/logout/ 401 [0.78, 127.0.0.1:63780][0m
+[mHTTP OPTIONS /api/auth/admin/login/ 200 [1.62, 127.0.0.1:51646][0m
+[mHTTP POST /api/auth/admin/login/ 200 [7.60, 127.0.0.1:51646][0m
+[mHTTP OPTIONS /api/admin/dashboard/stats/ 200 [0.03, 127.0.0.1:51646][0m
+[mHTTP OPTIONS /api/admin/dashboard/recent-activity/ 200 [0.04, 127.0.0.1:59147][0m
+[mHTTP OPTIONS /api/admin/dashboard/stats/ 200 [0.03, 127.0.0.1:51646][0m
+[mHTTP OPTIONS /api/admin/dashboard/recent-activity/ 200 [0.04, 127.0.0.1:59147][0m
+[mHTTP GET /api/admin/dashboard/recent-activity/ 200 [0.69, 127.0.0.1:51646][0m
+[mHTTP GET /api/admin/dashboard/stats/ 200 [0.79, 127.0.0.1:59147][0m
+[mHTTP GET /api/admin/dashboard/recent-activity/ 200 [0.33, 127.0.0.1:51646][0m
+[mHTTP GET /api/admin/dashboard/stats/ 200 [0.26, 127.0.0.1:59147][0m
+[mHTTP OPTIONS /api/admin/opportunities/?page=1 200 [0.04, 127.0.0.1:59147][0m
+[mHTTP OPTIONS /api/admin/opportunities/?page=1 200 [0.04, 127.0.0.1:51646][0m
+[mHTTP GET /api/admin/opportunities/?page=1 200 [0.57, 127.0.0.1:59147][0m
+[mHTTP GET /api/admin/opportunities/?page=1 200 [0.58, 127.0.0.1:51646][0m
+[mHTTP OPTIONS /api/resources/categories/ 200 [0.09, 127.0.0.1:51646][0m
+[mHTTP OPTIONS /api/resources/categories/ 200 [0.06, 127.0.0.1:50933][0m
+[mHTTP OPTIONS /api/admin/resources/ 200 [0.05, 127.0.0.1:59147][0m
+[mHTTP OPTIONS /api/admin/resources/ 200 [0.05, 127.0.0.1:52169][0m
+[mHTTP OPTIONS /api/admin/users/?page=1 200 [0.01, 127.0.0.1:50933][0m
+[mHTTP OPTIONS /api/admin/users/?page=1 200 [0.41, 127.0.0.1:51646][0m
+[mHTTP GET /api/admin/resources/ 200 [1.54, 127.0.0.1:52169][0m
+[mHTTP GET /api/resources/categories/ 200 [1.63, 127.0.0.1:59147][0m
+[mHTTP GET /api/admin/resources/ 200 [0.43, 127.0.0.1:52169][0m
+[mHTTP GET /api/admin/users/?page=1 200 [1.14, 127.0.0.1:50933][0m
+[mHTTP GET /api/resources/categories/ 200 [0.45, 127.0.0.1:59147][0m
+[mHTTP GET /api/admin/users/?page=1 200 [0.62, 127.0.0.1:52169][0m
+[mHTTP OPTIONS /api/forum/categories/ 200 [0.05, 127.0.0.1:52169][0m
+[mHTTP OPTIONS /api/forum/discussions/flagged/ 200 [0.10, 127.0.0.1:59147][0m
+[mHTTP GET /api/forum/categories/ 200 [0.59, 127.0.0.1:52169][0m
+[mHTTP GET /api/forum/discussions/flagged/ 200 [0.69, 127.0.0.1:59147][0m
+[mHTTP OPTIONS /api/forum/moderation/ 200 [0.01, 127.0.0.1:59147][0m
+[mHTTP GET /api/forum/moderation/ 200 [0.07, 127.0.0.1:59147][0m
+[mHTTP OPTIONS /api/forum/moderation/audit_log/ 200 [0.01, 127.0.0.1:59147][0m
+[mHTTP GET /api/forum/moderation/audit_log/ 200 [0.08, 127.0.0.1:59147][0m
+[mHTTP GET /api/forum/moderation/ 200 [0.13, 127.0.0.1:59147][0m
+[mHTTP GET /api/forum/moderation/audit_log/ 200 [0.09, 127.0.0.1:59147][0m
+[mHTTP GET /api/forum/moderation/audit_log/ 200 [0.09, 127.0.0.1:59147][0m
+[mHTTP GET /api/admin/analytics/?period=7days 200 [2.20, 127.0.0.1:59147][0m
+[mHTTP GET /api/admin/analytics/?period=7days 200 [0.38, 127.0.0.1:59147][0m
+[mHTTP OPTIONS /api/auth/profile/ 200 [0.10, 127.0.0.1:52819][0m
+[mHTTP OPTIONS /api/auth/profile/ 200 [0.08, 127.0.0.1:62984][0m
+[mHTTP GET /api/auth/profile/ 200 [0.20, 127.0.0.1:62984][0m
+[mHTTP GET /api/admin/analytics/?period=7days 200 [0.10, 127.0.0.1:62984][0m
+[mHTTP OPTIONS /api/applications/ 200 [0.00, 127.0.0.1:62984][0m
+[mHTTP GET /api/applications/ 200 [0.22, 127.0.0.1:62984][0m
+[mHTTP GET /api/admin/dashboard/recent-activity/ 200 [0.07, 127.0.0.1:52819][0m
+[mHTTP GET /api/admin/dashboard/stats/ 200 [0.08, 127.0.0.1:62984][0m
+[mHTTP GET /api/admin/dashboard/recent-activity/ 200 [0.06, 127.0.0.1:52819][0m
+[mHTTP GET /api/admin/dashboard/stats/ 200 [0.07, 127.0.0.1:62984][0m
+[mHTTP GET /api/admin/dashboard/recent-activity/ 200 [0.03, 127.0.0.1:62984][0m
+[mHTTP GET /api/admin/dashboard/recent-activity/ 200 [0.03, 127.0.0.1:62984][0m
+[mHTTP GET /api/admin/users/?page=1 200 [0.17, 127.0.0.1:62984][0m
+[mHTTP GET /api/admin/users/?page=1 200 [0.20, 127.0.0.1:52819][0m
+[mHTTP OPTIONS /api/admin/users/?page=1&is_active=true 200 [0.00, 127.0.0.1:52819][0m
+[mHTTP GET /api/admin/users/?page=1&is_active=true 200 [0.16, 127.0.0.1:52819][0m
+[mHTTP GET /api/applications/ 200 [0.12, 127.0.0.1:52819][0m
+Unauthorized: /api/applications/
+[31;1mHTTP GET /api/applications/ 401 [0.62, 127.0.0.1:59663][0m

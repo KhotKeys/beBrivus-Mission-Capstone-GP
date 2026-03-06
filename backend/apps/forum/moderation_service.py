@@ -1,23 +1,21 @@
 """
 AI Moderation Service - Listens and flags only, no autonomous actions
 """
-from django.core.mail import send_mail
 from django.conf import settings
-from django.template.loader import render_to_string
 from apps.ai_services.gemini_service import gemini_service
+from apps.notifications.email_service import notify_moderation_violation_admin, notify_user_content_flagged
 import logging
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
-MODERATION_EMAIL = "ethxkeys@gmail.com"
-
-def check_content_for_violations(content, author_username, post_id):
+def check_content_for_violations(content, author_username, post_id, content_type='forum_post'):
     """
     AI listens to content and flags violations - NO AUTONOMOUS ACTIONS
     Returns: dict with violation details or None
     """
     try:
-        result = gemini_service.moderate_content(content, "forum_post")
+        result = gemini_service.moderate_content(content, content_type)
         
         if not result.get('is_safe', True) and result.get('should_flag', False):
             violation = {
@@ -27,11 +25,26 @@ def check_content_for_violations(content, author_username, post_id):
                 'categories': result.get('categories', []),
                 'confidence': result.get('toxicity_score', 0),
                 'reason': result.get('reason', 'Policy violation detected'),
-                'timestamp': None  # Set by caller
+                'timestamp': timezone.now().isoformat(),
+                'content_type': content_type,
+                'source_url': f"/forums/{post_id}/" if content_type == 'forum_post' else ''
             }
             
-            # Send alert email - ONLY to ethxkeys@gmail.com
-            send_violation_alert(violation)
+            # Send alerts to admin and user
+            notify_moderation_violation_admin(violation)
+            
+            # Get user email if available (from author_username)
+            try:
+                from apps.accounts.models import User
+                user = User.objects.get(username=author_username)
+                notify_user_content_flagged(user.email, violation)
+                
+                # Notify mentor if user has one
+                if hasattr(user, 'mentor') and user.mentor and hasattr(user.mentor, 'email'):
+                    from apps.notifications.email_service import notify_mentor_violation_alert
+                    notify_mentor_violation_alert(user.mentor.email, violation)
+            except:
+                pass  # User might not exist yet
             
             return violation
         
@@ -41,44 +54,3 @@ def check_content_for_violations(content, author_username, post_id):
         logger.error(f"Moderation check failed: {e}")
         return None
 
-
-def send_violation_alert(violation):
-    """
-    Send formatted email alert to ethxkeys@gmail.com ONLY
-    """
-    try:
-        subject = f"🚨 Forum Violation Alert - {', '.join(violation['categories'])}"
-        
-        message = f"""
-AI MODERATION ALERT
-
-FLAGGED CONTENT:
-{violation['content']}
-
-DETAILS:
-- Username: {violation['username']}
-- Post ID: {violation['post_id']}
-- Violation Type: {', '.join(violation['categories'])}
-- AI Confidence: {violation['confidence']:.2%}
-- Reason: {violation['reason']}
-- Timestamp: {violation.get('timestamp', 'N/A')}
-
-ACTION REQUIRED:
-Review this content in Admin Portal at /admin/forum/moderation
-Select action: Warn User / Remove Content / Suspend Account / Dismiss
-
-This is an automated alert. The AI has taken NO action.
-"""
-        
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[MODERATION_EMAIL],
-            fail_silently=False,
-        )
-        
-        logger.info(f"Violation alert sent to {MODERATION_EMAIL} for post {violation['post_id']}")
-        
-    except Exception as e:
-        logger.error(f"Failed to send violation alert: {e}")

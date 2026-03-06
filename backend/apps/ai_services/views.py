@@ -562,8 +562,8 @@ class ChatView(APIView):
         """Create moderation flag and send email to admin"""
         from .models import ContentModerationFlag
         from apps.forum.moderation_models import FlaggedContent
-        from django.core.mail import send_mail
-        from threading import Thread
+        from apps.notifications.email_service import notify_moderation_violation_admin, notify_user_content_flagged
+        from django.utils import timezone
         
         categories = moderation_result.get('categories', [])
         violation_category = ', '.join(categories) if categories else 'Policy Violation'
@@ -591,35 +591,26 @@ class ChatView(APIView):
             status='pending'
         )
         
-        # Send email notification to admin
-        def send_async():
-            try:
-                subject = f'[beBrivus] Content Moderation Alert - {violation_category}'
-                message = (
-                    f'Content flagged for moderation review:\n\n'
-                    f'Source: AI Coach\n'
-                    f'Type: {content_type}\n'
-                    f'User: {user.email}\n'
-                    f'Violation: {violation_category}\n'
-                    f'Confidence: {moderation_result.get("confidence_score", 0.0):.2f}\n'
-                    f'Reason: {moderation_result.get("reason", "")}\n\n'
-                    f'Content Preview:\n{content_text[:200]}...\n\n'
-                    f'Review in Admin Moderation Center'
-                )
-                
-                send_mail(
-                    subject,
-                    message,
-                    settings.EMAIL_HOST_USER or 'no-reply@bebrivus.com',
-                    ['ethxkeys@gmail.com'],
-                    fail_silently=True
-                )
-                flag.admin_notified = True
-                flag.save()
-            except Exception as e:
-                logger.error(f'Failed to send moderation alert: {e}')
+        # Prepare violation data for email notifications
+        violation = {
+            'content': content_text[:500],
+            'username': user.username,
+            'post_id': 0,
+            'categories': categories,
+            'confidence': moderation_result.get('confidence_score', 0.0),
+            'reason': moderation_result.get('reason', ''),
+            'timestamp': timezone.now().isoformat(),
+            'content_type': content_type,
+            'source_url': f"/ai/chat/{content_id}/" if content_id else ''
+        }
         
-        Thread(target=send_async, daemon=True).start()
+        # Send email notifications asynchronously
+        notify_moderation_violation_admin(violation)  # Async by default
+        notify_user_content_flagged(user.email, violation)  # Async by default
+        
+        # Update flag to indicate notifications sent
+        flag.admin_notified = True
+        flag.save()
     
     def get(self, request):
         """Get user's chat sessions"""

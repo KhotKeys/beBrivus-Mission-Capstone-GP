@@ -212,6 +212,11 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@bebrivus.com')
 
+# Moderation and Admin Email Settings
+MODERATION_EMAIL = config('MODERATION_EMAIL', default='ethxkeys@gmail.com')
+CONTACT_EMAIL = config('CONTACT_EMAIL', default='support@bebrivus.com')
+ADMIN_EMAIL_RECIPIENTS = config('ADMIN_EMAIL_RECIPIENTS', cast=lambda v: [e.strip() for e in v.split(',')] if v else [], default='ethxkeys@gmail.com')
+
 # Frontend URL for password reset links
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
 FRONTEND_LOGIN_URL = config('FRONTEND_LOGIN_URL', default=f"{FRONTEND_URL}/login")

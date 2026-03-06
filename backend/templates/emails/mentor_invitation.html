@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentor Invitation</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Hero Section -->
+        <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); width: 100%; padding: 40px 20px; text-align: center;">
+            <div style="font-size: 28px; font-weight: bold; color: white; letter-spacing: 2px;">be<span style="color: #93c5fd;">Brivus</span></div>
+            <p style="margin: 10px 0 0 0; color: #dbeafe; font-size: 14px;">Student Mentor Match</p>
+        </div>
+
+        <!-- Content -->
+        <div style="padding: 40px 30px;">
+            <p style="font-size: 16px; color: #333333; margin-bottom: 20px; font-weight: 500;">Hi {{ mentor_name }},</p>
+            
+            <div style="background-color: #dbeafe; border-left: 4px solid #3b82f6; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                <p style="margin: 0; color: #1e40af; font-size: 15px;"><strong>You've been invited to mentor a student!</strong></p>
+                <p style="margin: 8px 0 0 0; color: #1e40af; font-size: 14px;">{{ student_name }} would like you to be their mentor.</p>
+            </div>
+
+            <p style="font-size: 15px; color: #555555; line-height: 1.6; margin-bottom: 20px;">
+                We think you'd be a great fit! {{ student_name }} is looking for guidance in:
+            </p>
+
+            <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                <h3 style="margin: 0 0 12px 0; color: #333333; font-size: 14px; font-weight: 600;">About the Mentoring:</h3>
+                <table style="width: 100%; font-size: 14px; line-height: 1.8;">
+                    <tr>
+                        <td style="color: #6b7280; width: 100px;"><strong>Student:</strong></td>
+                        <td style="color: #333333;">{{ student_name }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #6b7280;"><strong>Topic:</strong></td>
+                        <td style="color: #333333;">{{ topic }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #6b7280;"><strong>Focus:</strong></td>
+                        <td style="color: #333333;">{{ description }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <p style="font-size: 15px; color: #555555; line-height: 1.6; margin-bottom: 20px;">
+                As a mentor, you'll provide:
+            </p>
+            <ul style="margin: 0 0 25px 0; padding-left: 20px; color: #555555; line-height: 1.8; font-size: 14px;">
+                <li>Expert guidance and knowledge sharing</li>
+                <li>Career advice and insights</li>
+                <li>Scheduled mentoring sessions</li>
+                <li>Support and encouragement</li>
+            </ul>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ accept_link }}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">Accept Invitation</a>
+            </div>
+
+            <p style="font-size: 14px; color: #6b7280; line-height: 1.6; margin-top: 25px;">
+                You can review the invitation details and accept or decline on your mentor dashboard. The mentee will be notified of your decision.
+            </p>
+
+            <p style="font-size: 15px; color: #555555; line-height: 1.6; margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                Thank you for being part of the beBrivus mentor community!<br>
+                <strong style="color: #3b82f6;">The beBrivus Team</strong>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e9ecef; font-size: 12px; color: #6c757d;">
+            <p style="margin: 0;">© 2026 beBrivus. All rights reserved.</p>
+            <p style="margin: 5px 0 0 0;"><a href="https://bebrivus.com" style="color: #3b82f6; text-decoration: none;">Visit our website</a></p>
+        </div>
+    </div>
+</body>
+</html>

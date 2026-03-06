@@ -8,8 +8,7 @@ from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
+from apps.notifications.email_service import notify_password_reset
 from threading import Thread
 from .models import User, UserSkill, UserEducation, UserExperience
 from .serializers import (
@@ -22,36 +21,12 @@ def send_password_reset_email(user, reset_link):
     """
     Send password reset email to user asynchronously
     """
-    try:
-        # Send email
-        subject = 'Password Reset Request - beBrivus'
-        message = f'''
-Hello {user.first_name},
-
-You requested to reset your password for your beBrivus account.
-
-Click the link below to reset your password:
-{reset_link}
-
-This link will expire in 24 hours.
-
-If you didn't request this, please ignore this email.
-
-Best regards,
-The beBrivus Team
-        '''
-        
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=False,
-        )
-        
-        print(f"[EMAIL SENT] Password reset link sent to {user.email}")
-    except Exception as e:
-        print(f"[EMAIL ERROR] Failed to send password reset email to {user.email}: {str(e)}")
+    # Use EmailService for sending
+    notify_password_reset(
+        user_email=user.email,
+        user_name=user.first_name or user.username,
+        reset_link=reset_link
+    )
 
 
 class RegisterView(generics.CreateAPIView):

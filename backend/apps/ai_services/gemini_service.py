@@ -4,16 +4,18 @@ import json
 from django.conf import settings
 from django.core.cache import cache
 import logging
+import re
 
 try:
     import google.generativeai as genai
     GENAI_AVAILABLE = True
 except ImportError:
     GENAI_AVAILABLE = False
-    logger = logging.getLogger(__name__)
-    logger.warning("google-generativeai package not installed. Install with: pip install google-generativeai")
 
 logger = logging.getLogger(__name__)
+
+if not GENAI_AVAILABLE:
+    logger.warning("google-generativeai package not installed. Install with: pip install google-generativeai")
 
 
 class GeminiService:
@@ -23,26 +25,38 @@ class GeminiService:
     
     def __init__(self):
         self.api_key = getattr(settings, 'GEMINI_API_KEY', os.getenv('GEMINI_API_KEY'))
-        if self.api_key and GENAI_AVAILABLE:
+        self.client = None
+        self.model = None
+        
+        if not GENAI_AVAILABLE:
+            logger.warning("[GEMINI] google-generativeai package not available - AI features will be disabled")
+            return
+        
+        if not self.api_key:
+            logger.warning("[GEMINI] GEMINI_API_KEY environment variable not set - AI features disabled")
+            return
+        
+        try:
             genai.configure(api_key=self.api_key)
             self.client = True  # Flag to indicate API is configured
             self.model = 'gemini-2.5-flash'
-        else:
-            if not GENAI_AVAILABLE:
-                logger.warning("google-generativeai package not available - AI features will be disabled")
-            else:
-                logger.warning("GEMINI_API_KEY not found - AI features will be disabled")
+            logger.info(f"[GEMINI] API configured successfully with model: {self.model}")
+        except Exception as e:
+            logger.error(f"[GEMINI] Failed to configure API: {str(e)}")
             self.client = None
             self.model = None
     
     def _check_api_key(self):
         """Check if API key is available"""
-        if not self.api_key or not self.client:
+        if not self.api_key or not self.client or not GENAI_AVAILABLE:
             raise ValueError("GEMINI_API_KEY not configured - AI features are disabled")
 
     def is_available(self) -> bool:
         """Return True when the Gemini client is configured."""
-        return bool(self.api_key and self.client and GENAI_AVAILABLE)
+        is_avail = bool(self.api_key and self.client and GENAI_AVAILABLE)
+        if not is_avail:
+            logger.debug(f"[GEMINI] Not available - api_key:{bool(self.api_key)}, client:{bool(self.client)}, genai:{GENAI_AVAILABLE}")
+        return is_avail
     
     def generate_content(self, prompt: str, **kwargs) -> str:
         """
@@ -53,9 +67,11 @@ class GeminiService:
         try:
             model = genai.GenerativeModel(self.model)
             response = model.generate_content(prompt)
+            if not response or not response.text:
+                raise ValueError("Empty response from Gemini API")
             return response.text
         except Exception as e:
-            logger.error(f"Gemini API error: {str(e)}")
+            logger.error(f"[GEMINI] API error: {str(e)}")
             raise
     
     def analyze_opportunity_match(self, user_profile: Dict, opportunity: Dict) -> Dict:
@@ -360,7 +376,8 @@ class GeminiService:
         """
         try:
             self._check_api_key()
-        except ValueError:
+        except ValueError as e:
+            logger.warning(f"[MODERATION] API not available: {str(e)}")
             return {
                 "is_safe": True,
                 "toxicity_score": 0.0,
@@ -396,20 +413,59 @@ class GeminiService:
         try:
             response = self.generate_content(prompt)
             response = response.strip()
-            if response.startswith('```json'):
-                response = response[7:-3].strip()
-            elif response.startswith('```'):
-                response = response[3:-3].strip()
             
+            # Extract JSON from markdown code blocks
+            if response.startswith('```json'):
+                response = response[7:]
+                if response.endswith('```'):
+                    response = response[:-3]
+                response = response.strip()
+            elif response.startswith('```'):
+                response = response[3:]
+                if response.endswith('```'):
+                    response = response[:-3]
+                response = response.strip()
+            
+            # Parse and validate JSON
             result = json.loads(response)
+            
+            # Ensure all required fields exist
+            required_fields = ['is_safe', 'toxicity_score', 'categories', 'reason', 'should_flag', 'confidence_score']
+            for field in required_fields:
+                if field not in result:
+                    logger.warning(f"[MODERATION] Missing field '{field}' in response: {result}")
+                    result[field] = None
+            
+            # Validate toxicity_score is between 0 and 1
+            if not isinstance(result.get('toxicity_score'), (int, float)):
+                result['toxicity_score'] = 0.0
+            else:
+                result['toxicity_score'] = max(0.0, min(1.0, float(result['toxicity_score'])))
+            
+            # Ensure should_flag is boolean
+            if not isinstance(result.get('should_flag'), bool):
+                result['should_flag'] = result.get('toxicity_score', 0.0) > 0.5
+            
+            logger.debug(f"[MODERATION] Analyzed {content_type}: flagged={result['should_flag']}, score={result['toxicity_score']}")
             return result
-        except (json.JSONDecodeError, Exception) as e:
-            logger.error(f"Error moderating content: {str(e)}")
+            
+        except json.JSONDecodeError as e:
+            logger.error(f"[MODERATION] JSON parse error: {str(e)}, response: {response[:200]}")
             return {
                 "is_safe": True,
                 "toxicity_score": 0.0,
                 "categories": [],
-                "reason": "Unable to analyze",
+                "reason": "Unable to analyze - JSON parsing failed",
+                "should_flag": False,
+                "confidence_score": 0.0
+            }
+        except Exception as e:
+            logger.error(f"[MODERATION] Unexpected error: {str(e)}")
+            return {
+                "is_safe": True,
+                "toxicity_score": 0.0,
+                "categories": [],
+                "reason": f"Unable to analyze: {str(e)}",
                 "should_flag": False,
                 "confidence_score": 0.0
             }

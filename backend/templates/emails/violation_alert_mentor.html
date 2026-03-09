@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentee Content Alert</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Hero Section -->
+        <div style="background: linear-gradient(135deg, #5b21b6 0%, #9333ea 100%); width: 100%; padding: 40px 20px; text-align: center;">
+            <div style="font-size: 28px; font-weight: bold; color: white; letter-spacing: 2px;">be<span style="color: #d8b4fe;">Brivus</span></div>
+            <p style="margin: 10px 0 0 0; color: #f3e8ff; font-size: 14px;">Mentor Alert</p>
+        </div>
+
+        <!-- Content -->
+        <div style="padding: 40px 30px;">
+            <p style="font-size: 16px; color: #333333; margin-bottom: 20px; font-weight: 500;">Hello,</p>
+            
+            <div style="background-color: #ede9fe; border-left: 4px solid #9333ea; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                <p style="margin: 0; color: #5b21b6; font-size: 15px;"><strong>Alert:</strong> Your mentee's content has been flagged</p>
+                <p style="margin: 8px 0 0 0; color: #5b21b6; font-size: 14px;">{{ username }}'s {{ content_type }} was flagged by our moderation system.</p>
+            </div>
+
+            <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                <h3 style="margin: 0 0 12px 0; color: #333333; font-size: 14px; font-weight: 600;">Violation Details:</h3>
+                <p style="margin: 0; color: #555555; font-size: 14px; line-height: 1.6;">
+                    <strong>Mentee:</strong> {{ username }}<br>
+                    <strong>Violation Type:</strong> {{ categories }}<br>
+                    <strong>Issue:</strong> {{ reason }}
+                </p>
+            </div>
+
+            <p style="font-size: 15px; color: #555555; line-height: 1.6; margin-bottom: 20px;">
+                As a mentor, you may want to:
+            </p>
+            <ul style="margin: 0 0 20px 0; padding-left: 20px; color: #555555; line-height: 1.8; font-size: 14px;">
+                <li>Reach out to your mentee to discuss community guidelines</li>
+                <li>Provide guidance on acceptable content and behavior</li>
+                <li>Encourage them to review our terms of service</li>
+                <li>Monitor their future posts as part of your mentoring responsibilities</li>
+            </ul>
+
+            <p style="font-size: 14px; color: #6b7280; line-height: 1.6; margin-top: 25px;">
+                Our moderation team is also reviewing the content. The mentee will receive a separate notification about the flag.
+            </p>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="https://bebrivus.com/mentors/dashboard/" style="display: inline-block; background-color: #9333ea; color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">View in Mentor Dashboard</a>
+            </div>
+
+            <p style="font-size: 14px; color: #6b7280; line-height: 1.6; margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                Thank you for helping maintain our community standards.<br>
+                <strong style="color: #9333ea;">The beBrivus Moderation Team</strong>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e9ecef; font-size: 12px; color: #6c757d;">
+            <p style="margin: 0;">© 2026 beBrivus. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

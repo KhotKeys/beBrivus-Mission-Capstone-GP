@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Moderation Alert</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Hero Section -->
+        <div style="background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%); width: 100%; padding: 40px 20px; text-align: center;">
+            <div style="font-size: 28px; font-weight: bold; color: white; letter-spacing: 2px;">⚠️ MODERATION ALERT</div>
+        </div>
+
+        <!-- Content -->
+        <div style="padding: 40px 30px;">
+            <p style="font-size: 16px; color: #333333; margin-bottom: 20px; font-weight: 600;">Urgent: Content Flagged for Review</p>
+            
+            <div style="background-color: #fee2e2; border-left: 4px solid #dc2626; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                <p style="margin: 0; color: #7f1d1d; font-size: 15px;"><strong>Violation Type:</strong> {{ categories }}</p>
+                <p style="margin: 8px 0 0 0; color: #7f1d1d; font-size: 15px;"><strong>AI Confidence:</strong> {{ confidence }}</p>
+            </div>
+
+            <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                <h3 style="margin: 0 0 12px 0; color: #333333; font-size: 14px; font-weight: 600;">Flagged Content Details:</h3>
+                <table style="width: 100%; font-size: 14px; line-height: 1.8;">
+                    <tr>
+                        <td style="color: #6b7280; width: 120px;"><strong>Author:</strong></td>
+                        <td style="color: #333333;">{{ username }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #6b7280;"><strong>Post/Content ID:</strong></td>
+                        <td style="color: #333333;">{{ post_id }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #6b7280;"><strong>Content Type:</strong></td>
+                        <td style="color: #333333;">{{ content_type }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #6b7280;"><strong>Timestamp:</strong></td>
+                        <td style="color: #333333;">{{ timestamp }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="background-color: #fef5f1; border: 1px solid #fed7aa; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                <h3 style="margin: 0 0 12px 0; color: #7c2d12; font-size: 14px; font-weight: 600;">Reason for Flag:</h3>
+                <p style="margin: 0; color: #7c2d12; font-size: 14px; line-height: 1.6;">{{ reason }}</p>
+            </div>
+
+            <div style="background-color: #f3f4f6; border: 1px solid #d1d5db; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                <h3 style="margin: 0 0 15px 0; color: #333333; font-size: 14px; font-weight: 600;">Content Preview:</h3>
+                <p style="margin: 0; color: #555555; font-size: 13px; line-height: 1.6; max-height: 150px; overflow: hidden;">{{ content }}</p>
+            </div>
+
+            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                <h3 style="margin: 0 0 12px 0; color: #92400e; font-size: 14px; font-weight: 600;">Administration Required:</h3>
+                <ul style="margin: 0; padding-left: 20px; color: #92400e; line-height: 1.8; font-size: 14px;">
+                    <li>Review the flagged content</li>
+                    <li>Take appropriate action (Warn / Remove / Suspend)</li>
+                    <li>Document reason for action taken</li>
+                    <li><strong>AI has taken NO action - manual review required</strong></li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="https://bebrivus.com/admin/forum/moderation/" style="display: inline-block; background-color: #dc2626; color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: 600; font-size: 16px;">Review in Admin</a>
+            </div>
+
+            <p style="font-size: 13px; color: #6b7280; line-height: 1.6; margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                This is an automated alert from the beBrivus AI Moderation System. The AI system has flagged this content based on policy violations but has taken no autonomous action. Human review and decision is required.
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e9ecef; font-size: 12px; color: #6c757d;">
+            <p style="margin: 0;">© 2026 beBrivus. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

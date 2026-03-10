@@ -8,7 +8,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; color: string }> = {
   bug:                 { bg: '#fef2f2', color: '#ef4444' },
   feature:             { bg: '#eff6ff', color: '#3b82f6' },
   complaint:           { bg: '#fff7ed', color: '#f97316' },
-  compliment:          { bg: '#f0fdf4', color: '#10b981' },
+  compliment:          { bg: '#e6f2f3', color: '#125B66' },
   general:             { bg: '#faf5ff', color: '#8b5cf6' },
   other:               { bg: '#f9fafb', color: '#6b7280' },
   // Institution
@@ -16,7 +16,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; color: string }> = {
   platform_posting:    { bg: '#fff7ed', color: '#f97316' },
   application_process: { bg: '#faf5ff', color: '#8b5cf6' },
   student_conduct:     { bg: '#fef2f2', color: '#ef4444' },
-  partnership:         { bg: '#f0fdf4', color: '#10b981' },
+  partnership:         { bg: '#e6f2f3', color: '#125B66' },
   platform_bug:        { bg: '#fef2f2', color: '#dc2626' },
   billing_admin:       { bg: '#fffbeb', color: '#d97706' },
   // Mentor
@@ -26,7 +26,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; color: string }> = {
   profile_visibility:  { bg: '#faf5ff', color: '#8b5cf6' },
   feature_request:     { bg: '#eff6ff', color: '#2563eb' },
   scheduling:          { bg: '#f0f9ff', color: '#0284c7' },
-  communication:       { bg: '#f0fdf4', color: '#10b981' },
+  communication:       { bg: '#e6f2f3', color: '#125B66' },
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -39,7 +39,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 const STATUS_COLORS: Record<string, { bg: string; color: string; border: string }> = {
   open:      { bg: '#fffbeb', color: '#f59e0b', border: '#fcd34d' },
   in_review: { bg: '#eff6ff', color: '#3b82f6', border: '#bfdbfe' },
-  resolved:  { bg: '#f0fdf4', color: '#10b981', border: '#6ee7b7' },
+  resolved:  { bg: '#e6f2f3', color: '#125B66', border: '#66b1b7' },
   closed:    { bg: '#f9fafb', color: '#6b7280', border: '#e5e7eb' },
 };
 
@@ -109,13 +109,13 @@ export default function AdminFeedbackPage() {
     { label: 'Total Feedback',  value: stats?.total     ?? '—', color: '#6366f1', icon: '📬' },
     { label: 'Open',            value: stats?.open      ?? '—', color: '#f59e0b', icon: '📭' },
     { label: 'In Review',       value: stats?.in_review ?? '—', color: '#3b82f6', icon: '🔍' },
-    { label: 'Resolved',        value: stats?.resolved  ?? '—', color: '#10b981', icon: '✅' },
+    { label: 'Resolved',        value: stats?.resolved  ?? '—', color: '#125B66', icon: '✅' },
   ];
 
   const pieData = [
-    { name: 'Submitted', value: stats?.open || 0, color: '#10b981' },
+    { name: 'Submitted', value: stats?.open || 0, color: '#125B66' },
     { name: 'Under Review', value: stats?.in_review || 0, color: '#f59e0b' },
-    { name: 'Approved', value: stats?.resolved || 0, color: '#10b981' },
+    { name: 'Approved', value: stats?.resolved || 0, color: '#125B66' },
     { name: 'Escalated', value: stats?.closed || 0, color: '#dc2626' },
   ].filter(item => item.value > 0);
 
@@ -220,7 +220,7 @@ export default function AdminFeedbackPage() {
       {toastMsg && (
         <div style={{
           position: 'fixed', top: '24px', right: '24px',
-          background: toastMsg.includes('Failed') ? '#ef4444' : '#10b981',
+          background: toastMsg.includes('Failed') ? '#ef4444' : '#125B66',
           color: 'white', padding: '12px 24px', borderRadius: '10px',
           fontWeight: '600', fontSize: '14px', zIndex: 99999,
           boxShadow: '0 4px 16px rgba(0,0,0,0.15)',

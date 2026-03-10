@@ -183,6 +183,7 @@ export const OpportunityManagement: React.FC = () => {
         subtitle="Manage scholarships, internships, fellowships, and job opportunities"
         badge={totalOpportunities}
         variant="default"
+        backgroundImage="/opportunitry-management.png"
       />
 
       <div className="space-y-6 px-4 sm:px-6 lg:px-8">
@@ -436,9 +437,9 @@ export const OpportunityManagement: React.FC = () => {
           {visibleCount < opportunities.length ? (
             <button onClick={handleShowMore}
               style={{
-                color: '#10B981',
+                color: '#125B66',
                 background: 'none',
-                border: '1px solid #10B981',
+                border: '1px solid #125B66',
                 borderRadius: '8px',
                 padding: '8px 20px',
                 cursor: 'pointer',
@@ -905,7 +906,7 @@ const OpportunityViewModal: React.FC<OpportunityViewModalProps> = ({
                 <span
                   className={`px-2 py-1 rounded-full text-xs font-medium ${
                     opportunity.is_active
-                      ? "bg-green-100 text-green-800"
+                      ? "bg-[#e6f2f3] text-[#09373f]"
                       : "bg-red-100 text-red-800"
                   }`}
                 >

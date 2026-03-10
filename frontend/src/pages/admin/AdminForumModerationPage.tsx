@@ -194,7 +194,7 @@ export const AdminForumModerationPage: React.FC = () => {
           <p className="text-xs sm:text-sm text-gray-600">AI listens and flags only • All actions require human approval</p>
         </div>
         <div className="flex items-center gap-2 text-xs sm:text-sm">
-          <Shield className="w-4 h-4 text-green-600 flex-shrink-0" />
+          <Shield className="w-4 h-4 text-[#125B66] flex-shrink-0" />
           <span className="text-gray-600 truncate">Alerts: ethxkeys@gmail.com</span>
         </div>
       </div>
@@ -254,7 +254,7 @@ export const AdminForumModerationPage: React.FC = () => {
               <div className="text-center py-12">Loading...</div>
             ) : filteredPendingItems.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-lg border">
-                <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-2" />
+                <CheckCircle className="w-12 h-12 text-[#125B66] mx-auto mb-2" />
                 <p className="text-gray-600">No flagged content pending review</p>
               </div>
             ) : (

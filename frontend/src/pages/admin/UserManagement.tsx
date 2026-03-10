@@ -98,7 +98,7 @@ export const UserManagement: React.FC = () => {
       case "graduate":
         return "bg-primary-100 text-primary-800";
       case "community_talent":
-        return "bg-emerald-100 text-emerald-800";
+        return "bg-[#e6f2f3] text-[#09373f]";
       case "professional":
         return "bg-blue-100 text-blue-800";
       case "mentor":
@@ -289,6 +289,7 @@ export const UserManagement: React.FC = () => {
         subtitle="Manage and moderate user accounts, profiles, and permissions"
         badge={totalUsers}
         variant="wave"
+        backgroundImage="/user-management.jpg"
       />
 
       <div className="space-y-6 px-4 sm:px-6 lg:px-8">
@@ -587,9 +588,9 @@ export const UserManagement: React.FC = () => {
           {visibleCount < users.length ? (
             <button onClick={handleShowMore}
               style={{
-                color: '#10B981',
+                color: '#125B66',
                 background: 'none',
-                border: '1px solid #10B981',
+                border: '1px solid #125B66',
                 borderRadius: '8px',
                 padding: '8px 20px',
                 cursor: 'pointer',

@@ -17,7 +17,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; color: string }> = {
   bug:        { bg: '#fef2f2', color: '#ef4444' },
   feature:    { bg: '#eff6ff', color: '#3b82f6' },
   complaint:  { bg: '#fff7ed', color: '#f97316' },
-  compliment: { bg: '#f0fdf4', color: '#10b981' },
+  compliment: { bg: '#e6f2f3', color: '#125B66' },
   general:    { bg: '#faf5ff', color: '#8b5cf6' },
   other:      { bg: '#f9fafb', color: '#6b7280' },
 };
@@ -25,7 +25,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; color: string }> = {
 const STATUS_COLORS: Record<string, { bg: string; color: string; border: string }> = {
   open:      { bg: '#fffbeb', color: '#f59e0b', border: '#fcd34d' },
   in_review: { bg: '#eff6ff', color: '#3b82f6', border: '#bfdbfe' },
-  resolved:  { bg: '#f0fdf4', color: '#10b981', border: '#6ee7b7' },
+  resolved:  { bg: '#e6f2f3', color: '#125B66', border: '#66b1b7' },
   closed:    { bg: '#f9fafb', color: '#6b7280', border: '#e5e7eb' },
 };
 
@@ -267,7 +267,7 @@ export default function FeedbackPage() {
                   </p>
                   <button
                     onClick={resetForm}
-                    style={{ background: '#10b981', color: 'white', padding: '12px 28px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: '700', fontSize: '15px', boxSizing: 'border-box' }}
+                    style={{ background: '#125B66', color: 'white', padding: '12px 28px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: '700', fontSize: '15px', boxSizing: 'border-box' }}
                   >
                     {t('Submit Another')}
                   </button>
@@ -290,7 +290,7 @@ export default function FeedbackPage() {
                       value={category}
                       onChange={e => setCategory(e.target.value)}
                       style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '14px', background: 'white', outline: 'none', cursor: 'pointer', boxSizing: 'border-box', maxWidth: '100%' }}
-                      onFocus={e => e.currentTarget.style.borderColor = '#10b981'}
+                      onFocus={e => e.currentTarget.style.borderColor = '#125B66'}
                       onBlur={e => e.currentTarget.style.borderColor = '#d1d5db'}
                     >
                       {CATEGORY_OPTIONS.map(opt => (
@@ -310,7 +310,7 @@ export default function FeedbackPage() {
                       placeholder={t('Brief summary of your feedback')}
                       maxLength={200}
                       style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '14px', boxSizing: 'border-box', outline: 'none', maxWidth: '100%' }}
-                      onFocus={e => e.currentTarget.style.borderColor = '#10b981'}
+                      onFocus={e => e.currentTarget.style.borderColor = '#125B66'}
                       onBlur={e => e.currentTarget.style.borderColor = '#d1d5db'}
                     />
                     <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#9ca3af', textAlign: 'right' }}>{subject.length}/200</p>
@@ -326,7 +326,7 @@ export default function FeedbackPage() {
                       placeholder={t('Describe your feedback in detail... (minimum 20 characters)')}
                       rows={5}
                       style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '14px', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit', outline: 'none', maxWidth: '100%' }}
-                      onFocus={e => e.currentTarget.style.borderColor = '#10b981'}
+                      onFocus={e => e.currentTarget.style.borderColor = '#125B66'}
                       onBlur={e => e.currentTarget.style.borderColor = '#d1d5db'}
                     />
                     <p style={{ margin: '4px 0 0', fontSize: '12px', color: message.length < 20 ? '#ef4444' : '#9ca3af' }}>
@@ -339,7 +339,7 @@ export default function FeedbackPage() {
                     disabled={submitMutation.isPending}
                     style={{
                       width: '100%', padding: '14px',
-                      background: 'linear-gradient(135deg,#10b981,#059669)',
+                      background: 'linear-gradient(135deg,#125B66,#124666)',
                       color: 'white', border: 'none', borderRadius: '10px',
                       fontSize: '15px', fontWeight: '700', cursor: submitMutation.isPending ? 'not-allowed' : 'pointer',
                       opacity: submitMutation.isPending ? 0.7 : 1,
@@ -387,7 +387,7 @@ export default function FeedbackPage() {
                         </p>
                         {fb.rating && <StarRating value={fb.rating} readonly />}
                         {fb.admin_note && ['resolved', 'closed'].includes(fb.status) && (
-                          <div style={{ background: '#f0fdf4', borderLeft: '3px solid #10b981', borderRadius: '8px', padding: '10px 12px', marginTop: '10px' }}>
+                          <div style={{ background: '#e6f2f3', borderLeft: '3px solid #125B66', borderRadius: '8px', padding: '10px 12px', marginTop: '10px' }}>
                             <p style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: '700', color: '#15803d', textTransform: 'uppercase' }}>{t('Admin Response')}</p>
                             <p style={{ margin: 0, fontSize: '13px', color: '#374151' }}>{fb.admin_note}</p>
                           </div>

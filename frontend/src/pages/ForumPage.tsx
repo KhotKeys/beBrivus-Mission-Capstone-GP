@@ -577,7 +577,7 @@ export const ForumPage: React.FC = () => {
                               }}
                               style={{
                                 padding: '8px 16px', borderRadius: '6px', border: 'none',
-                                background: '#10B981', color: 'white',
+                                background: '#125B66', color: 'white',
                                 cursor: 'pointer', fontWeight: '600'
                               }}
                             >Save Changes</button>

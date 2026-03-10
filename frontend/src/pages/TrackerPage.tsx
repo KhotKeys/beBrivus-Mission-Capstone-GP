@@ -884,8 +884,8 @@ export const TrackerPage: React.FC = () => {
           </Card>
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="bg-green-100 p-2 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-600" />
+              <div className="bg-[#e6f2f3] p-2 rounded-lg">
+                <CheckCircle className="h-5 w-5 text-[#125B66]" />
               </div>
               <div>
                 <p className="text-xs sm:text-sm text-gray-600">Accepted</p>

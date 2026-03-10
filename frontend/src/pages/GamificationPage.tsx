@@ -126,7 +126,7 @@ export const GamificationPage: React.FC = () => {
   const getRarityColor = (rarity: string) => {
     const colors = {
       common: "text-gray-600 bg-gray-100",
-      uncommon: "text-green-600 bg-green-100",
+      uncommon: "text-[#125B66] bg-[#e6f2f3]",
       rare: "text-blue-600 bg-blue-100",
       epic: "text-purple-600 bg-purple-100",
       legendary: "text-yellow-600 bg-yellow-100",

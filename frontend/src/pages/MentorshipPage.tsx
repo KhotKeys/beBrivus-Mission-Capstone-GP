@@ -164,7 +164,7 @@ const MentorshipPage: React.FC = () => {
                 <span
                   className={`px-2 py-1 rounded-full text-xs font-medium ${
                     mentor.availability === "Available"
-                      ? "bg-green-100 text-green-800"
+                      ? "bg-[#e6f2f3] text-[#09373f]"
                       : mentor.availability === "Busy"
                       ? "bg-yellow-100 text-yellow-800"
                       : "bg-gray-100 text-gray-800"

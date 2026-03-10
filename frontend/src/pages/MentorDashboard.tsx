@@ -281,13 +281,13 @@ const MentorDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg xs:rounded-xl p-2 xs:p-3 sm:p-4 lg:p-6 text-white">
+          <div className="bg-gradient-to-r from-[#125B66] to-[#0f4f59] rounded-lg xs:rounded-xl p-2 xs:p-3 sm:p-4 lg:p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[8px] xs:text-[10px] sm:text-xs lg:text-sm text-emerald-100">Upcoming</p>
+                <p className="text-[8px] xs:text-[10px] sm:text-xs lg:text-sm text-[#cce5e7]">Upcoming</p>
                 <p className="text-base xs:text-xl sm:text-2xl lg:text-3xl font-bold">{upcomingCount}</p>
               </div>
-              <TrendingUp className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 text-emerald-200" />
+              <TrendingUp className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 text-[#99cbcf]" />
             </div>
           </div>
         </div>
@@ -746,7 +746,7 @@ const MentorDashboard: React.FC = () => {
             <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#111827' }}>
               Upcoming Sessions
               {upcoming.length > 0 && (
-                <span style={{ marginLeft: '10px', background: '#10b981', color: 'white', fontSize: '12px', padding: '2px 10px', borderRadius: '20px', fontWeight: '600' }}>
+                <span style={{ marginLeft: '10px', background: '#125B66', color: 'white', fontSize: '12px', padding: '2px 10px', borderRadius: '20px', fontWeight: '600' }}>
                   {upcoming.length}
                 </span>
               )}
@@ -771,7 +771,7 @@ const MentorDashboard: React.FC = () => {
               }}>
                 <div style={{
                   width: '48px', height: '48px', borderRadius: '50%',
-                  background: 'linear-gradient(135deg,#10b981,#059669)',
+                  background: 'linear-gradient(135deg,#125B66,#124666)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: 'white', fontWeight: '700', fontSize: '18px', flexShrink: 0,
                 }}>
@@ -796,8 +796,8 @@ const MentorDashboard: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
                   <span style={{
                     background: session.status === 'confirmed' ? '#f0fdf4' : '#fffbeb',
-                    color: session.status === 'confirmed' ? '#10b981' : '#f59e0b',
-                    border: `1px solid ${session.status === 'confirmed' ? '#6ee7b7' : '#fcd34d'}`,
+                    color: session.status === 'confirmed' ? '#125B66' : '#f59e0b',
+                    border: `1px solid ${session.status === 'confirmed' ? '#66b1b7' : '#fcd34d'}`,
                     padding: '3px 12px', borderRadius: '20px',
                     fontSize: '12px', fontWeight: '600',
                   }}>

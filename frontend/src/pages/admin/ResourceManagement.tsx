@@ -177,6 +177,7 @@ export const ResourceManagement: React.FC = () => {
         title="Resource Management" 
         subtitle="Manage templates, guides, tutorials, and other educational resources"
         variant="mixed"
+        backgroundImage="/resources.jpg"
       />
 
       <div className="space-y-6 px-4 sm:px-6 lg:px-8">
@@ -366,19 +367,19 @@ export const ResourceManagement: React.FC = () => {
               className="hover:shadow-lg transition-shadow"
             >
               <CardBody className="p-6">
-                <div className="flex flex-col items-center text-center gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                   {/* File Icon */}
                   <div
-                    className={`w-12 h-12 rounded-lg flex items-center justify-center ${getTypeColor(
-                      resource.type
+                    className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getTypeColor(
+                      resource.resource_type
                     )}`}
                   >
                     <TypeIcon className="w-6 h-6" />
                   </div>
 
                   {/* Content */}
-                  <div className="w-full">
-                    <div className="flex flex-wrap items-center justify-center gap-2 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
                       <h3 className="text-lg font-semibold text-neutral-900">
                         {resource.title}
                       </h3>
@@ -400,11 +401,11 @@ export const ResourceManagement: React.FC = () => {
                       </div>
                     </div>
 
-                    <p className="text-neutral-600 mb-3 mx-auto max-w-2xl">
+                    <p className="text-neutral-600 mb-3">
                       {resource.description}
                     </p>
 
-                    <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-neutral-500 mb-3">
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-500 mb-3">
                       <div className="flex items-center">
                         <User className="w-4 h-4 mr-1" />
                         {authorName(resource)}
@@ -412,7 +413,7 @@ export const ResourceManagement: React.FC = () => {
                       <div>Category: {resource.category?.name}</div>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm text-neutral-500">
+                    <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-neutral-500">
                       <div className="flex items-center">
                         <Download className="w-4 h-4 mr-1" />
                         {resource.download_count.toLocaleString()} downloads
@@ -429,7 +430,7 @@ export const ResourceManagement: React.FC = () => {
 
                     {/* Tags */}
                     {resource.tags.length > 0 && (
-                      <div className="flex flex-wrap justify-center gap-2 mt-3">
+                      <div className="flex flex-wrap gap-2 mt-3">
                         {resource.tags.map((tag, index) => (
                           <span
                             key={index}
@@ -443,12 +444,11 @@ export const ResourceManagement: React.FC = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex flex-wrap justify-center gap-2 w-full">
+                  <div className="flex sm:flex-col gap-2 flex-shrink-0">
                     {(resource.file || resource.external_url) && (
                       <Button
                         variant="secondary"
                         size="sm"
-                        className="w-full sm:w-auto"
                         onClick={() =>
                           window.open(
                             resource.file || resource.external_url,
@@ -461,7 +461,7 @@ export const ResourceManagement: React.FC = () => {
                       </Button>
                     )}
                     <Link to={`/admin/resources/${resource.id}/edit`}>
-                      <Button variant="secondary" size="sm" className="w-full sm:w-auto">
+                      <Button variant="secondary" size="sm">
                         <Edit className="w-4 h-4 mr-2" />
                         Edit
                       </Button>
@@ -469,7 +469,6 @@ export const ResourceManagement: React.FC = () => {
                     <Button
                       variant="secondary"
                       size="sm"
-                      className="w-full sm:w-auto"
                       onClick={() => handleDelete(resource)}
                     >
                       <Trash2 className="w-4 h-4 mr-2" />

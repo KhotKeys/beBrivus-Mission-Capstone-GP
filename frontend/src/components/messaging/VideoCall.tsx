@@ -176,7 +176,7 @@ export const VideoCall: React.FC<VideoCallProps> = ({
               </span>
             )}
             {callState.isConnected && (
-              <span className="text-green-400 text-sm">
+              <span className="text-[#125B66] text-sm">
                 {formatDuration(callState.duration)}
               </span>
             )}

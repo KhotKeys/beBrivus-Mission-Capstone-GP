@@ -74,7 +74,7 @@ export const MessagingWindow: React.FC<MessagingWindowProps> = ({
             </div>
             <div>
               <h2 className="font-semibold text-gray-900">{mentorName}</h2>
-              <span className="text-sm text-green-600">Online</span>
+              <span className="text-sm text-[#125B66]">Online</span>
             </div>
           </div>
           <div className="flex items-center space-x-2">

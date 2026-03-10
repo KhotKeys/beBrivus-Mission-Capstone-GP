@@ -33,7 +33,7 @@ export const Button: React.FC<ButtonProps> = ({
     secondary:
       "bg-gray-100 text-gray-900 hover:bg-gray-200 focus-visible:ring-gray-500",
     success:
-      "bg-green-600 text-white hover:bg-green-700 focus-visible:ring-green-500",
+      "bg-[#125B66] text-white hover:bg-[#124666] focus-visible:ring-[#125B66]",
     warning:
       "bg-yellow-600 text-white hover:bg-yellow-700 focus-visible:ring-yellow-500",
     error: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500",

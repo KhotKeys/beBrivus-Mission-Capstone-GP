@@ -502,7 +502,7 @@ export const HomePage: React.FC = () => {
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full border-2 border-white flex items-center justify-center text-white text-sm sm:text-base font-bold">
                       A
                     </div>
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full border-2 border-white flex items-center justify-center text-white text-sm sm:text-base font-bold">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#33979f] to-[#125B66] rounded-full border-2 border-white flex items-center justify-center text-white text-sm sm:text-base font-bold">
                       M
                     </div>
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full border-2 border-white flex items-center justify-center text-white text-sm sm:text-base font-bold">

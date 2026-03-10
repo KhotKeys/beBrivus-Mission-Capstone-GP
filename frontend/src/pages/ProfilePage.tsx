@@ -783,7 +783,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
   const getLevelColor = (level: string) => {
     const colors = {
       beginner: "bg-blue-100 text-blue-800",
-      intermediate: "bg-green-100 text-green-800",
+      intermediate: "bg-[#e6f2f3] text-[#09373f]",
       advanced: "bg-orange-100 text-orange-800",
       expert: "bg-purple-100 text-purple-800",
     };

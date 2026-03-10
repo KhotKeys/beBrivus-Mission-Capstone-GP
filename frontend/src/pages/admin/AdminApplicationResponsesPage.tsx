@@ -120,7 +120,7 @@ export const AdminApplicationResponsesPage: React.FC = () => {
       clicked: 'bg-blue-100 text-blue-800',
       under_review: 'bg-yellow-100 text-yellow-800',
       interview_scheduled: 'bg-purple-100 text-purple-800',
-      accepted: 'bg-green-100 text-green-800',
+      accepted: 'bg-[#e6f2f3] text-[#09373f]',
       rejected: 'bg-red-100 text-red-800',
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
@@ -133,6 +133,7 @@ export const AdminApplicationResponsesPage: React.FC = () => {
         subtitle="Review and manage applications for your opportunities"
         badge={applications.length}
         variant="rounded"
+        backgroundImage="/application-responses.png"
       />
 
       <div className="p-4 sm:p-6 lg:p-8">
@@ -221,7 +222,7 @@ export const AdminApplicationResponsesPage: React.FC = () => {
                         {new Date(app.submitted_at).toLocaleDateString()}
                       </span>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        app.opportunity_data?.application_type === 'internal' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                        app.opportunity_data?.application_type === 'internal' ? 'bg-[#e6f2f3] text-[#09373f]' : 'bg-blue-100 text-blue-800'
                       }`}>
                         {app.opportunity_data?.application_type === 'internal' ? 'Internal' : 'External'}
                       </span>
@@ -258,9 +259,9 @@ export const AdminApplicationResponsesPage: React.FC = () => {
           {visibleCount < filteredApps.length ? (
             <button onClick={handleShowMore}
               style={{
-                color: '#10B981',
+                color: '#125B66',
                 background: 'none',
-                border: '1px solid #10B981',
+                border: '1px solid #125B66',
                 borderRadius: '8px',
                 padding: '8px 20px',
                 cursor: 'pointer',
@@ -483,7 +484,7 @@ export const AdminApplicationResponsesPage: React.FC = () => {
                   <button
                     onClick={() => updateStatusMutation.mutate({ id: selectedApp.id, status: 'accepted', feedback })}
                     disabled={updateStatusMutation.isPending}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-[#125B66] text-white rounded-lg hover:bg-[#124666] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
                     <CheckCircle className="w-4 h-4" />
                     Accept

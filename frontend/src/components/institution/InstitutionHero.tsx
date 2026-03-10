@@ -36,7 +36,7 @@ export const InstitutionHero: React.FC<InstitutionHeroProps> = ({ title, subtitl
         <div 
           className="absolute top-0 right-0 w-1/3 h-full opacity-90"
           style={{
-            background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+            background: 'linear-gradient(135deg, #124666 0%, #125B66 100%)',
             transform: 'skewX(-15deg) translateX(20%)',
             boxShadow: '-10px 0 30px rgba(5, 150, 105, 0.3)',
             filter: 'blur(0.5px)',
@@ -74,7 +74,7 @@ export const InstitutionHero: React.FC<InstitutionHeroProps> = ({ title, subtitl
         <h1 className="text-lg sm:text-2xl md:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg leading-tight">
           {title}
           {badge !== undefined && (
-            <span className="ml-2 sm:ml-3 inline-block bg-emerald-500 text-white rounded-lg sm:rounded-xl px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm font-semibold">
+            <span className="ml-2 sm:ml-3 inline-block bg-[#125B66] text-white rounded-lg sm:rounded-xl px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm font-semibold">
               {badge}
             </span>
           )}

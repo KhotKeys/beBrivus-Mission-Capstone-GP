@@ -5,9 +5,10 @@ interface AdminHeroProps {
   subtitle: string;
   badge?: string | number;
   variant?: 'default' | 'rounded' | 'wave' | 'sharp' | 'mixed';
+  backgroundImage?: string;
 }
 
-export const AdminHero: React.FC<AdminHeroProps> = ({ title, subtitle, badge, variant = 'default' }) => {
+export const AdminHero: React.FC<AdminHeroProps> = ({ title, subtitle, badge, variant = 'default', backgroundImage }) => {
   const borderStyles = {
     default: 'rounded-b-3xl',
     rounded: 'rounded-b-[40px]',
@@ -18,8 +19,26 @@ export const AdminHero: React.FC<AdminHeroProps> = ({ title, subtitle, badge, va
 
   return (
     <div className={`relative h-40 sm:h-48 mb-6 overflow-hidden ${borderStyles[variant]}`}>
-      {/* Animated Background Pattern with Blur */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a8a] via-[#1e40af] to-[#2563eb] backdrop-blur-sm">
+      {/* Preload background image */}
+      {backgroundImage && (
+        <link rel="preload" as="image" href={backgroundImage} />
+      )}
+      
+      {/* Background Image or Gradient */}
+      <div 
+        className={`absolute inset-0 ${!backgroundImage ? 'bg-gradient-to-br from-[#1e3a8a] via-[#1e40af] to-[#2563eb]' : ''}`}
+        style={backgroundImage ? {
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundColor: 'transparent',
+        } : {}}
+      >
+        {/* Overlay for text readability */}
+        <div className="absolute inset-0 bg-black/40" />
+        {!backgroundImage && (
+          <>
         {/* Slanted Lines Pattern */}
         <svg className="absolute inset-0 w-full h-full opacity-80" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -74,6 +93,8 @@ export const AdminHero: React.FC<AdminHeroProps> = ({ title, subtitle, badge, va
             filter: 'blur(0.4px)',
           }}
         />
+          </>
+        )}
       </div>
 
       {/* Content */}
@@ -81,7 +102,7 @@ export const AdminHero: React.FC<AdminHeroProps> = ({ title, subtitle, badge, va
         <h1 className="text-lg sm:text-2xl md:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg leading-tight">
           {title}
           {badge !== undefined && (
-            <span className="ml-2 sm:ml-3 inline-block bg-emerald-500 text-white rounded-lg sm:rounded-xl px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm font-semibold">
+            <span className="ml-2 sm:ml-3 inline-block bg-[#125B66] text-white rounded-lg sm:rounded-xl px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm font-semibold">
               {badge}
             </span>
           )}

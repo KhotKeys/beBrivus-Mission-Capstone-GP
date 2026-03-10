@@ -46,7 +46,7 @@ const AdminAnalyticsPage = () => {
 
   // Color map for insight types
   const insightColors = {
-    positive: { bg: '#f0fdf4', border: '#10B981', icon: '✅' },
+    positive: { bg: '#e6f2f3', border: '#125B66', icon: '✅' },
     warning: { bg: '#fefce8', border: '#f59e0b', icon: '⚠️' },
     neutral: { bg: '#eff6ff', border: '#3b82f6', icon: '💡' },
   };
@@ -57,6 +57,7 @@ const AdminAnalyticsPage = () => {
         title="Analytics Dashboard" 
         subtitle={`Real-time platform data • Auto-refreshes every 60s${analytics?.generated_at ? ' • Last updated: ' + new Date(analytics.generated_at).toLocaleTimeString() : ''}`}
         variant="sharp"
+        backgroundImage="/analytics.png"
       />
 
       <div style={{ padding: '16px 20px', maxWidth: '1400px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
@@ -84,7 +85,7 @@ const AdminAnalyticsPage = () => {
           <button
             onClick={getAIInsights}
             disabled={loadingInsights || !analytics}
-            style={{ padding: '8px 12px', borderRadius: '8px', border: 'none', background: '#10B981', color: 'white', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
+            style={{ padding: '8px 12px', borderRadius: '8px', border: 'none', background: '#125B66', color: 'white', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
           >
             {loadingInsights ? '🤖 Analysing...' : '🤖 Get AI Insights'}
           </button>
@@ -107,9 +108,9 @@ const AdminAnalyticsPage = () => {
       <div className="analytics-metrics" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '20px', justifyItems: 'center' }}>
         {[
           { label: 'Total Users', value: analytics?.total_users || 0, sub: `+${analytics?.new_users_period || 0} this period`, icon: '👥', color: '#3b82f6' },
-          { label: 'Active Users', value: analytics?.active_users || 0, sub: 'logged in this period', icon: '🟢', color: '#10B981' },
+          { label: 'Active Users', value: analytics?.active_users || 0, sub: 'logged in this period', icon: '🟢', color: '#125B66' },
           { label: 'Total Applications', value: analytics?.total_applications || 0, sub: `+${analytics?.applications_period || 0} this period`, icon: '📋', color: '#8b5cf6' },
-          { label: 'Accepted', value: analytics?.application_status?.accepted || 0, sub: `${analytics?.total_applications ? Math.round((analytics.application_status.accepted / analytics.total_applications) * 100) : 0}% acceptance rate`, icon: '✅', color: '#10B981' },
+          { label: 'Accepted', value: analytics?.application_status?.accepted || 0, sub: `${analytics?.total_applications ? Math.round((analytics.application_status.accepted / analytics.total_applications) * 100) : 0}% acceptance rate`, icon: '✅', color: '#125B66' },
           { label: 'Opportunities', value: analytics?.total_opportunities || 0, sub: `${analytics?.active_opportunities || 0} active`, icon: '🎯', color: '#f59e0b' },
           { label: 'Forum Discussions', value: analytics?.total_discussions || 0, sub: `+${analytics?.new_discussions_period || 0} this period`, icon: '💬', color: '#ec4899' },
           { label: 'Mentor Bookings', value: analytics?.total_bookings || 0, sub: `${analytics?.confirmed_bookings || 0} confirmed • ${analytics?.pending_bookings || 0} pending`, icon: '📅', color: '#06b6d4' },
@@ -146,7 +147,7 @@ const AdminAnalyticsPage = () => {
                     {colors.icon} {insight.title}
                   </div>
                   <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#374151' }}>{insight.insight}</p>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#10B981', fontWeight: '500' }}>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#125B66', fontWeight: '500' }}>
                     → {insight.recommendation}
                   </p>
                 </div>
@@ -167,7 +168,7 @@ const AdminAnalyticsPage = () => {
               pending: '#f59e0b',
               under_review: '#3b82f6',
               interview_scheduled: '#8b5cf6',
-              accepted: '#10B981',
+              accepted: '#125B66',
               rejected: '#ef4444',
             };
             return (
@@ -222,7 +223,7 @@ const AdminAnalyticsPage = () => {
               <tr key={i} style={{ borderBottom: '1px solid #f3f4f6' }}>
                 <td style={{ padding: '10px 8px', fontSize: '14px', fontWeight: '500' }}>{opp.opportunity__title}</td>
                 <td style={{ padding: '10px 8px', fontSize: '13px', color: '#6b7280' }}>{opp.opportunity__organization}</td>
-                <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: '700', color: '#10B981' }}>{opp.application_count}</td>
+                <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: '700', color: '#125B66' }}>{opp.application_count}</td>
               </tr>
             ))}
             {(!analytics?.top_opportunities || analytics.top_opportunities.length === 0) && (
@@ -243,7 +244,7 @@ const AdminAnalyticsPage = () => {
             return (
               <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                 <span style={{ fontSize: '11px', fontWeight: '700', color: '#374151' }}>{day.count}</span>
-                <div style={{ width: '100%', height: `${height}px`, background: '#10B981', borderRadius: '4px 4px 0 0', transition: 'height 0.5s' }} />
+                <div style={{ width: '100%', height: `${height}px`, background: '#125B66', borderRadius: '4px 4px 0 0', transition: 'height 0.5s' }} />
                 <span style={{ fontSize: '10px', color: '#9ca3af' }}>
                   {new Date(day.date).toLocaleDateString('en', { weekday: 'short' })}
                 </span>

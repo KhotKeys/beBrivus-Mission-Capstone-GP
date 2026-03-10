@@ -182,7 +182,7 @@ export const ApplicationFormPage: React.FC = () => {
                   value={formData.full_name}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="John Doe"
+                  placeholder="Khot Gabriel"
                   required
                 />
               </div>
@@ -198,7 +198,7 @@ export const ApplicationFormPage: React.FC = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="john@example.com"
+                  placeholder="khotgabriel@example.com"
                   required
                 />
               </div>
@@ -453,7 +453,7 @@ export const ApplicationFormPage: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: '12px 20px',
-                background: submitMutation.isPending ? '#9CA3AF' : '#10B981',
+                background: submitMutation.isPending ? '#9CA3AF' : '#125B66',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',

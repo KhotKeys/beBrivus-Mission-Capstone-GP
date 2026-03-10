@@ -118,7 +118,7 @@ export const AdminLayout: React.FC = () => {
       case 'moderation': return <AlertTriangle className="w-4 h-4 text-red-500" />;
       case 'booking': return <Calendar className="w-4 h-4 text-blue-500" />;
       case 'ai_coach': return <Bot className="w-4 h-4 text-purple-500" />;
-      case 'user_registration': return <UserPlus className="w-4 h-4 text-green-500" />;
+      case 'user_registration': return <UserPlus className="w-4 h-4 text-[#125B66]" />;
       case 'application': return <FileCheck className="w-4 h-4 text-orange-500" />;
       default: return <Bell className="w-4 h-4 text-gray-500" />;
     }

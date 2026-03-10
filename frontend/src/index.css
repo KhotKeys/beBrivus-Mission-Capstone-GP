@@ -12,17 +12,17 @@
 
   /* Color Palette */
 
-  /* Primary – Emerald Green */
-  --color-primary-50: #ecfdf5;
-  --color-primary-100: #d1fae5;
-  --color-primary-200: #a7f3d0;
-  --color-primary-300: #6ee7b7;
-  --color-primary-400: #34d399;
-  --color-primary-500: #10b981; /* Main emerald */
-  --color-primary-600: #059669;
-  --color-primary-700: #047857;
-  --color-primary-800: #065f46;
-  --color-primary-900: #064e3b;
+  /* Primary – Brand Teal */
+  --color-primary-50: #e6f2f3;
+  --color-primary-100: #cce5e7;
+  --color-primary-200: #99cbcf;
+  --color-primary-300: #66b1b7;
+  --color-primary-400: #33979f;
+  --color-primary-500: #125B66; /* Main brand teal */
+  --color-primary-600: #0f4f59;
+  --color-primary-700: #0c434c;
+  --color-primary-800: #09373f;
+  --color-primary-900: #062b32;
 
   /* Secondary – Indigo/Teal */
   --color-secondary-50: #f3f6fb;
@@ -36,17 +36,17 @@
   --color-secondary-800: #1a2255;
   --color-secondary-900: #141a40;
 
-  /* Success – Emerald Green */
-  --color-success-50: #ecfdf5;
-  --color-success-100: #d1fae5;
-  --color-success-200: #a7f3d0;
-  --color-success-300: #6ee7b7;
-  --color-success-400: #34d399;
-  --color-success-500: #10b981; /* Main success green */
-  --color-success-600: #059669;
-  --color-success-700: #047857;
-  --color-success-800: #065f46;
-  --color-success-900: #064e3b;
+  /* Success – Brand Teal */
+  --color-success-50: #e6f2f3;
+  --color-success-100: #cce5e7;
+  --color-success-200: #99cbcf;
+  --color-success-300: #66b1b7;
+  --color-success-400: #33979f;
+  --color-success-500: #125B66; /* Main success teal */
+  --color-success-600: #0f4f59;
+  --color-success-700: #0c434c;
+  --color-success-800: #09373f;
+  --color-success-900: #062b32;
 
   /* Warning – Gold */
   --color-warning-50: #fefce8;

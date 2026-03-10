@@ -19,7 +19,37 @@ Core product goals:
 - Provide practical support through mentorship, resources, and AI guidance.
 - Ensure broad accessibility through multilingual and offline-capable experience.
 
-## 2. Core Capabilities
+## 2. Demo & Design
+
+### Live Demo
+- **Application URL**: [https://bebrivus.example.com](https://bebrivus.example.com)
+- **Demo Credentials**: Available upon request
+
+### Design Assets
+- **Figma Design**: [View Complete Design System](https://www.figma.com/your-design-link)
+- **Design Includes**:
+  - Student dashboard wireframes
+  - Institution portal layouts
+  - Admin panel interface designs
+  - Mobile responsive views
+  - Component library and design tokens
+  - User flow diagrams
+
+### Screenshots
+
+**Student Dashboard**
+![Student Dashboard](frontend/public/student-dashboard.png)
+
+**Admin Panel**
+![Admin Panel](frontend/public/user-management.jpg)
+
+**Opportunity Management**
+![Opportunity Management](frontend/public/opportunitry-management.png)
+
+**Analytics Dashboard**
+![Analytics](frontend/public/analytics.png)
+
+## 3. Core Capabilities
 
 ### Student Experience
 
@@ -45,7 +75,7 @@ Core product goals:
 - Oversight of opportunities and resources.
 - Platform analytics and operational visibility.
 
-## 3. Architecture
+## 4. Architecture
 
 High-level architecture:
 
@@ -85,7 +115,7 @@ beBrivus-Mission-Capstone/
   README.md
 ```
 
-## 4. Technology Stack
+## 5. Technology Stack
 
 Frontend:
 
@@ -106,7 +136,7 @@ Backend:
 - Django Simple JWT
 - Google Gemini integration (AI services)
 
-## 5. Local Development Setup
+## 6. Local Development Setup
 
 ### Prerequisites
 
@@ -150,7 +180,7 @@ cd backend
 celery -A core worker --loglevel=info
 ```
 
-## 6. Environment Configuration
+## 7. Environment Configuration
 
 Create `backend/.env` and set values like the following:
 
@@ -181,15 +211,15 @@ Optional frontend `.env`:
 VITE_API_BASE_URL=http://localhost:8001/api
 ```
 
-## 7. Localization and Accessibility
+## 8. Localization and Accessibility
 
 The platform includes multilingual support for major African language contexts and international usage. Language state is persisted on the client, and UI rendering includes support for language-specific layout behavior where required.
 
-## 8. Offline and PWA Behavior
+## 9. Offline and PWA Behavior
 
 The frontend includes progressive web app support with caching and offline-oriented behavior for selected assets and previously loaded content.
 
-## 9. Testing and Quality Checks
+## 10. Testing and Quality Checks
 
 Backend checks:
 
@@ -207,7 +237,7 @@ npm run lint
 npm run build
 ```
 
-## 10. API Surface (Summary)
+## 11. API Surface (Summary)
 
 The backend exposes REST endpoints under `/api/` for:
 
@@ -220,7 +250,7 @@ The backend exposes REST endpoints under `/api/` for:
 
 Refer to app-specific views/serializers in `backend/apps/` for implementation-level endpoint details.
 
-## 11. Deployment Notes
+## 12. Deployment Notes
 
 The repository contains deployment-oriented assets and scripts (for example service files and compose configuration) to support server-based deployments.
 
@@ -232,16 +262,16 @@ Minimum production recommendations:
 - configure strict host/CORS policies
 - run asynchronous workers and Redis in managed services where possible
 
-## 12. Security Guidance
+## 13. Security Guidance
 
 - Do not commit runtime secrets (`.env`, app passwords, API keys, production credentials).
 - Keep sensitive files ignored in `.gitignore`.
 - If a secret is exposed, rotate it immediately and remove it from repository history if necessary.
 
-## 13. License
+## 14. License
 
 This project is licensed under the MIT License.
 
-## 14. Maintainers
+## 15. Maintainers
 
 Project ownership and contributor details can be maintained in this section as the team evolves.

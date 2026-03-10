@@ -27,7 +27,6 @@ import {
   Star,
   Edit2,
   Trash2,
-  Check,
 } from "lucide-react";
 
 interface ChatMessage {
@@ -69,7 +68,7 @@ export const AICoachPage: React.FC = () => {
   const [renameValue, setRenameValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const renameInputRef = useRef<HTMLInputElement>(null);
+  const renameInputRef = useRef<HTMLInputElement | null>(null);
 
   // Fetch chat sessions
   const { data: sessions = [] } = useQuery<ChatSession[]>({
@@ -767,7 +766,7 @@ interface ChatSessionItemProps {
   onRenameCancel: () => void;
   onRenameChange: (value: string) => void;
   onDelete: (session: ChatSession, e: React.MouseEvent) => void;
-  renameInputRef: React.RefObject<HTMLInputElement>;
+  renameInputRef: React.RefObject<HTMLInputElement | null>;
   formatDate: (date: string) => string;
 }
 

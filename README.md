@@ -22,11 +22,11 @@ Core product goals:
 ## 2. Demo & Design
 
 ### Live Demo
-- **Application URL**: [https://bebrivus.example.com]([https://bebrivus.example.com](https://drive.google.com/file/d/1tFjFcZb7105Kh40Zw3N0b-ui1YCL1yYW/view))
+- **Application URL**: [[https://bebrivus.example.com](https://drive.google.com/file/d/1tFjFcZb7105Kh40Zw3N0b-ui1YCL1yYW/view)]
 - **Demo Credentials**: Available upon request
 
 ### Design Assets
-- **Figma Design**: [View Complete Design System]([https://www.figma.com/your-design-link](https://www.figma.com/design/CNoGWFBj59n4JHGY4oVd0X/beBrivus-Capstone-Figma-Design?node-id=4567-271&p=f))
+- **Figma Design**: [[https://www.figma.com/your-design-link](https://www.figma.com/design/CNoGWFBj59n4JHGY4oVd0X/beBrivus-Capstone-Figma-Design?node-id=4567-271&p=f)]
 - **Design Includes**:
   - Student dashboard wireframes
   - Institution portal layouts

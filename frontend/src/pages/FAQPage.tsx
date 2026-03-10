@@ -11,7 +11,7 @@ export const FAQPage: React.FC = () => {
       questions: [
         {
           q: "What is beBrivus?",
-          a: "beBrivus is a comprehensive platform that helps students discover and apply for scholarships, internships, and fellowship opportunities worldwide. We provide AI-powered recommendations, expert mentorship, application tracking, and community support to maximize your chances of success."
+          a: "beBrivus is a comprehensive platform that empowers talented refugees, internally displaced persons (IDPs), and underserved African students to discover and apply for scholarships, internships, and fellowship opportunities worldwide. We provide AI-powered recommendations, expert mentorship, application tracking, and community support to maximize your chances of success and break barriers to educational advancement."
         },
         {
           q: "How do I create an account?",

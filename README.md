@@ -26,7 +26,7 @@ Core product goals:
 - **Demo Credentials**: Available upon request
 
 ### Design Assets
-- **Figma Design**: [[https://www.figma.com/your-design-link](https://www.figma.com/design/CNoGWFBj59n4JHGY4oVd0X/beBrivus-Capstone-Figma-Design?node-id=4567-271&p=f)]
+- **Figma Design**: [[https://www.figma.com/[your-design-link](https://www.figma.com/design/CNoGWFBj59n4JHGY4oVd0X/beBrivus-Capstone-Figma-Design?node-id=4567-271&p=f)]]
 - **Design Includes**:
   - Student dashboard wireframes
   - Institution portal layouts

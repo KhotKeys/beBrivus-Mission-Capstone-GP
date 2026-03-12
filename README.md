@@ -38,16 +38,16 @@ Core product goals:
 ### Screenshots
 
 **Student Dashboard**
-![Student Dashboard](frontend/public/student-dashboard.png)
+![Student Dashboard](frontend/public/user-dashboard.png)
 
 **Admin Panel**
-![Admin Panel](frontend/public/user-management.jpg)
+![Admin Panel](frontend/public/admin-opportunity.png)
 
 **Opportunity Management**
-![Opportunity Management](frontend/public/opportunitry-management.png)
+![Opportunity Management](frontend/public/opportunities-site.png)
 
 **Analytics Dashboard**
-![Analytics](frontend/public/analytics.png)
+![Analytics](frontend/public/analytics-dashboard.png)
 
 ## 3. Core Capabilities
 

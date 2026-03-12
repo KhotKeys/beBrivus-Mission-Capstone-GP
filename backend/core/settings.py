@@ -232,7 +232,7 @@ CONTACT_EMAIL = config('CONTACT_EMAIL', default='support@bebrivus.com')
 ADMIN_EMAIL_RECIPIENTS = config('ADMIN_EMAIL_RECIPIENTS', cast=lambda v: [e.strip() for e in v.split(',')] if v else [], default='ethxkeys@gmail.com')
 
 # Frontend URL for password reset links
-FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
+FRONTEND_URL = config('FRONTEND_URL', default='https://bebrivus.com')
 FRONTEND_LOGIN_URL = config('FRONTEND_LOGIN_URL', default=f"{FRONTEND_URL}/login")
 
 # Logging Configuration

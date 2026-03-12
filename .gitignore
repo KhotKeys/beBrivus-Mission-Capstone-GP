@@ -60,5 +60,7 @@ build/
 .env.production
 backend/.env
 backend/logs/
-backend/db.sqlite3
 backend/media/
+
+# Keep local secrets out of git, but allow the backend SQLite database to be tracked.
+!backend/db.sqlite3

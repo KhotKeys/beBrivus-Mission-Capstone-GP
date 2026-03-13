@@ -234,6 +234,7 @@ ADMIN_EMAIL_RECIPIENTS = config('ADMIN_EMAIL_RECIPIENTS', cast=lambda v: [e.stri
 # Frontend URL for password reset links
 FRONTEND_URL = config('FRONTEND_URL', default='https://bebrivus.com')
 FRONTEND_LOGIN_URL = config('FRONTEND_LOGIN_URL', default=f"{FRONTEND_URL}/login")
+FRONTEND_ADMIN_LOGIN_URL = config('FRONTEND_ADMIN_LOGIN_URL', default=f"{FRONTEND_URL}/admin/login")
 
 # Logging Configuration
 LOGGING = {

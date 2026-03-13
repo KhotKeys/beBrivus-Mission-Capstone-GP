@@ -948,6 +948,7 @@ class MentorDashboardViewSet(viewsets.GenericViewSet):
             duration = int((session.scheduled_end - session.scheduled_start).total_seconds() / 60)
             topic = session.notes or 'General Mentorship'
             login_url = getattr(settings, 'FRONTEND_LOGIN_URL', 'https://bebrivus.com/login')
+            admin_login_url = getattr(settings, 'FRONTEND_ADMIN_LOGIN_URL', 'https://bebrivus.com/admin/login')
             meeting_link_html = f'<a href="{meeting_link}" style="color:#10b981;">{meeting_link}</a>' if meeting_link else 'To be provided by mentor'
             
             # ── EMAIL A — Student confirmation ──────────────────────────
@@ -1048,7 +1049,7 @@ class MentorDashboardViewSet(viewsets.GenericViewSet):
       <p style="margin:0;"><strong>Topic:</strong> {topic}</p>
     </div>
     <div style="text-align:center;">
-            <a href="{login_url}"
+            <a href="{admin_login_url}"
          style="background:#6366f1;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;">
         View in Admin Panel
       </a>

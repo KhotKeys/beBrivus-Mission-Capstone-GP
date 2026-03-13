@@ -30,7 +30,9 @@ def send_invitation_email(user, password):
     Send invitation email to user asynchronously
     """
     try:
-        login_url = getattr(settings, 'FRONTEND_LOGIN_URL', 'https://bebrivus.com/login')
+        user_login_url = getattr(settings, 'FRONTEND_LOGIN_URL', 'https://bebrivus.com/login')
+        admin_login_url = getattr(settings, 'FRONTEND_ADMIN_LOGIN_URL', 'https://bebrivus.com/admin/login')
+        login_url = admin_login_url if getattr(user, 'user_type', '') == 'admin' else user_login_url
         frontend_url = getattr(settings, 'FRONTEND_URL', 'https://bebrivus.com')
         logo_url = f"{frontend_url}/beBivus.png"
         

@@ -54,6 +54,7 @@ def send_all_booking_emails(booking, student, mentor_obj, session_date, start_ti
 
     session_type_display = session_type.replace('_', ' ').title()
     login_url = getattr(settings, 'FRONTEND_LOGIN_URL', 'https://bebrivus.com/login')
+    admin_login_url = getattr(settings, 'FRONTEND_ADMIN_LOGIN_URL', 'https://bebrivus.com/admin/login')
 
     def build_email_html(recipient_type, recipient_name, student_name, mentor_name):
         if recipient_type == 'student':
@@ -74,6 +75,7 @@ def send_all_booking_emails(booking, student, mentor_obj, session_date, start_ti
             greeting = 'Hello Admin,'
             message = f'A new mentorship session has been booked between <strong>{student_name}</strong> and <strong>{mentor_name}</strong>.'
             cta_text = 'View in Admin Panel'
+        cta_url = admin_login_url if recipient_type == 'admin' else login_url
 
         return f"""
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
@@ -98,7 +100,7 @@ def send_all_booking_emails(booking, student, mentor_obj, session_date, start_ti
               </table>
             </div>
             <div style="text-align:center;margin:20px 0;">
-                            <a href="{login_url}"
+                                                        <a href="{cta_url}"
                  style="background:{color};color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;">
                 {cta_text}
               </a>

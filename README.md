@@ -56,11 +56,13 @@ Core product goals:
 - Opportunity discovery with search and filtering.
 - Personal application tracking and progress monitoring.
 - Self-service account deletion from profile settings with confirmation and secure sign-out flow.
+- Feedback form submission with acknowledgment and support follow-up workflow.
 - Mentor discovery, booking, and communication.
 - Community forum participation.
 - Resource library access.
 - AI-assisted support for guidance and moderation-related features.
 - Notification-driven reminders and updates.
+- Access to Privacy Policy, Terms of Service, Cookie Policy, and Accessibility pages.
 
 ### Institution Experience
 
@@ -75,6 +77,7 @@ Core product goals:
 - Forum and content moderation.
 - Oversight of opportunities and resources.
 - Platform analytics and operational visibility.
+- Feedback intake/review workflows and response tracking for user-submitted issues.
 
 ## 4. Architecture
 

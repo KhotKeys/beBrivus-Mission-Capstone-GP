@@ -31,7 +31,7 @@ export const CookiePolicyPage: React.FC = () => {
             {/* Introduction */}
             <section>
               <p className="text-[10px] xs:text-xs sm:text-sm md:text-base text-secondary-700 leading-relaxed">
-                This Cookie Policy explains how beBrivus uses cookies and similar tracking technologies when you visit our platform. By using beBrivus, you consent to the use of cookies as described in this policy.
+                This Cookie Policy explains how beBrivus uses cookies and browser storage technologies when you visit our platform. By using beBrivus, you consent to the use of these technologies as described in this policy.
               </p>
             </section>
 
@@ -57,14 +57,14 @@ export const CookiePolicyPage: React.FC = () => {
               </div>
             </section>
 
-            {/* Types of Cookies We Use */}
+            {/* What We Actually Use */}
             <section>
               <h2 className="text-2xl font-bold text-secondary-900 mb-6">
-                Types of Cookies We Use
+                What We Actually Use
               </h2>
               
               <div className="space-y-6">
-                {/* Essential Cookies */}
+                {/* Essential Session Cookies */}
                 <div className="bg-success-50 border-l-4 border-success-500 p-6 rounded-lg">
                   <div className="flex items-start">
                     <div className="w-10 h-10 bg-success-500 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
@@ -72,16 +72,16 @@ export const CookiePolicyPage: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="text-xl font-semibold text-success-900 mb-2">
-                        1. Essential Cookies (Required)
+                        1. Essential Session Cookies (Required)
                       </h3>
                       <p className="text-success-800 mb-3">
-                        These cookies are necessary for the platform to function and cannot be disabled. They enable core functionality such as:
+                        Our Django backend automatically sets session cookies that are necessary for the platform to function. These cookies:
                       </p>
                       <ul className="list-disc list-inside space-y-1 text-success-800">
-                        <li>User authentication and login sessions</li>
-                        <li>Security and fraud prevention</li>
-                        <li>Load balancing and platform performance</li>
-                        <li>Remember your cookie preferences</li>
+                        <li>Maintain your login session on the server side</li>
+                        <li>Enable security features and CSRF protection</li>
+                        <li>Are deleted when you close your browser (session cookies)</li>
+                        <li>Cannot be disabled as they are required for core functionality</li>
                       </ul>
                       <div className="mt-3 inline-flex items-center text-success-700 font-semibold">
                         <CheckCircle className="w-4 h-4 mr-2" />
@@ -91,7 +91,7 @@ export const CookiePolicyPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Functional Cookies */}
+                {/* Browser Local Storage */}
                 <div className="bg-primary-50 border-l-4 border-primary-500 p-6 rounded-lg">
                   <div className="flex items-start">
                     <div className="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
@@ -99,133 +99,79 @@ export const CookiePolicyPage: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="text-xl font-semibold text-primary-900 mb-2">
-                        2. Functional Cookies (Optional)
+                        2. Browser Local Storage (Not Cookies)
                       </h3>
                       <p className="text-primary-800 mb-3">
-                        These cookies enhance your experience by remembering your preferences and settings:
+                        We use your browser's localStorage (NOT cookies) to store:
                       </p>
                       <ul className="list-disc list-inside space-y-1 text-primary-800">
-                        <li>Language and region preferences</li>
-                        <li>Display settings and customization</li>
-                        <li>Filter and search preferences</li>
-                        <li>Recently viewed opportunities</li>
-                        <li>Notification preferences</li>
+                        <li><strong>Authentication tokens:</strong> JWT access and refresh tokens for keeping you logged in</li>
+                        <li><strong>User profile data:</strong> Cached copy of your profile information for faster loading</li>
+                        <li><strong>Language preference:</strong> Your selected language (stored as 'bebrivus_language')</li>
+                        <li><strong>Analytics data:</strong> Registration and resource upload tracking</li>
                       </ul>
-                      <div className="mt-3 inline-flex items-center text-primary-700 font-semibold">
-                        <Settings className="w-4 h-4 mr-2" />
-                        Can be managed in settings
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Analytics Cookies */}
-                <div className="bg-secondary-50 border-l-4 border-secondary-500 p-6 rounded-lg">
-                  <div className="flex items-start">
-                    <div className="w-10 h-10 bg-secondary-500 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
-                      <BarChart3 className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-semibold text-secondary-900 mb-2">
-                        3. Analytics and Performance Cookies (Optional)
-                      </h3>
-                      <p className="text-secondary-800 mb-3">
-                        These cookies help us understand how users interact with our platform and identify areas for improvement:
-                      </p>
-                      <ul className="list-disc list-inside space-y-1 text-secondary-800">
-                        <li>Page views and navigation patterns</li>
-                        <li>Time spent on pages and features</li>
-                        <li>Click tracking and user behavior analysis</li>
-                        <li>Error reporting and debugging</li>
-                        <li>Performance metrics and load times</li>
-                      </ul>
-                      <div className="mt-3 space-y-1">
-                        <p className="text-secondary-700 font-semibold">
-                          Third-party analytics providers we use:
+                      <div className="mt-3 bg-primary-100 p-3 rounded">
+                        <p className="text-primary-900 text-sm font-semibold mb-1">Important Note:</p>
+                        <p className="text-primary-800 text-sm">
+                          localStorage is different from cookies. It persists until you manually clear your browser data or log out. You can clear it through your browser settings.
                         </p>
-                        <ul className="list-disc list-inside text-secondary-700">
-                          <li>Google Analytics</li>
-                          <li>Mixpanel</li>
-                          <li>Hotjar</li>
-                        </ul>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Marketing Cookies */}
-                <div className="bg-warning-50 border-l-4 border-warning-500 p-6 rounded-lg">
+                {/* What We DON'T Use */}
+                <div className="bg-neutral-50 border-l-4 border-neutral-500 p-6 rounded-lg">
                   <div className="flex items-start">
-                    <div className="w-10 h-10 bg-warning-500 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
+                    <div className="w-10 h-10 bg-neutral-500 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
                       <Eye className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold text-warning-900 mb-2">
-                        4. Marketing and Targeting Cookies (Optional)
+                      <h3 className="text-xl font-semibold text-neutral-900 mb-2">
+                        3. What We DON'T Use
                       </h3>
-                      <p className="text-warning-800 mb-3">
-                        These cookies track your browsing activity to deliver personalized content and advertisements:
+                      <p className="text-neutral-800 mb-3">
+                        To be completely transparent, we do NOT currently use:
                       </p>
-                      <ul className="list-disc list-inside space-y-1 text-warning-800">
-                        <li>Personalized opportunity recommendations</li>
-                        <li>Retargeting and remarketing campaigns</li>
-                        <li>Social media integration and sharing</li>
-                        <li>Conversion tracking</li>
-                        <li>Email campaign effectiveness</li>
+                      <ul className="list-disc list-inside space-y-1 text-neutral-800">
+                        <li>❌ Google Analytics or any analytics cookies</li>
+                        <li>❌ Mixpanel, Hotjar, or similar tracking tools</li>
+                        <li>❌ Facebook Pixel, Google Ads, or marketing cookies</li>
+                        <li>❌ LinkedIn Insight Tag or social media tracking</li>
+                        <li>❌ Third-party advertising or retargeting cookies</li>
+                        <li>❌ Web beacons or tracking pixels</li>
+                        <li>❌ Device fingerprinting</li>
+                        <li>❌ Session replay tools</li>
                       </ul>
-                      <div className="mt-3 space-y-1">
-                        <p className="text-warning-700 font-semibold">
-                          Third-party advertising partners:
-                        </p>
-                        <ul className="list-disc list-inside text-warning-700">
-                          <li>Google Ads</li>
-                          <li>Facebook Pixel</li>
-                          <li>LinkedIn Insight Tag</li>
-                        </ul>
-                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* Other Tracking Technologies */}
+            {/* IP Address and User Agent Collection */}
             <section>
               <h2 className="text-2xl font-bold text-secondary-900 mb-4">
-                Other Tracking Technologies
+                IP Address and Browser Information
               </h2>
               
               <div className="space-y-4">
                 <p className="text-secondary-700">
-                  In addition to cookies, we may use other tracking technologies:
+                  For security and analytics purposes, we collect:
                 </p>
 
                 <div className="space-y-3">
                   <div className="bg-neutral-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-secondary-900 mb-2">Web Beacons (Pixels)</h3>
+                    <h3 className="font-semibold text-secondary-900 mb-2">IP Addresses</h3>
                     <p className="text-secondary-700">
-                      Small transparent image files embedded in web pages and emails to track page views, email opens, and user engagement.
+                      We collect your IP address when you view forum discussions, opportunities, and resources. This helps us prevent abuse and understand geographic usage patterns.
                     </p>
                   </div>
 
                   <div className="bg-neutral-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-secondary-900 mb-2">Local Storage</h3>
+                    <h3 className="font-semibold text-secondary-900 mb-2">Browser and Device Information</h3>
                     <p className="text-secondary-700">
-                      HTML5 local storage to save data locally in your browser for improved performance and offline functionality.
-                    </p>
-                  </div>
-
-                  <div className="bg-neutral-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-secondary-900 mb-2">Device Fingerprinting</h3>
-                    <p className="text-secondary-700">
-                      Collection of device and browser characteristics to identify unique users for security and analytics purposes.
-                    </p>
-                  </div>
-
-                  <div className="bg-neutral-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-secondary-900 mb-2">Session Replay</h3>
-                    <p className="text-secondary-700">
-                      Recording of user interactions (clicks, scrolls, mouse movements) to improve user experience and identify usability issues.
+                      We collect your browser type and device information (user agent string) to ensure compatibility and improve the user experience across different devices.
                     </p>
                   </div>
                 </div>
@@ -266,33 +212,19 @@ export const CookiePolicyPage: React.FC = () => {
 
                   <div>
                     <h3 className="text-lg font-semibold text-secondary-900 mb-2">
-                      2. Platform Cookie Preferences
+                      2. Clear Browser Local Storage
                     </h3>
                     <p className="text-secondary-700">
-                      You can manage your cookie preferences directly on beBrivus through your account settings or our cookie consent banner.
+                      To clear authentication tokens and cached data, you can clear your browser's localStorage through your browser's developer tools or by logging out of beBrivus.
                     </p>
                   </div>
 
                   <div>
                     <h3 className="text-lg font-semibold text-secondary-900 mb-2">
-                      3. Opt-Out Tools
-                    </h3>
-                    <p className="text-secondary-700 mb-2">
-                      Opt out of third-party advertising cookies:
-                    </p>
-                    <ul className="list-disc list-inside space-y-1 text-secondary-700">
-                      <li><a href="https://optout.aboutads.info/" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-700">Digital Advertising Alliance (DAA)</a></li>
-                      <li><a href="https://www.youronlinechoices.com/" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-700">Your Online Choices (Europe)</a></li>
-                      <li><a href="https://www.networkadvertising.org/choices/" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-700">Network Advertising Initiative (NAI)</a></li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold text-secondary-900 mb-2">
-                      4. Do Not Track (DNT)
+                      3. Account Deletion
                     </h3>
                     <p className="text-secondary-700">
-                      Some browsers support "Do Not Track" signals. However, there is currently no industry standard for responding to DNT signals, and we do not currently respond to them.
+                      If you want to permanently remove all your data from beBrivus, you can delete your account through your profile settings. This will clear all stored data including localStorage items.
                     </p>
                   </div>
                 </div>
@@ -302,7 +234,7 @@ export const CookiePolicyPage: React.FC = () => {
                     ⚠️ Important Note:
                   </p>
                   <p className="text-warning-800">
-                    Disabling cookies may affect your ability to use certain features of beBrivus. Essential cookies are required for the platform to function and cannot be disabled.
+                    Disabling session cookies will prevent you from logging in and using beBrivus. Clearing localStorage will log you out and remove your language preference.
                   </p>
                 </div>
               </div>
@@ -311,42 +243,42 @@ export const CookiePolicyPage: React.FC = () => {
             {/* Data Retention */}
             <section>
               <h2 className="text-2xl font-bold text-secondary-900 mb-4">
-                Cookie Data Retention
+                Data Retention
               </h2>
               
               <div className="space-y-4">
                 <p className="text-secondary-700">
-                  Different cookies have different retention periods:
+                  Here's how long we retain different types of data:
                 </p>
 
                 <div className="overflow-x-auto">
                   <table className="min-w-full bg-white border border-neutral-200 rounded-lg">
                     <thead className="bg-neutral-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 border-b">Cookie Type</th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 border-b">Data Type</th>
                         <th className="px-6 py-3 text-left text-sm font-semibold text-secondary-900 border-b">Retention Period</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-neutral-200">
                       <tr>
-                        <td className="px-6 py-4 text-secondary-700">Session Cookies</td>
+                        <td className="px-6 py-4 text-secondary-700">Session Cookies (Django)</td>
                         <td className="px-6 py-4 text-secondary-700">Deleted when browser closes</td>
                       </tr>
                       <tr>
-                        <td className="px-6 py-4 text-secondary-700">Authentication Cookies</td>
+                        <td className="px-6 py-4 text-secondary-700">JWT Access Token (localStorage)</td>
+                        <td className="px-6 py-4 text-secondary-700">1 hour (then auto-refreshed)</td>
+                      </tr>
+                      <tr>
+                        <td className="px-6 py-4 text-secondary-700">JWT Refresh Token (localStorage)</td>
                         <td className="px-6 py-4 text-secondary-700">30 days</td>
                       </tr>
                       <tr>
-                        <td className="px-6 py-4 text-secondary-700">Functional Cookies</td>
-                        <td className="px-6 py-4 text-secondary-700">1 year</td>
+                        <td className="px-6 py-4 text-secondary-700">User Profile Cache (localStorage)</td>
+                        <td className="px-6 py-4 text-secondary-700">Until logout or manual clear</td>
                       </tr>
                       <tr>
-                        <td className="px-6 py-4 text-secondary-700">Analytics Cookies</td>
-                        <td className="px-6 py-4 text-secondary-700">2 years</td>
-                      </tr>
-                      <tr>
-                        <td className="px-6 py-4 text-secondary-700">Marketing Cookies</td>
-                        <td className="px-6 py-4 text-secondary-700">1 year</td>
+                        <td className="px-6 py-4 text-secondary-700">Language Preference (localStorage)</td>
+                        <td className="px-6 py-4 text-secondary-700">Until manual clear</td>
                       </tr>
                     </tbody>
                   </table>

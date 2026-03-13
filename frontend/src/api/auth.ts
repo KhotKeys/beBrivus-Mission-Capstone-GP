@@ -91,6 +91,25 @@ export const authApi = {
     });
     return response.data;
   },
+
+  deleteAccount: async (password: string): Promise<void> => {
+    await apiClient.post('/auth/delete-account/', { password });
+    
+    // Clear all localStorage data
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('admin_access_token');
+    localStorage.removeItem('admin_refresh_token');
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminRefreshToken');
+    localStorage.removeItem('bebrivus_language');
+    localStorage.removeItem('registration_analytics');
+    localStorage.removeItem('resource_uploads');
+    
+    // Redirect to home page
+    window.location.href = '/';
+  },
 };
 
 export default authApi;

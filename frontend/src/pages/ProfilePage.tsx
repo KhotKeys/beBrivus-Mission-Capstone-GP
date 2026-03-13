@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Layout } from "../components/layout";
@@ -391,6 +392,25 @@ export const ProfilePage: React.FC = () => {
           isEditing={isEditingExperience}
           onEditToggle={() => setIsEditingExperience(!isEditingExperience)}
         />
+
+        {/* Account Management */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border-l-4 border-error-500">
+          <h2 className="text-xl sm:text-2xl font-bold text-secondary-900 mb-4">
+            Account Management
+          </h2>
+          <div className="space-y-4">
+            <p className="text-sm text-secondary-600">
+              If you wish to permanently delete your account and all associated data, you can do so below.
+            </p>
+            <Link
+              to="/delete-account"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-error-600 text-white font-semibold rounded-lg hover:bg-error-700 transition-colors text-sm"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Account
+            </Link>
+          </div>
+        </div>
       </div>
     </Layout>
   );

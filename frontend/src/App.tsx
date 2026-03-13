@@ -70,6 +70,7 @@ import { ContactUsPage } from "./pages/ContactUsPage";
 import { PartnerWithUsPage } from "./pages/PartnerWithUsPage";
 import { UploadedResourcesPage } from "./pages/UploadedResourcesPage";
 import FeedbackPage from "./pages/FeedbackPage";
+import { DeleteAccountPage } from "./pages/DeleteAccountPage";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -269,6 +270,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ProfileRouteWrapper />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/delete-account"
+        element={
+          <ProtectedRoute>
+            <DeleteAccountPage />
           </ProtectedRoute>
         }
       />

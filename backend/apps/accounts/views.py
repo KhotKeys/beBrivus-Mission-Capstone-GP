@@ -3,13 +3,15 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from apps.notifications.email_service import notify_password_reset
 from threading import Thread
+import os
+from pathlib import Path
 from .models import User, UserSkill, UserEducation, UserExperience
 from .serializers import (
     UserRegistrationSerializer, UserLoginSerializer, UserProfileSerializer,
@@ -396,4 +398,73 @@ class PasswordResetConfirmView(generics.GenericAPIView):
             return Response(
                 {'error': 'Invalid reset link'},
                 status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class DeleteAccountView(generics.GenericAPIView):
+    """Delete user account and all associated data"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        password = request.data.get('password')
+        
+        if not password:
+            return Response(
+                {'error': 'Password is required to confirm account deletion'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Verify password
+        user = authenticate(username=request.user.email, password=password)
+        if user is None or user.id != request.user.id:
+            return Response(
+                {'error': 'Incorrect password'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Delete uploaded files before deleting user
+            # 1. Profile picture
+            if request.user.profile_picture:
+                try:
+                    if os.path.isfile(request.user.profile_picture.path):
+                        os.remove(request.user.profile_picture.path)
+                except Exception as e:
+                    print(f"Error deleting profile picture: {e}")
+            
+            # 2. Application documents
+            from apps.applications.models import Application, ApplicationDocument
+            user_applications = Application.objects.filter(user=request.user)
+            for application in user_applications:
+                for document in application.documents.all():
+                    try:
+                        if document.file and os.path.isfile(document.file.path):
+                            os.remove(document.file.path)
+                    except Exception as e:
+                        print(f"Error deleting application document: {e}")
+            
+            # 3. Forum images
+            from apps.forum.models import Discussion
+            user_discussions = Discussion.objects.filter(author=request.user)
+            for discussion in user_discussions:
+                if discussion.image:
+                    try:
+                        if os.path.isfile(discussion.image.path):
+                            os.remove(discussion.image.path)
+                    except Exception as e:
+                        print(f"Error deleting forum image: {e}")
+            
+            # Delete user (CASCADE will handle related database records)
+            user_email = request.user.email
+            request.user.delete()
+            
+            return Response(
+                {'message': f'Account {user_email} has been permanently deleted'},
+                status=status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to delete account: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

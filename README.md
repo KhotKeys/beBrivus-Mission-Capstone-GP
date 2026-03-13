@@ -55,6 +55,7 @@ Core product goals:
 
 - Opportunity discovery with search and filtering.
 - Personal application tracking and progress monitoring.
+- Self-service account deletion from profile settings with confirmation and secure sign-out flow.
 - Mentor discovery, booking, and communication.
 - Community forum participation.
 - Resource library access.

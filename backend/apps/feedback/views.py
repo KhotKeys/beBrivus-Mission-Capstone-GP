@@ -1,5 +1,6 @@
 import logging
 import traceback
+from django.conf import settings
 from django.utils import timezone
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
@@ -97,6 +98,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
 
         stars = '⭐' * feedback.rating if feedback.rating else ''
         rating_row = f'<p><strong>Rating:</strong> {stars} ({feedback.rating}/5)</p>' if feedback.rating else ''
+        login_url = getattr(settings, 'FRONTEND_LOGIN_URL', 'https://bebrivus.com/login')
 
         # Email A — Admin notification
         _send_email(
@@ -119,7 +121,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
                   <p style="margin:0;color:#374151;line-height:1.6;">{feedback.message}</p>
                 </div>
                 <div style="text-align:center;">
-                  <a href="http://localhost:5173/admin/feedback"
+                                    <a href="{login_url}"
                      style="background:#6366f1;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;">
                     Review in Admin Panel
                   </a>

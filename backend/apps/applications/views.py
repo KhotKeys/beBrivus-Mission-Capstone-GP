@@ -180,6 +180,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             
             if new_status in status_messages:
                 subject_text, color, message = status_messages[new_status]
+                login_url = getattr(django_settings, 'FRONTEND_LOGIN_URL', 'https://bebrivus.com/login')
                 
                 html = f"""<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
   <div style="background:{color};padding:24px;border-radius:12px 12px 0 0;text-align:center;">
@@ -195,7 +196,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
       {'<p><strong>Feedback:</strong> ' + feedback_text + '</p>' if feedback_text else ''}
     </div>
     <div style="text-align:center;margin-top:20px;">
-      <a href="http://localhost:5173/applications"
+            <a href="{login_url}"
          style="background:{color};color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;">
         View My Applications
       </a>

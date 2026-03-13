@@ -53,6 +53,7 @@ def send_all_booking_emails(booking, student, mentor_obj, session_date, start_ti
     logger = logging.getLogger(__name__)
 
     session_type_display = session_type.replace('_', ' ').title()
+    login_url = getattr(settings, 'FRONTEND_LOGIN_URL', 'https://bebrivus.com/login')
 
     def build_email_html(recipient_type, recipient_name, student_name, mentor_name):
         if recipient_type == 'student':
@@ -97,7 +98,7 @@ def send_all_booking_emails(booking, student, mentor_obj, session_date, start_ti
               </table>
             </div>
             <div style="text-align:center;margin:20px 0;">
-              <a href="http://localhost:5173/mentors"
+                            <a href="{login_url}"
                  style="background:{color};color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;">
                 {cta_text}
               </a>
@@ -204,7 +205,8 @@ def notify_booking_created(session) -> None:
             print(f"Logo error: {e}")
             return ""
     
-    frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+    frontend_url = getattr(settings, 'FRONTEND_URL', 'https://bebrivus.com')
+    login_url = getattr(settings, 'FRONTEND_LOGIN_URL', f'{frontend_url}/login')
     duration = int((session.scheduled_end - session.scheduled_start).total_seconds() / 60)
     
     html_content = render_to_string('emails/booking_confirmed.html', {
@@ -215,7 +217,7 @@ def notify_booking_created(session) -> None:
         'duration': f'{duration} minutes',
         'session_format': session.get_session_type_display(),
         'frontend_url': frontend_url,
-        'dashboard_url': f'{frontend_url}/mentorship',
+        'dashboard_url': login_url,
         'logo_base64': get_logo_base64(),
     })
     
@@ -321,7 +323,8 @@ def notify_session_confirmed(session) -> None:
     
     mentor_user = session.mentor.user
     mentee_user = session.mentee
-    frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+    frontend_url = getattr(settings, 'FRONTEND_URL', 'https://bebrivus.com')
+    login_url = getattr(settings, 'FRONTEND_LOGIN_URL', f'{frontend_url}/login')
     duration = int((session.scheduled_end - session.scheduled_start).total_seconds() / 60)
     
     html_content = render_to_string('emails/booking_confirmed.html', {
@@ -332,7 +335,7 @@ def notify_session_confirmed(session) -> None:
         'duration': f'{duration} minutes',
         'session_format': session.get_session_type_display(),
         'frontend_url': frontend_url,
-        'dashboard_url': f'{frontend_url}/mentorship',
+        'dashboard_url': login_url,
         'logo_base64': get_logo_base64(),
     })
     

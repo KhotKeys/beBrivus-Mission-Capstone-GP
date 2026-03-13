@@ -506,6 +506,7 @@ OR
             admin_emails = get_admin_emails()
 
             if admin_emails:
+                login_url = getattr(settings, 'FRONTEND_LOGIN_URL', 'https://bebrivus.com/login')
                 reason_labels = {
                     'spam': 'Spam',
                     'hate_speech': 'Hate Speech',
@@ -539,7 +540,7 @@ OR
                     </div>
                     {'<div style="background:#fef2f2;border-radius:8px;padding:12px;margin-bottom:16px;"><p style="color:#ef4444;font-weight:700;margin:0;">⚠️ This post has been flagged 3+ times and requires immediate review.</p></div>' if discussion.flag_count >= 3 else ''}
                     <div style="text-align:center;">
-                      <a href="http://localhost:5173/admin/forum"
+                                            <a href="{login_url}"
                          style="background:#1f2937;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">
                         Review in Admin Panel
                       </a>
@@ -551,7 +552,7 @@ OR
 
                 msg = EmailMultiAlternatives(
                     subject=subject,
-                    body=f'Post "{discussion.title}" flagged by {user.username} for {reason}. Flag count: {discussion.flag_count}. Review at http://localhost:5173/admin/forum',
+                    body=f'Post "{discussion.title}" flagged by {user.username} for {reason}. Flag count: {discussion.flag_count}. Review at {login_url}',
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     to=admin_emails
                 )

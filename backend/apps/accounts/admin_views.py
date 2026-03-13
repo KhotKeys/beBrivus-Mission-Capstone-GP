@@ -30,8 +30,8 @@ def send_invitation_email(user, password):
     Send invitation email to user asynchronously
     """
     try:
-        login_url = getattr(settings, 'FRONTEND_LOGIN_URL', 'http://localhost:5173/login')
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+        login_url = getattr(settings, 'FRONTEND_LOGIN_URL', 'https://bebrivus.com/login')
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'https://bebrivus.com')
         logo_url = f"{frontend_url}/beBivus.png"
         
         # Prepare email context

@@ -58,6 +58,7 @@ Core product goals:
 - Self-service account deletion from profile settings with confirmation and secure sign-out flow.
 - Feedback form submission with acknowledgment and support follow-up workflow.
 - Mentor discovery, booking, and communication.
+- Direct messaging with mentors, institutions, and other users for personalized support and communication.
 - Community forum participation.
 - Resource library access.
 - AI-assisted support for guidance and moderation-related features.
@@ -68,6 +69,7 @@ Core product goals:
 
 - Opportunity publishing and lifecycle management.
 - Application intake and review workflows.
+- Direct messaging with applicants and mentors for streamlined communication.
 - Candidate communication support.
 - Organization-facing dashboard tools.
 

@@ -183,7 +183,10 @@ export const AdminLayout: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-50 lg:flex overflow-x-hidden">
+    <div
+      className="min-h-screen bg-neutral-50 lg:flex overflow-x-hidden"
+      style={{ minWidth: '150px', width: '100%', boxSizing: 'border-box' }}
+    >
       <OfflineBanner />
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
@@ -277,10 +280,13 @@ export const AdminLayout: React.FC = () => {
       </div>
 
       {/* Main content */}
-      <div className="w-full min-w-0 overflow-x-hidden">
+      <div className="w-full min-w-0 overflow-x-hidden" style={{ minWidth: 0, flex: 1 }}>
         {/* Top header */}
-        <header className="bg-white shadow-sm border-b border-neutral-200">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4">
+        <header className="bg-white shadow-sm border-b border-neutral-200" style={{ minWidth: 0, overflowX: 'hidden' }}>
+          <div
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-2 sm:px-4 py-3"
+            style={{ width: '100%', boxSizing: 'border-box', minWidth: 0 }}
+          >
             <div className="flex items-center flex-1 min-w-0">
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -442,7 +448,7 @@ export const AdminLayout: React.FC = () => {
         </header>
 
         {/* Page content */}
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="p-2 sm:p-4 lg:p-6" style={{ width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
           <Outlet />
         </main>
       </div>

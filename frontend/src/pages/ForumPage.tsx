@@ -23,6 +23,8 @@ interface Discussion {
     username: string;
     first_name: string;
     last_name: string;
+    profile_picture?: string;
+    profile_picture_url?: string;
   };
   is_pinned: boolean;
   is_locked: boolean;
@@ -381,8 +383,10 @@ export const ForumPage: React.FC = () => {
                 <div className="p-4 sm:p-6 pb-4 text-center sm:text-left">
                   <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                     {/* User Avatar */}
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold text-lg flex-shrink-0 mx-auto sm:mx-0">
-                      {formatAuthorInitial(discussion.author)}
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold text-lg flex-shrink-0 mx-auto sm:mx-0 overflow-hidden">
+                      {(discussion.author.profile_picture_url || discussion.author.profile_picture) ? (
+                        <img src={discussion.author.profile_picture_url || discussion.author.profile_picture} alt={formatAuthorName(discussion.author)} className="w-full h-full object-cover" />
+                      ) : formatAuthorInitial(discussion.author)}
                     </div>
 
                     <div className="flex-1 min-w-0">

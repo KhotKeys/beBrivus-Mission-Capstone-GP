@@ -176,10 +176,10 @@ export const AdminDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-w-0 overflow-x-hidden">
       {/* Welcome Header */}
       <div
-        className="rounded-2xl p-6 sm:p-8 text-white relative overflow-hidden"
+        className="rounded-2xl p-4 sm:p-6 md:p-8 text-white relative overflow-hidden min-w-0"
         style={{
           backgroundImage:
             "linear-gradient(135deg, rgba(2,6,23,0.75) 0%, rgba(2,6,23,0.55) 45%, rgba(2,6,23,0.8) 100%), url('/security.png')",
@@ -190,7 +190,7 @@ export const AdminDashboard: React.FC = () => {
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Welcome back, Admin!</h1>
+            <h1 className="text-xl sm:text-3xl font-bold mb-2 break-words">Welcome back, Admin!</h1>
             <p className="text-primary-100 text-lg">
               Here's what's happening with your platform today.
             </p>
@@ -249,7 +249,7 @@ export const AdminDashboard: React.FC = () => {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
@@ -311,16 +311,16 @@ export const AdminDashboard: React.FC = () => {
           <h2 className="text-xl font-semibold text-neutral-900 mb-4">
             Quick Actions
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" style={{ minWidth: 0 }}>
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               return (
                 <Link key={index} to={action.href}>
-                  <Card className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1 group">
-                    <CardBody className="p-6">
-                      <div className="flex items-start">
+                  <Card className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1 group" style={{ minWidth: 0, overflow: 'hidden' }}>
+                    <CardBody className="p-4 sm:p-6">
+                      <div className="flex items-start min-w-0">
                         <div
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 ${
+                          className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0 ${
                             action.color === "primary"
                               ? "bg-primary-100 text-primary-600 group-hover:bg-primary-200"
                               : action.color === "success"
@@ -332,15 +332,15 @@ export const AdminDashboard: React.FC = () => {
                         >
                           <Icon className="w-6 h-6" />
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-neutral-900 mb-1 group-hover:text-primary-600 transition-colors">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-neutral-900 mb-1 group-hover:text-primary-600 transition-colors truncate">
                             {action.title}
                           </h3>
-                          <p className="text-sm text-neutral-600">
+                          <p className="text-sm text-neutral-600 line-clamp-2">
                             {action.description}
                           </p>
                         </div>
-                        <Plus className="w-5 h-5 text-neutral-400 group-hover:text-primary-600 transition-colors" />
+                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-400 group-hover:text-primary-600 transition-colors flex-shrink-0 ml-1" />
                       </div>
                     </CardBody>
                   </Card>

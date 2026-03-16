@@ -335,7 +335,7 @@ export default function MentorFeedbackPage() {
                         {fb.rating && <StarRating value={fb.rating} readonly />}
                         {fb.admin_note && ['resolved', 'closed'].includes(fb.status) && (
                           <div style={{ background: '#e6f2f3', borderLeft: '3px solid #125B66', borderRadius: '8px', padding: '10px 12px', marginTop: '10px' }}>
-                            <p style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: '700', color: '#15803d', textTransform: 'uppercase' }}>Admin Response</p>
+                            <p style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: '700', color: '#15803d', textTransform: 'uppercase' }}>beBrivus Response</p>
                             <p style={{ margin: 0, fontSize: '13px', color: '#374151' }}>{fb.admin_note}</p>
                           </div>
                         )}

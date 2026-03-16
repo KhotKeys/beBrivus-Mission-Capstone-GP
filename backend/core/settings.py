@@ -175,6 +175,8 @@ SIMPLE_JWT = {
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [
+    'https://bebrivus.com',
+    'http://www.bebrivus.com',
     'http://localhost:5173',
     'http://localhost:5174',
     'https://bebrivus.netlify.app',

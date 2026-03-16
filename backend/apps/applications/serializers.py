@@ -59,7 +59,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
         return obj.user.email if obj.user else 'No email'
     
     def get_user_phone(self, obj):
-        return getattr(obj.user, 'phone_number', None) if obj.user else None
+        return obj.phone if obj.phone else getattr(obj.user, 'phone_number', None)
     
     def get_cv_url(self, obj):
         # Get CV from related documents
@@ -122,7 +122,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
             'company_name', 'company_logo', 'location', 'employment_type', 'salary_range',
             'opportunity_data', 'cv_url',
             'cover_letter', 'status', 'submitted_at', 'interview_date', 'notes',
-            'age', 'university', 'course', 'year_of_study', 'country_of_residence', 'why_chosen', 'career_goals',
+            'phone', 'age', 'university', 'course', 'year_of_study', 'country_of_residence', 'why_chosen', 'career_goals',
             'days_since_applied', 'next_action_date', 'is_upcoming_action',
             'created_at', 'updated_at'
         ]

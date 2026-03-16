@@ -41,6 +41,8 @@ export const ProfilePage: React.FC = () => {
   const [isEditingEducation, setIsEditingEducation] = useState(false);
   const [isEditingExperience, setIsEditingExperience] = useState(false);
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [uploadError, setUploadError] = useState('');
 
   // Fetch profile data
   const { data: profile, isLoading } = useQuery({
@@ -68,36 +70,52 @@ export const ProfilePage: React.FC = () => {
   // Upload profile picture mutation
   const uploadPictureMutation = useMutation({
     mutationFn: (file: File) => profileApi.uploadProfilePicture(file),
-    onSuccess: async () => {
-      const updatedProfile = await profileApi.getProfile().then((res) => res.data);
+    onSuccess: (response) => {
+      const updatedProfile = response.data;
+      queryClient.setQueryData(["profile"], updatedProfile);
       queryClient.invalidateQueries({ queryKey: ["profile"] });
-      // Update AuthContext with the full updated profile data
-      await updateAuthProfile({
+      updateAuthProfile({
         first_name: updatedProfile.first_name,
         last_name: updatedProfile.last_name,
-        profile_picture: updatedProfile.profile_picture,
+        profile_picture: updatedProfile.profile_picture_url || updatedProfile.profile_picture,
         user_type: updatedProfile.user_type as "institution" | "student" | "graduate" | "mentor" | "admin",
       });
       setIsUploadingPicture(false);
-      alert("Profile picture uploaded successfully!");
+      setUploadSuccess(true);
+      setTimeout(() => setUploadSuccess(false), 3000);
     },
     onError: () => {
-      alert("Failed to upload profile picture. Please try again.");
+      setUploadError('Upload failed. Please try a valid image under 5MB.');
+      setTimeout(() => setUploadError(''), 4000);
       setIsUploadingPicture(false);
+    },
+  });
+
+  const deleteProfilePictureMutation = useMutation({
+    mutationFn: () => profileApi.deleteProfilePicture(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      updateAuthProfile({ profile_picture: undefined });
+      setUploadSuccess(true);
+      setTimeout(() => setUploadSuccess(false), 3000);
+    },
+    onError: () => {
+      setUploadError('Failed to delete profile picture.');
+      setTimeout(() => setUploadError(''), 4000);
     },
   });
 
   const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate file type
       if (!file.type.startsWith("image/")) {
-        alert("Please select a valid image file");
+        setUploadError('Please select a valid image file.');
+        setTimeout(() => setUploadError(''), 4000);
         return;
       }
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert("File size must be less than 5MB");
+        setUploadError('File too large. Max 5MB allowed.');
+        setTimeout(() => setUploadError(''), 4000);
         return;
       }
       setIsUploadingPicture(true);
@@ -136,10 +154,20 @@ export const ProfilePage: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
               {/* Profile Picture */}
               <div className="relative mx-auto sm:mx-0">
-                {profile.profile_picture ? (
+                {uploadSuccess && (
+                  <div className="absolute -top-8 left-0 right-0 text-center text-xs font-semibold text-green-600 bg-green-50 border border-green-200 rounded px-2 py-1 whitespace-nowrap">
+                    ✓ Photo updated!
+                  </div>
+                )}
+                {uploadError && (
+                  <div className="absolute -top-8 left-0 right-0 text-center text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1 whitespace-nowrap">
+                    {uploadError}
+                  </div>
+                )}
+                {(profile.profile_picture_url || profile.profile_picture) ? (
                   <div className="relative group">
                     <img
-                      src={profile.profile_picture}
+                      src={profile.profile_picture_url || profile.profile_picture}
                       alt={profile.first_name}
                       className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover"
                     />
@@ -155,12 +183,8 @@ export const ProfilePage: React.FC = () => {
                         />
                       </label>
                       <button
-                        onClick={() => {
-                          if (confirm("Are you sure you want to remove your profile picture?")) {
-                            // TODO: Implement delete profile picture
-                            alert("Profile picture deletion coming soon!");
-                          }
-                        }}
+                        onClick={() => deleteProfilePictureMutation.mutate()}
+                        disabled={deleteProfilePictureMutation.isPending}
                         className="hover:bg-black/70 p-2 rounded"
                       >
                         <Trash2 className="w-4 h-4 text-white" />
@@ -199,7 +223,7 @@ export const ProfilePage: React.FC = () => {
               {/* Basic Info */}
               <div className="flex-1 w-full">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900 text-center sm:text-left">
+                  <h1 className="profile-name-h1 text-base xs:text-lg sm:text-3xl font-bold text-secondary-900 text-center sm:text-left">
                     {profile.first_name} {profile.last_name}
                   </h1>
                   <button
@@ -282,7 +306,7 @@ export const ProfilePage: React.FC = () => {
         <div className="card mb-4 sm:mb-6">
           <div className="card-body p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h2 className="text-lg sm:text-xl font-semibold text-secondary-900">
+              <h2 className="profile-section-h2 text-sm xs:text-base sm:text-xl font-semibold text-secondary-900">
                 {t("Education")} & Academic Info
               </h2>
             </div>
@@ -379,23 +403,26 @@ export const ProfilePage: React.FC = () => {
         <SkillsSection
           isEditing={isEditingSkills}
           onEditToggle={() => setIsEditingSkills(!isEditingSkills)}
+          initialSkills={profile.skills || []}
         />
 
         {/* Education Section */}
         <EducationSection
           isEditing={isEditingEducation}
           onEditToggle={() => setIsEditingEducation(!isEditingEducation)}
+          initialEducation={profile.education || []}
         />
 
         {/* Experience Section */}
         <ExperienceSection
           isEditing={isEditingExperience}
           onEditToggle={() => setIsEditingExperience(!isEditingExperience)}
+          initialExperience={profile.experience || []}
         />
 
         {/* Account Management */}
         <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border-l-4 border-error-500">
-          <h2 className="text-xl sm:text-2xl font-bold text-secondary-900 mb-4">
+          <h2 className="profile-section-h2 text-sm xs:text-base sm:text-2xl font-bold text-secondary-900 mb-4">
             Account Management
           </h2>
           <div className="space-y-4">
@@ -404,7 +431,7 @@ export const ProfilePage: React.FC = () => {
             </p>
             <Link
               to="/delete-account"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-error-600 text-white font-semibold rounded-lg hover:bg-error-700 transition-colors text-sm"
+              className="profile-delete-btn inline-flex items-center gap-2 px-2 xs:px-4 py-1.5 xs:py-2 bg-error-600 text-white font-semibold rounded-lg hover:bg-error-700 transition-colors text-xs xs:text-sm"
             >
               <Trash2 className="w-4 h-4" />
               Delete Account
@@ -717,11 +744,13 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
 interface SkillsSectionProps {
   isEditing: boolean;
   onEditToggle: () => void;
+  initialSkills: UserSkill[];
 }
 
 const SkillsSection: React.FC<SkillsSectionProps> = ({
   isEditing,
   onEditToggle,
+  initialSkills,
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -730,24 +759,23 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
     level: "beginner" as const,
   });
   const [error, setError] = useState<string>("");
+  const [skills, setSkills] = useState<UserSkill[]>(initialSkills);
 
-  const { data: skills = [], isLoading: isLoadingSkills, isError: isSkillsError, refetch: refetchSkills } = useQuery({
-    queryKey: ["skills"],
-    queryFn: () => profileApi.getSkills().then((res) => res.data),
-    staleTime: 0,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true,
-  });
+  // Keep in sync when profile refetches
+  React.useEffect(() => { setSkills(initialSkills); }, [initialSkills]);
 
   const addSkillMutation = useMutation({
     mutationFn: (skill: Omit<UserSkill, "id" | "verified" | "created_at">) =>
       profileApi.addSkill(skill),
     onSuccess: async (response) => {
-      await queryClient.invalidateQueries({ queryKey: ["skills"] });
-      await refetchSkills();
+      await queryClient.invalidateQueries({ queryKey: ["profile"] });
+      const saved: UserSkill = response.data;
+      setSkills(prev =>
+        prev.some(s => s.id === saved.id)
+          ? prev.map(s => s.id === saved.id ? saved : s)
+          : [...prev, saved]
+      );
       setNewSkill({ name: "", level: "beginner" });
-      
-      // Show message if skill was updated instead of created
       if (response.data.message) {
         setError(response.data.message);
         setTimeout(() => setError(""), 3000);
@@ -782,9 +810,9 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
 
   const deleteSkillMutation = useMutation({
     mutationFn: (id: number) => profileApi.deleteSkill(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["skills"] });
-      queryClient.refetchQueries({ queryKey: ["skills"] });
+    onSuccess: (_, id) => {
+      setSkills(prev => prev.filter(s => s.id !== id));
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
       setError("");
     },
     onError: (error: any) => {
@@ -814,7 +842,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
     <div className="card mb-4 sm:mb-6">
       <div className="card-body p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-          <h2 className="text-lg sm:text-xl font-semibold text-secondary-900 flex items-center gap-2">
+          <h2 className="profile-section-h2 text-sm xs:text-base sm:text-xl font-semibold text-secondary-900 flex items-center gap-2">
             <Award className="w-5 h-5 flex-shrink-0" />
             Skills
           </h2>
@@ -832,18 +860,6 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
             )}
           </button>
         </div>
-
-        {isLoadingSkills && (
-          <div className="flex items-center justify-center py-6">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-          </div>
-        )}
-
-        {isSkillsError && !isLoadingSkills && (
-          <div className="mb-3 p-3 bg-error-100 border border-error-300 rounded text-error-700 text-sm">
-            Failed to load skills. Please try again.
-          </div>
-        )}
 
         {isEditing && (
           <form
@@ -938,16 +954,19 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
 interface EducationSectionProps {
   isEditing: boolean;
   onEditToggle: () => void;
+  initialEducation: UserEducation[];
 }
 
 const EducationSection: React.FC<EducationSectionProps> = ({
   isEditing,
   onEditToggle,
+  initialEducation,
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showAddForm, setShowAddForm] = useState(false);
   const [error, setError] = useState<string>("");
+  const [education, setEducation] = useState<UserEducation[]>(initialEducation);
   const [newEducation, setNewEducation] = useState<
     Omit<UserEducation, "id" | "created_at" | "updated_at">
   >({
@@ -961,31 +980,27 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     current: false,
   });
 
-  const { data: education = [], isLoading: isLoadingEducation, isError: isEducationError, refetch: refetchEducation } = useQuery({
-    queryKey: ["education"],
-    queryFn: () => profileApi.getEducation().then((res) => res.data),
-    staleTime: 0,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true,
-  });
+  React.useEffect(() => { setEducation(initialEducation); }, [initialEducation]);
 
   const addEducationMutation = useMutation({
     mutationFn: (
       data: Omit<UserEducation, "id" | "created_at" | "updated_at">
     ) => profileApi.addEducation(data),
     onSuccess: async (response) => {
-      await queryClient.invalidateQueries({ queryKey: ["education"] });
-      await refetchEducation();
+      const saved: UserEducation = response.data;
+      setEducation(prev =>
+        prev.some(e => e.id === saved.id)
+          ? prev.map(e => e.id === saved.id ? saved : e)
+          : [...prev, saved]
+      );
+      await queryClient.invalidateQueries({ queryKey: ["profile"] });
       setShowAddForm(false);
-      
-      // Show message if education was updated instead of created
       if (response.data.message) {
         setError(response.data.message);
         setTimeout(() => setError(""), 3000);
       } else {
         setError("");
       }
-      
       setNewEducation({
         institution: "",
         degree: "",
@@ -1024,9 +1039,9 @@ const EducationSection: React.FC<EducationSectionProps> = ({
 
   const deleteEducationMutation = useMutation({
     mutationFn: (id: number) => profileApi.deleteEducation(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["education"] });
-      queryClient.refetchQueries({ queryKey: ["education"] });
+    onSuccess: (_, id) => {
+      setEducation(prev => prev.filter(e => e.id !== id));
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
       setError("");
     },
     onError: (error: any) => {
@@ -1049,7 +1064,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
     <div className="card mb-4 sm:mb-6">
       <div className="card-body p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-          <h2 className="text-lg sm:text-xl font-semibold text-secondary-900 flex items-center gap-2">
+          <h2 className="profile-section-h2 text-sm xs:text-base sm:text-xl font-semibold text-secondary-900 flex items-center gap-2">
             <GraduationCap className="w-5 h-5 flex-shrink-0" />
             Education
           </h2>
@@ -1067,18 +1082,6 @@ const EducationSection: React.FC<EducationSectionProps> = ({
             )}
           </button>
         </div>
-
-        {isLoadingEducation && (
-          <div className="flex items-center justify-center py-6">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-          </div>
-        )}
-
-        {isEducationError && !isLoadingEducation && (
-          <div className="mb-3 p-3 bg-error-100 border border-error-300 rounded text-error-700 text-sm">
-            Failed to load education. Please try again.
-          </div>
-        )}
 
         {isEditing && !showAddForm && (
           <button
@@ -1296,16 +1299,19 @@ const EducationSection: React.FC<EducationSectionProps> = ({
 interface ExperienceSectionProps {
   isEditing: boolean;
   onEditToggle: () => void;
+  initialExperience: UserExperience[];
 }
 
 const ExperienceSection: React.FC<ExperienceSectionProps> = ({
   isEditing,
   onEditToggle,
+  initialExperience,
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showAddForm, setShowAddForm] = useState(false);
   const [error, setError] = useState<string>("");
+  const [experience, setExperience] = useState<UserExperience[]>(initialExperience);
   const [newExperience, setNewExperience] = useState<
     Omit<UserExperience, "id" | "created_at" | "updated_at">
   >({
@@ -1318,31 +1324,27 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     current: false,
   });
 
-  const { data: experience = [], isLoading: isLoadingExperience, isError: isExperienceError, refetch: refetchExperience } = useQuery({
-    queryKey: ["experience"],
-    queryFn: () => profileApi.getExperience().then((res) => res.data),
-    staleTime: 0,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true,
-  });
+  React.useEffect(() => { setExperience(initialExperience); }, [initialExperience]);
 
   const addExperienceMutation = useMutation({
     mutationFn: (
       data: Omit<UserExperience, "id" | "created_at" | "updated_at">
     ) => profileApi.addExperience(data),
     onSuccess: async (response) => {
-      await queryClient.invalidateQueries({ queryKey: ["experience"] });
-      await refetchExperience();
+      const saved: UserExperience = response.data;
+      setExperience(prev =>
+        prev.some(e => e.id === saved.id)
+          ? prev.map(e => e.id === saved.id ? saved : e)
+          : [...prev, saved]
+      );
+      await queryClient.invalidateQueries({ queryKey: ["profile"] });
       setShowAddForm(false);
-      
-      // Show message if experience was updated instead of created
       if (response.data.message) {
         setError(response.data.message);
         setTimeout(() => setError(""), 3000);
       } else {
         setError("");
       }
-      
       setNewExperience({
         company: "",
         position: "",
@@ -1380,9 +1382,9 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
 
   const deleteExperienceMutation = useMutation({
     mutationFn: (id: number) => profileApi.deleteExperience(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["experience"] });
-      queryClient.refetchQueries({ queryKey: ["experience"] });
+    onSuccess: (_, id) => {
+      setExperience(prev => prev.filter(e => e.id !== id));
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
       setError("");
     },
     onError: (error: any) => {
@@ -1405,7 +1407,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     <div className="card mb-4 sm:mb-6">
       <div className="card-body p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-          <h2 className="text-lg sm:text-xl font-semibold text-secondary-900 flex items-center gap-2">
+          <h2 className="profile-section-h2 text-sm xs:text-base sm:text-xl font-semibold text-secondary-900 flex items-center gap-2">
             <Briefcase className="w-5 h-5 flex-shrink-0" />
             Experience
           </h2>
@@ -1423,18 +1425,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
             )}
           </button>
         </div>
-
-        {isLoadingExperience && (
-          <div className="flex items-center justify-center py-6">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-          </div>
-        )}
-
-        {isExperienceError && !isLoadingExperience && (
-          <div className="mb-3 p-3 bg-error-100 border border-error-300 rounded text-error-700 text-sm">
-            Failed to load experience. Please try again.
-          </div>
-        )}
 
         {isEditing && !showAddForm && (
           <button

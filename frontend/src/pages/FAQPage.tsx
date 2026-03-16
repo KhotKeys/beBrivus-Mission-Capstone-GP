@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Layout } from "../components/layout";
+import { useTranslation } from 'react-i18next';
 import { HelpCircle, ChevronDown, ChevronUp } from "lucide-react";
 
 export const FAQPage: React.FC = () => {
+  const { t } = useTranslation();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const faqs = [
@@ -139,7 +141,7 @@ export const FAQPage: React.FC = () => {
           {/* FAQ Sections */}
           <div className="space-y-4 xs:space-y-5 sm:space-y-6 lg:space-y-8">
             {faqs.map((category, categoryIndex) => (
-              <div key={categoryIndex} className="bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg p-3 xs:p-4 sm:p-5 md:p-6 lg:p-8">
+              <div key={categoryIndex}>
                 <h2 className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-secondary-900 mb-3 xs:mb-4 sm:mb-5 lg:mb-6 text-center">
                   {category.category}
                 </h2>

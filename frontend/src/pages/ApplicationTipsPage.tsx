@@ -1,8 +1,10 @@
 import React from "react";
 import { Layout } from "../components/layout";
+import { useTranslation } from 'react-i18next';
 import { Lightbulb, CheckCircle, FileText, Users, Clock, Target } from "lucide-react";
 
 export const ApplicationTipsPage: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white py-6 xs:py-8 sm:py-12 lg:py-16 xl:py-20 relative overflow-x-hidden">
@@ -41,10 +43,10 @@ export const ApplicationTipsPage: React.FC = () => {
                 </h2>
               </div>
               <ul className="list-disc list-inside space-y-1 xs:space-y-1.5 sm:space-y-2 text-[10px] xs:text-xs sm:text-sm md:text-base text-secondary-700 ml-0 sm:ml-10 md:ml-12 lg:ml-16">
-                <li>Begin research at least 6-12 months before deadlines</li>
-                <li>Create a calendar with all important dates and milestones</li>
-                <li>Allocate time for each application component</li>
-                <li>Build in buffer time for unexpected delays</li>
+                <li>{t('Begin research at least 6-12 months before deadlines')}</li>
+                <li>{t('Create a calendar with all important dates and milestones')}</li>
+                <li>{t('Allocate time for each application component')}</li>
+                <li>{t('Build in buffer time for unexpected delays')}</li>
               </ul>
             </section>
 
@@ -59,22 +61,22 @@ export const ApplicationTipsPage: React.FC = () => {
               </div>
               <div className="space-y-2 xs:space-y-3 sm:space-y-4 ml-0 sm:ml-10 md:ml-12 lg:ml-16">
                 <div className="bg-success-50 border-l-4 border-success-500 p-2 xs:p-3 sm:p-4 rounded">
-                  <h3 className="font-semibold text-success-900 mb-1 xs:mb-1.5 sm:mb-2 text-xs xs:text-sm sm:text-base">Do:</h3>
+                  <h3 className="font-semibold text-success-900 mb-1 xs:mb-1.5 sm:mb-2 text-xs xs:text-sm sm:text-base">{t('Do:')}</h3>
                   <ul className="list-disc list-inside space-y-0.5 xs:space-y-1 text-success-800 text-[10px] xs:text-xs sm:text-sm">
-                    <li>Tell your unique story with specific examples</li>
-                    <li>Connect your experiences to future goals</li>
-                    <li>Show passion and genuine interest</li>
-                    <li>Tailor each statement to the specific opportunity</li>
-                    <li>Get feedback from mentors and peers</li>
+                    <li>{t('Tell your unique story with specific examples')}</li>
+                    <li>{t('Connect your experiences to future goals')}</li>
+                    <li>{t('Show passion and genuine interest')}</li>
+                    <li>{t('Tailor each statement to the specific opportunity')}</li>
+                    <li>{t('Get feedback from mentors and peers')}</li>
                   </ul>
                 </div>
                 <div className="bg-error-50 border-l-4 border-error-500 p-2 xs:p-3 sm:p-4 rounded">
-                  <h3 className="font-semibold text-error-900 mb-1 xs:mb-1.5 sm:mb-2 text-xs xs:text-sm sm:text-base">Don't:</h3>
+                  <h3 className="font-semibold text-error-900 mb-1 xs:mb-1.5 sm:mb-2 text-xs xs:text-sm sm:text-base">{t('Don\'t:')}</h3>
                   <ul className="list-disc list-inside space-y-0.5 xs:space-y-1 text-error-800 text-[10px] xs:text-xs sm:text-sm">
-                    <li>Use generic or clichéd language</li>
-                    <li>Simply list achievements without context</li>
-                    <li>Exceed word limits or ignore formatting guidelines</li>
-                    <li>Submit without thorough proofreading</li>
+                    <li>{t('Use generic or clichéd language')}</li>
+                    <li>{t('Simply list achievements without context')}</li>
+                    <li>{t('Exceed word limits or ignore formatting guidelines')}</li>
+                    <li>{t('Submit without thorough proofreading')}</li>
                   </ul>
                 </div>
               </div>
@@ -90,11 +92,11 @@ export const ApplicationTipsPage: React.FC = () => {
                 </h2>
               </div>
               <ul className="list-disc list-inside space-y-1 xs:space-y-1.5 sm:space-y-2 text-[10px] xs:text-xs sm:text-sm md:text-base text-secondary-700 ml-0 sm:ml-10 md:ml-12 lg:ml-16">
-                <li>Choose recommenders who know you well and can speak to your strengths</li>
-                <li>Ask at least 2-3 months before the deadline</li>
-                <li>Provide recommenders with your CV, personal statement, and opportunity details</li>
-                <li>Follow up politely and send thank-you notes</li>
-                <li>Ensure recommenders understand what the scholarship values</li>
+                <li>{t('Choose recommenders who know you well and can speak to your strengths')}</li>
+                <li>{t('Ask at least 2-3 months before the deadline')}</li>
+                <li>{t('Provide recommenders with your CV, personal statement, and opportunity details')}</li>
+                <li>{t('Follow up politely and send thank-you notes')}</li>
+                <li>{t('Ensure recommenders understand what the scholarship values')}</li>
               </ul>
             </section>
 
@@ -112,12 +114,12 @@ export const ApplicationTipsPage: React.FC = () => {
                   If you advance to the interview stage, preparation is key:
                 </p>
                 <ul className="list-disc list-inside space-y-1 xs:space-y-1.5 sm:space-y-2 text-[10px] xs:text-xs sm:text-sm md:text-base text-secondary-700">
-                  <li>Research the organization and its values thoroughly</li>
-                  <li>Practice common interview questions with a mentor</li>
-                  <li>Prepare thoughtful questions to ask interviewers</li>
-                  <li>Conduct mock interviews to build confidence</li>
-                  <li>Dress professionally and test technology in advance (for virtual interviews)</li>
-                  <li>Be authentic and let your personality shine</li>
+                  <li>{t('Research the organization and its values thoroughly')}</li>
+                  <li>{t('Practice common interview questions with a mentor')}</li>
+                  <li>{t('Prepare thoughtful questions to ask interviewers')}</li>
+                  <li>{t('Conduct mock interviews to build confidence')}</li>
+                  <li>{t('Dress professionally and test technology in advance (for virtual interviews)')}</li>
+                  <li>{t('Be authentic and let your personality shine')}</li>
                 </ul>
               </div>
             </section>
@@ -132,13 +134,13 @@ export const ApplicationTipsPage: React.FC = () => {
                 </h2>
               </div>
               <div className="bg-primary-50 border border-primary-200 p-3 xs:p-4 sm:p-5 lg:p-6 rounded-md xs:rounded-lg ml-0 sm:ml-10 md:ml-12 lg:ml-16">
-                <h3 className="font-semibold text-primary-900 mb-2 xs:mb-2.5 sm:mb-3 text-xs xs:text-sm sm:text-base">Application Timeline Template:</h3>
+                <h3 className="font-semibold text-primary-900 mb-2 xs:mb-2.5 sm:mb-3 text-xs xs:text-sm sm:text-base">{t('Application Timeline Template:')}</h3>
                 <div className="space-y-1 xs:space-y-1.5 sm:space-y-2 text-primary-800 text-[10px] xs:text-xs sm:text-sm">
-                  <p><strong>6-12 months before:</strong> Research opportunities, identify mentors</p>
-                  <p><strong>4-6 months before:</strong> Request recommendation letters, draft essays</p>
-                  <p><strong>2-3 months before:</strong> Finalize essays, gather documents</p>
-                  <p><strong>1 month before:</strong> Review, proofread, submit</p>
-                  <p><strong>After submission:</strong> Prepare for potential interviews</p>
+                  <p><strong>{t('6-12 months before:')}</strong>{t('Research opportunities, identify mentors')}</p>
+                  <p><strong>{t('4-6 months before:')}</strong>{t('Request recommendation letters, draft essays')}</p>
+                  <p><strong>{t('2-3 months before:')}</strong>{t('Finalize essays, gather documents')}</p>
+                  <p><strong>{t('1 month before:')}</strong>{t('Review, proofread, submit')}</p>
+                  <p><strong>{t('After submission:')}</strong>{t('Prepare for potential interviews')}</p>
                 </div>
               </div>
             </section>
@@ -150,23 +152,23 @@ export const ApplicationTipsPage: React.FC = () => {
               <ul className="space-y-2 xs:space-y-2.5 sm:space-y-3 text-[10px] xs:text-xs sm:text-sm md:text-base text-secondary-700">
                 <li className="flex items-start">
                   <CheckCircle className="w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-success-600 mr-2 xs:mr-2.5 sm:mr-3 mt-0.5 xs:mt-1 flex-shrink-0" />
-                  <span><strong>Be specific:</strong> Use concrete examples and quantifiable achievements</span>
+                  <span><strong>{t('Be specific:')}</strong>{t('Use concrete examples and quantifiable achievements')}</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-success-600 mr-2 xs:mr-2.5 sm:mr-3 mt-0.5 xs:mt-1 flex-shrink-0" />
-                  <span><strong>Show impact:</strong> Demonstrate how you've made a difference</span>
+                  <span><strong>{t('Show impact:')}</strong>{t('Demonstrate how you\'ve made a difference')}</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-success-600 mr-2 xs:mr-2.5 sm:mr-3 mt-0.5 xs:mt-1 flex-shrink-0" />
-                  <span><strong>Be authentic:</strong> Let your genuine passion and personality come through</span>
+                  <span><strong>{t('Be authentic:')}</strong>{t('Let your genuine passion and personality come through')}</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-success-600 mr-2 xs:mr-2.5 sm:mr-3 mt-0.5 xs:mt-1 flex-shrink-0" />
-                  <span><strong>Apply broadly:</strong> Don't limit yourself to just one opportunity</span>
+                  <span><strong>{t('Apply broadly:')}</strong>{t('Don\'t limit yourself to just one opportunity')}</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-success-600 mr-2 xs:mr-2.5 sm:mr-3 mt-0.5 xs:mt-1 flex-shrink-0" />
-                  <span><strong>Learn from rejection:</strong> Each application is a learning experience</span>
+                  <span><strong>{t('Learn from rejection:')}</strong>{t('Each application is a learning experience')}</span>
                 </li>
               </ul>
             </section>

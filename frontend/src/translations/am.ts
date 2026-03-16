@@ -64,6 +64,7 @@ export default {
   
   // Additional UI
   'Tracker': 'ተከታታይ',
+  'Messages': 'መልዕክቶች',
   'Find Opportunities': 'እድሎች ፈልግ',
   'Find a Mentor': 'አማካሪ ፈልግ',
   'Track Applications': 'ማመልከቻዎች ተከታተል',

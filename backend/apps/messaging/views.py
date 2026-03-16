@@ -1,17 +1,23 @@
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.db.models import Q, Prefetch
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.contrib.auth.models import User
-from .models import Conversation, Message, MessageRead, Notification
+from django.contrib.auth import get_user_model
+from .models import Conversation, Message, MessageRead, Notification, UserPublicKey, E2EMessage
 from .serializers import (
-    ConversationSerializer, 
+    ConversationSerializer,
     ConversationCreateSerializer,
     MessageSerializer,
     NotificationSerializer
 )
+import logging
+import traceback
+
+User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
@@ -219,3 +225,391 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
             read_at__isnull=True
         ).update(read_at=timezone.now())
         return Response({'status': 'all_read'})
+
+
+# ── E2E Encrypted Messaging Views ─────────────────────────────────────────────
+
+def _initials(user):
+    name = user.get_full_name() or user.username
+    parts = name.strip().split()
+    if len(parts) >= 2:
+        return f'{parts[0][0]}{parts[-1][0]}'.upper()
+    return name[:2].upper()
+
+
+class UserPublicKeyView(APIView):
+    """
+    GET  /api/messaging/keys/           — get own public key
+    GET  /api/messaging/keys/<user_id>/ — get any user's public key
+    POST /api/messaging/keys/           — register/update own public key
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, user_id=None):
+        if not user_id:
+            try:
+                key = UserPublicKey.objects.get(user=request.user)
+                return Response({'public_key': key.public_key, 'user_id': request.user.id})
+            except UserPublicKey.DoesNotExist:
+                return Response({'public_key': None, 'user_id': request.user.id})
+        try:
+            key = UserPublicKey.objects.get(user_id=user_id)
+            return Response({'public_key': key.public_key, 'user_id': user_id})
+        except UserPublicKey.DoesNotExist:
+            return Response({'error': 'Public key not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request):
+        public_key = request.data.get('public_key', '').strip()
+        if not public_key or len(public_key) < 40 or len(public_key) > 50:
+            return Response({'error': 'Invalid public key format.'}, status=status.HTTP_400_BAD_REQUEST)
+        key_obj, created = UserPublicKey.objects.update_or_create(
+            user=request.user,
+            defaults={'public_key': public_key},
+        )
+        logger.info(f'[E2E] Public key {"registered" if created else "updated"} for {request.user.username}')
+        return Response(
+            {'public_key': key_obj.public_key, 'created': created},
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+
+class E2EConversationView(APIView):
+    """
+    GET  /api/messaging/e2e/conversations/ — list conversations
+    POST /api/messaging/e2e/conversations/ — get or create conversation
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        convs = (
+            Conversation.objects
+            .filter(participants=request.user)
+            .prefetch_related('participants')
+            .order_by('-updated_at')
+        )
+        results = []
+        for conv in convs:
+            other = conv.get_other_participant(request.user)
+            if not other:
+                continue
+            last_msg = conv.e2e_messages.last()
+            unread = conv.e2e_messages.filter(is_read=False).exclude(sender=request.user).count()
+            try:
+                other_pub_key = other.public_key.public_key
+            except Exception:
+                other_pub_key = None
+            results.append({
+                'id': conv.id,
+                'other_participant': {
+                    'id': other.id,
+                    'full_name': other.get_full_name() or other.username,
+                    'email': other.email,
+                    'avatar_initials': _initials(other),
+                    'public_key': other_pub_key,
+                },
+                'last_message': {
+                    'encrypted_content': last_msg.encrypted_content,
+                    'nonce': last_msg.nonce,
+                    'sender_id': last_msg.sender_id,
+                    'created_at': last_msg.created_at.isoformat(),
+                    'is_read': last_msg.is_read,
+                } if last_msg else None,
+                'unread_count': unread,
+                'updated_at': conv.updated_at.isoformat(),
+            })
+        return Response(results)
+
+    def post(self, request):
+        recipient_id = request.data.get('recipient_id')
+        if not recipient_id:
+            return Response({'error': 'recipient_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        if int(recipient_id) == request.user.id:
+            return Response({'error': 'You cannot message yourself.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            recipient = User.objects.get(id=recipient_id, is_active=True)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        existing = (
+            Conversation.objects
+            .filter(participants=request.user)
+            .filter(participants=recipient)
+        ).first()
+
+        if existing:
+            conv = existing
+        else:
+            conv = Conversation.objects.create()
+            conv.participants.add(request.user, recipient)
+            logger.info(f'[E2E] New conversation {conv.id}: {request.user.username} <-> {recipient.username}')
+
+        try:
+            other_pub_key = recipient.public_key.public_key
+        except Exception:
+            other_pub_key = None
+
+        return Response({
+            'id': conv.id,
+            'other_participant': {
+                'id': recipient.id,
+                'full_name': recipient.get_full_name() or recipient.username,
+                'email': recipient.email,
+                'avatar_initials': _initials(recipient),
+                'public_key': other_pub_key,
+            },
+            'unread_count': 0,
+            'last_message': None,
+            'updated_at': conv.updated_at.isoformat(),
+        }, status=status.HTTP_201_CREATED)
+
+
+class E2EMessagesView(APIView):
+    """
+    GET  /api/messaging/e2e/conversations/<id>/messages/ — load history
+    POST /api/messaging/e2e/conversations/<id>/send/     — send encrypted message
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def _get_conv(self, conv_id, user):
+        try:
+            conv = Conversation.objects.get(id=conv_id)
+        except Conversation.DoesNotExist:
+            return None, Response({'error': 'Conversation not found.'}, status=status.HTTP_404_NOT_FOUND)
+        if not conv.participants.filter(id=user.id).exists():
+            return None, Response({'error': 'Forbidden.'}, status=status.HTTP_403_FORBIDDEN)
+        return conv, None
+
+    def get(self, request, conv_id):
+        conv, err = self._get_conv(conv_id, request.user)
+        if err:
+            return err
+        conv.e2e_messages.filter(is_read=False).exclude(sender=request.user).update(
+            is_read=True, read_at=timezone.now()
+        )
+        msgs = conv.e2e_messages.select_related('sender').all()
+        data = [{
+            'id': m.id,
+            'sender_id': m.sender_id,
+            'sender_name': (m.sender.get_full_name() or m.sender.username) if m.sender else 'Deleted',
+            'encrypted_content': m.encrypted_content,
+            'nonce': m.nonce,
+            'recipient_pub_key': m.recipient_pub_key,
+            'sender_encrypted_content': m.sender_encrypted_content,
+            'sender_nonce': m.sender_nonce,
+            'sender_public_key': m.sender_public_key,
+            'is_encrypted': m.is_encrypted,
+            'is_edited': m.is_edited,
+            'is_deleted': m.is_deleted,
+            'is_read': m.is_read,
+            'created_at': m.created_at.isoformat(),
+            'is_mine': m.sender_id == request.user.id,
+        } for m in msgs]
+        return Response(data)
+
+    def post(self, request, conv_id):
+        conv, err = self._get_conv(conv_id, request.user)
+        if err:
+            return err
+
+        content = request.data.get('content', '').strip()
+        if not content:
+            return Response({'error': 'Message content cannot be empty.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        msg = E2EMessage.objects.create(
+            conversation=conv,
+            sender=request.user,
+            encrypted_content=content,
+            nonce='',
+            recipient_pub_key='',
+            sender_encrypted_content='',
+            sender_nonce='',
+            sender_public_key='',
+            is_encrypted=False,
+        )
+        conv.updated_at = timezone.now()
+        conv.save(update_fields=['updated_at'])
+
+        try:
+            from channels.layers import get_channel_layer
+            from asgiref.sync import async_to_sync
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f'e2e_conv_{conv.id}',
+                {
+                    'type': 'new_e2e_message',
+                    'message_id': msg.id,
+                    'conversation_id': conv.id,
+                    'sender_id': request.user.id,
+                    'sender_name': request.user.get_full_name() or request.user.username,
+                    'encrypted_content': content,
+                    'nonce': '',
+                    'recipient_pub_key': '',
+                    'sender_encrypted_content': '',
+                    'sender_nonce': '',
+                    'sender_public_key': '',
+                    'is_encrypted': False,
+                    'created_at': msg.created_at.isoformat(),
+                }
+            )
+        except Exception as e:
+            logger.warning(f'[E2E] WebSocket broadcast failed (offline delivery via REST): {e}')
+
+        return Response({
+            'id': msg.id,
+            'sender_id': request.user.id,
+            'sender_name': request.user.get_full_name() or request.user.username,
+            'encrypted_content': content,
+            'nonce': '',
+            'recipient_pub_key': '',
+            'sender_encrypted_content': '',
+            'sender_nonce': '',
+            'sender_public_key': '',
+            'is_encrypted': False,
+            'is_edited': False,
+            'is_deleted': False,
+            'is_read': False,
+            'created_at': msg.created_at.isoformat(),
+            'is_mine': True,
+        }, status=status.HTTP_201_CREATED)
+
+
+class E2EMessageEditView(APIView):
+    """PATCH /api/messaging/e2e/messages/<id>/edit/"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, msg_id):
+        try:
+            msg = E2EMessage.objects.get(id=msg_id, sender=request.user)
+        except E2EMessage.DoesNotExist:
+            return Response({'error': 'Message not found or not yours.'}, status=status.HTTP_404_NOT_FOUND)
+
+        encrypted_content        = request.data.get('encrypted_content', '').strip()
+        nonce                    = request.data.get('nonce', '').strip()
+        sender_encrypted_content = request.data.get('sender_encrypted_content', '').strip()
+        sender_nonce             = request.data.get('sender_nonce', '').strip()
+
+        if not encrypted_content:
+            return Response({'error': 'Content cannot be empty.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        msg.encrypted_content        = encrypted_content
+        msg.nonce                    = nonce or msg.nonce
+        msg.sender_encrypted_content = sender_encrypted_content or msg.sender_encrypted_content
+        msg.sender_nonce             = sender_nonce or msg.sender_nonce
+        msg.is_edited                = True
+        msg.save(update_fields=['encrypted_content', 'nonce', 'sender_encrypted_content', 'sender_nonce', 'is_edited'])
+
+        try:
+            from channels.layers import get_channel_layer
+            from asgiref.sync import async_to_sync
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f'e2e_conv_{msg.conversation_id}',
+                {
+                    'type': 'message_edited',
+                    'message_id': msg.id,
+                    'encrypted_content': encrypted_content,
+                    'nonce': nonce,
+                    'sender_encrypted_content': sender_encrypted_content,
+                    'sender_nonce': sender_nonce,
+                    'is_edited': True,
+                }
+            )
+        except Exception as e:
+            logger.warning(f'[E2E] Edit WS broadcast failed: {e}')
+
+        return Response({'id': msg.id, 'is_edited': True})
+
+
+class E2EMessageDeleteView(APIView):
+    """DELETE /api/messaging/e2e/messages/<id>/delete/"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, msg_id):
+        try:
+            msg = E2EMessage.objects.get(id=msg_id, sender=request.user)
+        except E2EMessage.DoesNotExist:
+            return Response({'error': 'Message not found or not yours.'}, status=status.HTTP_404_NOT_FOUND)
+
+        msg.is_deleted               = True
+        msg.encrypted_content        = ''
+        msg.nonce                    = ''
+        msg.sender_encrypted_content = ''
+        msg.sender_nonce             = ''
+        msg.save(update_fields=['is_deleted', 'encrypted_content', 'nonce', 'sender_encrypted_content', 'sender_nonce'])
+
+        try:
+            from channels.layers import get_channel_layer
+            from asgiref.sync import async_to_sync
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f'e2e_conv_{msg.conversation_id}',
+                {'type': 'message_deleted', 'message_id': msg.id}
+            )
+        except Exception as e:
+            logger.warning(f'[E2E] Delete WS broadcast failed: {e}')
+
+        return Response({'deleted': True, 'message_id': msg.id})
+
+
+class E2EConversationDeleteView(APIView):
+    """DELETE /api/messaging/e2e/conversations/<id>/delete/"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, conv_id):
+        try:
+            conv = Conversation.objects.get(id=conv_id)
+        except Conversation.DoesNotExist:
+            return Response({'error': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        if not conv.participants.filter(id=request.user.id).exists():
+            return Response({'error': 'Forbidden.'}, status=status.HTTP_403_FORBIDDEN)
+        conv.participants.remove(request.user)
+        if conv.participants.count() == 0:
+            conv.delete()
+        return Response({'deleted': True})
+
+
+class UserSearchView(APIView):
+    """GET /api/messaging/users/search/?q=name"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        q = request.query_params.get('q', '').strip()
+        if len(q) < 2:
+            return Response({'results': []})
+        users = (
+            User.objects
+            .filter(
+                Q(username__icontains=q) |
+                Q(first_name__icontains=q) |
+                Q(last_name__icontains=q) |
+                Q(email__icontains=q),
+                is_active=True,
+            )
+            .exclude(id=request.user.id)[:10]
+        )
+        results = []
+        for u in users:
+            try:
+                pub_key = u.public_key.public_key
+            except Exception:
+                pub_key = None
+            results.append({
+                'id': u.id,
+                'full_name': u.get_full_name() or u.username,
+                'email': u.email,
+                'avatar_initials': _initials(u),
+                'public_key': pub_key,
+            })
+        return Response({'results': results})
+
+
+class UnreadCountView(APIView):
+    """GET /api/messaging/unread/"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        count = E2EMessage.objects.filter(
+            conversation__participants=request.user,
+            is_read=False,
+        ).exclude(sender=request.user).count()
+        return Response({'unread_count': count})

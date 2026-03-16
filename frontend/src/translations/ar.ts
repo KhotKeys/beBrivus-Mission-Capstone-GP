@@ -64,6 +64,7 @@ export default {
   
   // Additional UI
   'Tracker': 'المتتبع',
+  'Messages': 'الرسائل',
   'Find Opportunities': 'ابحث عن الفرص',
   'Find a Mentor': 'ابحث عن مرشد',
   'Track Applications': 'تتبع الطلبات',

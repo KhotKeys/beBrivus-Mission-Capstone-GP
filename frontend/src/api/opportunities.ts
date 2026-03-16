@@ -1,15 +1,16 @@
 import apiClient from './client';
 
 export interface Opportunity {
-  external_url: any;
+  external_url: string;
   category_name: string;
-  remote_allowed: any;
-  organization: ReactNode;
-  currency: any;
-  difficulty_level: ReactNode;
+  remote_allowed: boolean;
+  organization: string;
+  currency: string;
+  difficulty_level: string;
   created_at: string | number | Date;
   id: number;
   title: string;
+  short_description: string;
   company: string;
   company_logo?: string;
   location: string;
@@ -18,6 +19,9 @@ export interface Opportunity {
   experience_level: string;
   description: string;
   requirements: string;
+  benefits: string;
+  application_process: string;
+  required_documents: string;
   salary_min?: number;
   salary_max?: number;
   salary_currency: string;
@@ -31,6 +35,13 @@ export interface Opportunity {
   is_active: boolean;
   is_saved?: boolean;
   is_applied?: boolean;
+  status: string;
+  featured: boolean;
+  application_type: string;
+  category: number;
+  views_count: number;
+  applications_count: number;
+  tags?: string[];
 }
 
 export interface OpportunitySearchParams {

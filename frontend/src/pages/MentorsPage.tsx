@@ -22,34 +22,30 @@ export const MentorsPage: React.FC = () => {
         showZigZag
       />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="w-full min-w-0 overflow-x-hidden px-2 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
 
         {/* Search and Filters */}
-        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm mb-6 sm:mb-8">
-          <div className="flex flex-col lg:flex-row gap-4 items-center">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5" />
-                <Input
-                  type="text"
-                  placeholder={t("Search mentors by name, expertise, or company")}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 sm:pl-10 text-sm sm:text-base"
-                />
-              </div>
+        <div className="bg-white p-3 sm:p-6 rounded-lg shadow-sm mb-6 sm:mb-8">
+          <div className="flex flex-col gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                type="text"
+                placeholder={t("Search mentors by name, expertise, or company")}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 text-sm w-full"
+              />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full lg:w-auto">
+            <div className="flex flex-col gap-2">
               <select
                 value={filterExpertise}
                 onChange={(e) => setFilterExpertise(e.target.value)}
-                className="px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm sm:text-base w-full"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
               >
                 <option value="all">{t("All Expertise")}</option>
                 <option value="Product Management">{t("Product Management")}</option>
-                <option value="Software Engineering">
-                  {t("Software Engineering")}
-                </option>
+                <option value="Software Engineering">{t("Software Engineering")}</option>
                 <option value="Design">{t("Design")}</option>
                 <option value="Data Science">{t("Data Science")}</option>
                 <option value="Marketing">{t("Marketing")}</option>
@@ -57,7 +53,7 @@ export const MentorsPage: React.FC = () => {
               <select
                 value={filterAvailability}
                 onChange={(e) => setFilterAvailability(e.target.value)}
-                className="px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm sm:text-base w-full"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
               >
                 <option value="all">{t("All Availability")}</option>
                 <option value="Available">{t("Available")}</option>
@@ -67,7 +63,7 @@ export const MentorsPage: React.FC = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm sm:text-base w-full"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
               >
                 <option value="match">{t("Best Match")}</option>
                 <option value="rating">{t("Highest Rated")}</option>

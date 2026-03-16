@@ -457,6 +457,7 @@ def notify_mentor_invitation(mentor_email: str, mentor_name: str, invitation_dat
         'topic': invitation_data.get('topic', ''),
         'description': invitation_data.get('description', ''),
         'accept_link': invitation_data.get('accept_link', ''),
+        'frontend_url': getattr(settings, 'FRONTEND_URL', 'https://bebrivus.com'),
     }
     
     return EmailService.send_html_email(

@@ -4,8 +4,8 @@ import { ArrowRight } from "lucide-react";
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="bg-secondary-900 text-white pt-10 sm:pt-16 pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <footer className="bg-secondary-900 text-white pt-10 sm:pt-16 pb-8" style={{ minWidth: '150px', overflowX: 'hidden', width: '100%', boxSizing: 'border-box' }}>
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8" style={{ width: '100%', boxSizing: 'border-box' }}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 sm:gap-12 mb-10 sm:mb-12">
           {/* Company Info */}
           <div>

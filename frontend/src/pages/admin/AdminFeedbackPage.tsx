@@ -392,7 +392,7 @@ export default function AdminFeedbackPage() {
                     </div>
 
                     <div style={{ marginBottom: '14px' }}>
-                      <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Admin Response / Note</label>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>beBrivus Response / Note</label>
                       <textarea
                         value={edit.admin_note}
                         onChange={e => updateEditState(fb.id, 'admin_note', e.target.value)}

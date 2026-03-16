@@ -64,6 +64,7 @@ export default {
   
   // Additional UI
   'Tracker': 'Rastreador',
+  'Messages': 'Mensagens',
   'Find Opportunities': 'Encontrar oportunidades',
   'Find a Mentor': 'Encontrar um mentor',
   'Track Applications': 'Rastrear candidaturas',

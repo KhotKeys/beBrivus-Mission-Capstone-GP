@@ -317,6 +317,25 @@ class ResourceProgressView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
 
+class ResourceTrackViewView(APIView):
+    """POST /resources/<id>/view/ — record a ResourceView for analytics"""
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, resource_id):
+        try:
+            resource = Resource.objects.get(id=resource_id, is_published=True)
+        except Resource.DoesNotExist:
+            return Response({'error': 'Resource not found'}, status=status.HTTP_404_NOT_FOUND)
+        ResourceView.objects.create(
+            resource=resource,
+            user=request.user if request.user.is_authenticated else None,
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', ''),
+        )
+        resource.increment_view_count()
+        return Response({'view_count': resource.view_count})
+
+
 class ResourceDownloadView(APIView):
     """Handle resource downloads"""
     permission_classes = [permissions.AllowAny]

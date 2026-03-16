@@ -64,6 +64,7 @@ export default {
   
   // Additional UI
   'Tracker': 'Lɔn wäär',
+  'Messages': 'Wɛc',
   'Find Opportunities': 'Lɔn cï wëu',
   'Find a Mentor': 'Lɔn wäär cï lëu',
   'Track Applications': 'Lɔn cï lɔn',

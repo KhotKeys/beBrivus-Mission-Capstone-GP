@@ -115,6 +115,7 @@ class OpportunityViewSet(viewsets.ReadOnlyModelViewSet):
             status='submitted',
             submitted_at=timezone.now(),
             cover_letter=cover_letter,
+            phone=phone,
             age=int(age) if age else None,
             university=university,
             course=course,

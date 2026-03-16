@@ -26,6 +26,7 @@ class Application(models.Model):
     additional_info = models.TextField(blank=True)
     
     # New application form fields
+    phone = models.CharField(max_length=30, blank=True)
     age = models.PositiveIntegerField(blank=True, null=True)
     university = models.CharField(max_length=200, blank=True)
     course = models.CharField(max_length=200, blank=True)

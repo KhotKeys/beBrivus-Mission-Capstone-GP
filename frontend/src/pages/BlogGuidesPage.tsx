@@ -1,8 +1,10 @@
 import React from "react";
 import { Layout } from "../components/layout";
+import { useTranslation } from 'react-i18next';
 import { BookOpen, FileText, Video } from "lucide-react";
 
 export const BlogGuidesPage: React.FC = () => {
+  const { t } = useTranslation();
   const guides = [
     {
       title: "The Ultimate Scholarship Application Guide",

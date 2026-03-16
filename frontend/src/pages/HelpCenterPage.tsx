@@ -1,8 +1,10 @@
 import React from "react";
 import { Layout } from "../components/layout";
+import { useTranslation } from 'react-i18next';
 import { LifeBuoy, Search, BookOpen, MessageCircle, Mail } from "lucide-react";
 
 export const HelpCenterPage: React.FC = () => {
+  const { t } = useTranslation();
   const categories = [
     {
       icon: Search,
@@ -87,19 +89,19 @@ export const HelpCenterPage: React.FC = () => {
 
           {/* Popular Articles */}
           <div className="bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg p-4 xs:p-5 sm:p-6 lg:p-8 mb-4 xs:mb-5 sm:mb-6 lg:mb-8">
-            <h2 className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-secondary-900 mb-3 xs:mb-4 sm:mb-5 lg:mb-6 text-center">Popular Articles</h2>
+            <h2 className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-secondary-900 mb-3 xs:mb-4 sm:mb-5 lg:mb-6 text-center">{t('Popular Articles')}</h2>
             <div className="space-y-2 xs:space-y-3 sm:space-y-4">
               <a href="#" className="block p-2 xs:p-3 sm:p-4 hover:bg-neutral-50 rounded-md xs:rounded-lg transition-colors">
-                <h3 className="font-semibold text-secondary-900 mb-0.5 xs:mb-1 text-xs xs:text-sm sm:text-base">How do I create an account?</h3>
-                <p className="text-secondary-600 text-[10px] xs:text-xs sm:text-sm">Step-by-step guide to getting started with beBrivus</p>
+                <h3 className="font-semibold text-secondary-900 mb-0.5 xs:mb-1 text-xs xs:text-sm sm:text-base">{t('How do I create an account?')}</h3>
+                <p className="text-secondary-600 text-[10px] xs:text-xs sm:text-sm">{t('Step-by-step guide to getting started with beBrivus')}</p>
               </a>
               <a href="#" className="block p-2 xs:p-3 sm:p-4 hover:bg-neutral-50 rounded-md xs:rounded-lg transition-colors">
-                <h3 className="font-semibold text-secondary-900 mb-0.5 xs:mb-1 text-xs xs:text-sm sm:text-base">How does the AI recommendation system work?</h3>
-                <p className="text-secondary-600 text-[10px] xs:text-xs sm:text-sm">Learn about our personalized opportunity matching</p>
+                <h3 className="font-semibold text-secondary-900 mb-0.5 xs:mb-1 text-xs xs:text-sm sm:text-base">{t('How does the AI recommendation system work?')}</h3>
+                <p className="text-secondary-600 text-[10px] xs:text-xs sm:text-sm">{t('Learn about our personalized opportunity matching')}</p>
               </a>
               <a href="#" className="block p-2 xs:p-3 sm:p-4 hover:bg-neutral-50 rounded-md xs:rounded-lg transition-colors">
-                <h3 className="font-semibold text-secondary-900 mb-0.5 xs:mb-1 text-xs xs:text-sm sm:text-base">How do I connect with a mentor?</h3>
-                <p className="text-secondary-600 text-[10px] xs:text-xs sm:text-sm">Find and book sessions with expert mentors</p>
+                <h3 className="font-semibold text-secondary-900 mb-0.5 xs:mb-1 text-xs xs:text-sm sm:text-base">{t('How do I connect with a mentor?')}</h3>
+                <p className="text-secondary-600 text-[10px] xs:text-xs sm:text-sm">{t('Find and book sessions with expert mentors')}</p>
               </a>
             </div>
           </div>
@@ -107,7 +109,7 @@ export const HelpCenterPage: React.FC = () => {
           {/* Contact Support */}
           <div className="grid md:grid-cols-2 gap-3 xs:gap-4 sm:gap-5 lg:gap-6">
             <div className="bg-gradient-to-br from-primary-600 to-secondary-600 rounded-lg xs:rounded-xl sm:rounded-2xl p-4 xs:p-5 sm:p-6 lg:p-8 text-white text-center md:text-left">
-              <h3 className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-bold mb-2 xs:mb-3">Still Need Help?</h3>
+              <h3 className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-bold mb-2 xs:mb-3">{t('Still Need Help?')}</h3>
               <p className="text-primary-100 mb-3 xs:mb-4 sm:mb-5 lg:mb-6 text-[10px] xs:text-xs sm:text-sm md:text-base">
                 Our support team is ready to assist you with any questions
               </p>
@@ -119,7 +121,7 @@ export const HelpCenterPage: React.FC = () => {
               </a>
             </div>
             <div className="bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg p-4 xs:p-5 sm:p-6 lg:p-8 text-center md:text-left">
-              <h3 className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-secondary-900 mb-2 xs:mb-3">Browse All Topics</h3>
+              <h3 className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-secondary-900 mb-2 xs:mb-3">{t('Browse All Topics')}</h3>
               <p className="text-secondary-700 mb-3 xs:mb-4 sm:mb-5 lg:mb-6 text-[10px] xs:text-xs sm:text-sm md:text-base">
                 Explore our complete knowledge base for detailed guides and tutorials
               </p>

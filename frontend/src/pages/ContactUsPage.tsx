@@ -1,8 +1,10 @@
 import React from "react";
 import { Layout } from "../components/layout";
+import { useTranslation } from 'react-i18next';
 import { Mail, Phone, MapPin, MessageSquare, Send } from "lucide-react";
 
 export const ContactUsPage: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white py-6 xs:py-8 sm:py-12 lg:py-16 xl:py-20 relative overflow-x-hidden">
@@ -98,9 +100,9 @@ export const ContactUsPage: React.FC = () => {
                       <Mail className="w-5 h-5 xs:w-6 xs:h-6 text-primary-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-secondary-900 mb-1 text-xs xs:text-sm sm:text-base">Email</h3>
-                      <p className="text-secondary-600 text-[10px] xs:text-xs sm:text-sm">support@bebrivus.com</p>
-                      <p className="text-secondary-600 text-[10px] xs:text-xs sm:text-sm">partnerships@bebrivus.com</p>
+                      <h3 className="font-semibold text-secondary-900 mb-1 text-xs xs:text-sm sm:text-base">{t('Email')}</h3>
+                      <p className="text-secondary-600 text-[10px] xs:text-xs sm:text-sm">{t('support@bebrivus.com')}</p>
+                      <p className="text-secondary-600 text-[10px] xs:text-xs sm:text-sm">{t('partnerships@bebrivus.com')}</p>
                     </div>
                   </div>
 
@@ -109,9 +111,9 @@ export const ContactUsPage: React.FC = () => {
                       <Phone className="w-5 h-5 xs:w-6 xs:h-6 text-success-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-secondary-900 mb-1 text-xs xs:text-sm sm:text-base">Phone</h3>
-                      <p className="text-secondary-600 text-[10px] xs:text-xs sm:text-sm"><a href="tel:+250798619967" className="hover:text-primary-600">+250 798 619 967</a></p>
-                      <p className="text-secondary-500 text-[9px] xs:text-[10px] sm:text-xs">Mon-Fri, 8am-5pm CAT</p>
+                      <h3 className="font-semibold text-secondary-900 mb-1 text-xs xs:text-sm sm:text-base">{t('Phone')}</h3>
+                      <p className="text-secondary-600 text-[10px] xs:text-xs sm:text-sm"><a href="tel:+250798619967" className="hover:text-primary-600">{t('+250 798 619 967')}</a></p>
+                      <p className="text-secondary-500 text-[9px] xs:text-[10px] sm:text-xs">{t('Mon-Fri, 8am-5pm CAT')}</p>
                     </div>
                   </div>
 
@@ -120,7 +122,7 @@ export const ContactUsPage: React.FC = () => {
                       <MapPin className="w-5 h-5 xs:w-6 xs:h-6 text-warning-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-secondary-900 mb-1 text-xs xs:text-sm sm:text-base">Address</h3>
+                      <h3 className="font-semibold text-secondary-900 mb-1 text-xs xs:text-sm sm:text-base">{t('Address')}</h3>
                       <p className="text-secondary-600 text-[10px] xs:text-xs sm:text-sm">
                         beBrivus Inc.<br />
                         KG 11 Ave<br />

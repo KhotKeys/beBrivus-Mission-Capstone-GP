@@ -35,9 +35,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Check if user is authenticated on mount
   useEffect(() => {
-    const initAuth = () => {
+    const initAuth = async () => {
       const accessToken = tokenManager.getAccessToken();
+      const refreshToken = tokenManager.getRefreshToken();
 
+      // If access token is valid, restore user from localStorage
       if (accessToken && !tokenManager.isTokenExpired(accessToken)) {
         try {
           const userProfile = localStorage.getItem("user");
@@ -48,7 +50,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           console.error("Failed to get user profile:", error);
           tokenManager.clearTokens();
         }
+        setIsLoading(false);
+        return;
       }
+
+      // Access token expired — try silent refresh before logging out
+      if (refreshToken && !tokenManager.isTokenExpired(refreshToken)) {
+        try {
+          // Use plain axios (not apiClient) to avoid the response interceptor
+          // redirecting to /login when the refresh itself fails
+          const { default: axios } = await import('axios');
+          const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/api';
+          const res = await axios.post(`${API_BASE_URL}/auth/token/refresh/`, { refresh: refreshToken });
+          const newAccess = res.data.access;
+          const newRefresh = res.data.refresh || refreshToken;
+          tokenManager.setTokens(newAccess, newRefresh);
+          // Fetch fresh profile with new token
+          const userProfile = await authApi.getProfile();
+          localStorage.setItem("user", JSON.stringify(userProfile));
+          setUser(userProfile);
+        } catch (error) {
+          console.error("Silent refresh failed:", error);
+          tokenManager.clearTokens();
+          localStorage.removeItem('user');
+        }
+      } else {
+        // Both tokens gone/expired — clear everything
+        tokenManager.clearTokens();
+        localStorage.removeItem('user');
+      }
+
       setIsLoading(false);
     };
 
@@ -122,7 +153,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const updateProfile = async (data: Partial<User>) => {
     try {
-      const updatedUser = await authApi.updateProfile(data);
+      // Merge into current user in state/localStorage without re-PATCHing
+      // (actual PATCH is done by the caller via profileApi)
+      const current = user || ({} as User);
+      const updatedUser = { ...current, ...data };
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
     } catch (error) {

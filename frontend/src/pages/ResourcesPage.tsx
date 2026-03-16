@@ -199,7 +199,15 @@ export const ResourcesPage: React.FC = () => {
     return `https://${url}`;
   };
 
+  const trackView = async (resourceId: number) => {
+    try {
+      const { default: apiClient } = await import('../api/client');
+      await apiClient.post(`/resources/${resourceId}/view/`);
+    } catch {}
+  };
+
   const handleDownload = (resource: Resource) => {
+    trackView(resource.id);
     if (resource.file) {
       const resolved = normalizeUrl(resource.file);
       window.open(resolved, "_blank", "noopener,noreferrer");
@@ -207,6 +215,7 @@ export const ResourcesPage: React.FC = () => {
   };
 
   const handleOpenLink = (resource: Resource) => {
+    trackView(resource.id);
     if (resource.external_url) {
       const resolved = normalizeUrl(resource.external_url);
       window.open(resolved, "_blank", "noopener,noreferrer");
@@ -419,6 +428,7 @@ export const ResourcesPage: React.FC = () => {
         key={i18n.language}
         title={t('Resource Library')}
         subtitle={t('Resources hero description')}
+        backgroundImage="/commons.png"
       />
 
       <div className="bg-white border-b border-neutral-200">

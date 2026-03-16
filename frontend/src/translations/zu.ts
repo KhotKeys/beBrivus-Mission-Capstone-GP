@@ -64,6 +64,7 @@ export default {
   
   // Additional UI
   'Tracker': 'Umlandeli',
+  'Messages': 'Imiyalezo',
   'Find Opportunities': 'Thola amathuba',
   'Find a Mentor': 'Thola umeluleki',
   'Track Applications': 'Landela izicelo',

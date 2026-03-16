@@ -262,8 +262,8 @@ const AddApplicationModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
+      <div className="bg-white rounded-t-2xl sm:rounded-lg p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Add Application</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
@@ -369,8 +369,8 @@ const ViewApplicationModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
+      <div className="bg-white rounded-t-2xl sm:rounded-lg p-6 w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold">Application Details</h2>
           <div className="flex gap-2">
@@ -455,7 +455,7 @@ const ViewApplicationModal: React.FC<{
           {/* Notes */}
           {application.notes && (
             <div>
-              <h4 className="text-sm font-medium text-gray-900 mb-2">Admin Feedback</h4>
+              <h4 className="text-sm font-medium text-gray-900 mb-2">beBrivus Feedback</h4>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p className="text-gray-700 whitespace-pre-wrap">
                   {application.notes}
@@ -543,8 +543,8 @@ const EditApplicationModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
+      <div className="bg-white rounded-t-2xl sm:rounded-lg p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Edit Application</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
@@ -666,19 +666,19 @@ export const TrackerPage: React.FC = () => {
 
   // Load applications on component mount
   useEffect(() => {
-    loadApplications();
+    loadApplications(true);
     
-    // Auto-refresh every 30 seconds to catch status updates
+    // Auto-refresh every 30 seconds — silent, no loading spinner
     const interval = setInterval(() => {
-      loadApplications();
+      loadApplications(false);
     }, 30000);
     
     return () => clearInterval(interval);
   }, []);
 
-  const loadApplications = async () => {
+  const loadApplications = async (isInitial = false) => {
     try {
-      setLoading(true);
+      if (isInitial) setLoading(true);
       setError(null);
       const response = await applicationsApi.getApplications({
         ordering: "-submitted_at",
@@ -686,11 +686,11 @@ export const TrackerPage: React.FC = () => {
       setApplications(response.results || []);
     } catch (err) {
       console.error("Failed to load applications:", err);
-      if (!applications.length) { // Only show error if no cached data
+      if (isInitial) {
         setError("Failed to load applications. Please try again.");
       }
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 
@@ -819,7 +819,7 @@ export const TrackerPage: React.FC = () => {
             <div className="text-center">
               <AlertCircle className="h-8 w-8 mx-auto mb-4 text-red-500" />
               <p className="text-red-600 mb-4">{error}</p>
-              <Button onClick={loadApplications}>Try Again</Button>
+              <Button onClick={() => loadApplications(true)}>Try Again</Button>
             </div>
           </div>
         </div>
@@ -836,7 +836,7 @@ export const TrackerPage: React.FC = () => {
         backgroundImage="/tracker.jpeg"
         showZigZag
       />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 overflow-x-hidden min-w-0">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8 text-center sm:text-left">
           <div>
             <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">

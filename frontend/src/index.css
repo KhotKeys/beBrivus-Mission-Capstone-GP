@@ -172,6 +172,12 @@
 /* Custom Screens for Tailwind */
 @custom-media --xs (min-width: 320px);
 
+/* App root responsive floor — 150px minimum width */
+#root {
+  min-width: 150px;
+  width: 100%;
+}
+
 /* Base Styles */
 body {
   font-family: var(--font-family-sans);
@@ -197,6 +203,23 @@ body {
 
 .btn-secondary {
   @apply bg-secondary-200 text-secondary-900 hover:bg-secondary-300 focus:ring-secondary-500;
+}
+
+@media (max-width: 319px) {
+  .profile-name-h1 {
+    font-size: 0.85rem;
+    line-height: 1.2;
+  }
+
+  .profile-section-h2 {
+    font-size: 0.75rem;
+    line-height: 1.2;
+  }
+
+  .profile-delete-btn {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.5rem;
+  }
 }
 
 @media (max-width: 196px) {
@@ -385,7 +408,7 @@ body {
 
 /* Prevent horizontal overflow */
 [dir="rtl"] body {
-  overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* Language Selector Dropdown Fix */

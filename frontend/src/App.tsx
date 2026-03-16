@@ -71,6 +71,7 @@ import { PartnerWithUsPage } from "./pages/PartnerWithUsPage";
 import { UploadedResourcesPage } from "./pages/UploadedResourcesPage";
 import FeedbackPage from "./pages/FeedbackPage";
 import { DeleteAccountPage } from "./pages/DeleteAccountPage";
+import MessagesPage from "./pages/MessagesPage";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -278,6 +279,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <DeleteAccountPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/messages"
+        element={
+          <ProtectedRoute>
+            <MessagesPage />
           </ProtectedRoute>
         }
       />

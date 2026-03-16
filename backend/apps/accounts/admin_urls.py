@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import admin_views
+from .views import WeeklyAnalyticsView, WeeklyAnalyticsExportView
 
 app_name = 'admin_accounts'
 
@@ -19,6 +20,10 @@ urlpatterns = [
     path('analytics/', admin_views.AnalyticsDashboardView.as_view(), name='analytics'),
     path('analytics/ai-insights/', admin_views.AIAnalyticsInsightView.as_view(), name='ai-insights'),
     
+    # Weekly analytics
+    path('analytics/weekly/', WeeklyAnalyticsView.as_view(), name='analytics-weekly'),
+    path('analytics/weekly/export/', WeeklyAnalyticsExportView.as_view(), name='analytics-weekly-export'),
+
     # Search
     path('search/', admin_views.AdminSearchView.as_view(), name='admin-search'),
     

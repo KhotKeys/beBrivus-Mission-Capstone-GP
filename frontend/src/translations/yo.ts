@@ -64,6 +64,7 @@ export default {
   
   // Additional UI
   'Tracker': 'Olutọpa',
+  'Messages': 'Awọn ifiranṣẹ',
   'Find Opportunities': 'Wa awọn anfaani',
   'Find a Mentor': 'Wa olukọni',
   'Track Applications': 'Tọpa awọn ibeere',

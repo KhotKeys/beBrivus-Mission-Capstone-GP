@@ -231,7 +231,7 @@ export const InstitutionOpportunitiesPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="bg-white">
+      <div className="bg-white" style={{ minWidth: 0, overflowX: 'hidden', width: '100%' }}>
         <section
           className="relative overflow-hidden"
           style={{
@@ -242,7 +242,7 @@ export const InstitutionOpportunitiesPage: React.FC = () => {
             backgroundRepeat: "no-repeat",
           }}
         >
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+          <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8 py-16 sm:py-20">
             <div className="max-w-3xl">
               <p className="text-xs uppercase tracking-[0.3em] text-primary-200">
                 Institution Portal
@@ -282,18 +282,18 @@ export const InstitutionOpportunitiesPage: React.FC = () => {
           </div>
         </section>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-4 sm:space-y-6">
+        <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-10 space-y-4 sm:space-y-6">
           {/* Navigation Tabs */}
-          <div className="flex gap-2 border-b border-neutral-200">
+          <div className="flex gap-1 sm:gap-2 border-b border-neutral-200 overflow-x-auto">
             <Link
               to="/institution/opportunities"
-              className="px-4 py-2 text-sm font-medium border-b-2 border-primary-600 text-primary-600"
+              className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border-b-2 border-primary-600 text-primary-600 whitespace-nowrap"
             >
               Opportunities
             </Link>
             <Link
               to="/institution/applications"
-              className="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-neutral-600 hover:text-neutral-900 hover:border-neutral-300"
+              className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border-b-2 border-transparent text-neutral-600 hover:text-neutral-900 hover:border-neutral-300 whitespace-nowrap"
             >
               Applications
             </Link>

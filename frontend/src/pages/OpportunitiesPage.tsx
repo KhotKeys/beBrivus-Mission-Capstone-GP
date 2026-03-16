@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import {
   Search,
@@ -29,11 +30,9 @@ const OpportunityCard: React.FC<{
 }> = ({ opportunity, onSave }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const handleSave = () => {
-    if (onSave) {
-      onSave(opportunity.id);
-    }
-  };
+  const [showDetail, setShowDetail] = useState(false);
+
+  const handleSave = () => { if (onSave) onSave(opportunity.id); };
 
   const handleApply = async () => {
     // If external application, open external link
@@ -246,6 +245,7 @@ const OpportunityCard: React.FC<{
                   size="sm"
                   variant="secondary"
                   className="w-full md:w-auto text-[11px] sm:text-sm px-3 py-2 justify-center"
+                  onClick={() => setShowDetail(true)}
                 >
                   <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
                   {t("Learn More")}
@@ -282,6 +282,162 @@ const OpportunityCard: React.FC<{
           </div>
         )}
       </CardBody>
+
+      {showDetail && createPortal(
+        <div
+          style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '16px', boxSizing: 'border-box',
+          }}
+          onClick={() => setShowDetail(false)}
+        >
+          {/* Background image */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+            backgroundImage: 'url(/opportunitry-management.png)',
+            backgroundSize: 'cover', backgroundPosition: 'center',
+            filter: 'blur(4px)', transform: 'scale(1.05)',
+          }} />
+          {/* Dim overlay */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+            background: 'rgba(0,0,0,0.5)',
+          }} />
+          {/* Modal card */}
+          <div
+            style={{
+              position: 'relative', zIndex: 1,
+              background: '#fff', borderRadius: '12px',
+              width: '100%', maxWidth: '680px',
+              maxHeight: '90vh', overflowY: 'auto',
+              padding: '24px', boxSizing: 'border-box',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close */}
+            <button onClick={() => setShowDetail(false)}
+              style={{ position: 'absolute', top: '14px', right: '14px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', lineHeight: 1, color: '#6b7280' }}
+              aria-label="Close">✕</button>
+
+            {/* ── BASIC INFORMATION ── */}
+            <div style={{ marginBottom: '18px', paddingRight: '28px' }}>
+              <p style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9ca3af', margin: '0 0 8px' }}>Basic Information</p>
+              <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#111827', margin: '0 0 8px', lineHeight: 1.3 }}>{opportunity.title}</h2>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '10px' }}>
+                <span style={{ padding: '2px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 600, background: '#e0f2fe', color: '#0369a1' }}>{opportunity.category_name}</span>
+                <span style={{ padding: '2px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 600, background: '#f3f4f6', color: '#374151' }}>{opportunity.difficulty_level}</span>
+                <span style={{ padding: '2px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 600, background: opportunity.application_type === 'external' ? '#fef3c7' : '#d1fae5', color: opportunity.application_type === 'external' ? '#92400e' : '#065f46' }}>
+                  {opportunity.application_type === 'external' ? 'External Application' : 'Internal (Platform)'}
+                </span>
+                {opportunity.remote_allowed && <span style={{ padding: '2px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 600, background: '#dbeafe', color: '#1d4ed8' }}>Remote</span>}
+                {opportunity.featured && <span style={{ padding: '2px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 600, background: '#fef9c3', color: '#854d0e' }}>⭐ Featured</span>}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(130px,1fr))', gap: '8px', fontSize: '12px', color: '#4b5563' }}>
+                <div style={{ display: 'flex', gap: '5px' }}>
+                  <Award style={{ width: 13, height: 13, marginTop: 2, flexShrink: 0, color: '#6b7280' }} />
+                  <div><div style={{ fontSize: '9px', color: '#9ca3af', fontWeight: 700, textTransform: 'uppercase', marginBottom: 1 }}>Organization</div>{String(opportunity.organization)}</div>
+                </div>
+                {opportunity.location && (
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    <MapPin style={{ width: 13, height: 13, marginTop: 2, flexShrink: 0, color: '#6b7280' }} />
+                    <div><div style={{ fontSize: '9px', color: '#9ca3af', fontWeight: 700, textTransform: 'uppercase', marginBottom: 1 }}>Location</div>{opportunity.location}</div>
+                  </div>
+                )}
+                {opportunity.application_deadline && (
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    <Calendar style={{ width: 13, height: 13, marginTop: 2, flexShrink: 0, color: '#6b7280' }} />
+                    <div>
+                      <div style={{ fontSize: '9px', color: '#9ca3af', fontWeight: 700, textTransform: 'uppercase', marginBottom: 1 }}>Application Deadline</div>
+                      {new Date(opportunity.application_deadline).toLocaleDateString()}
+                      {daysLeft !== null && (
+                        <span style={{ marginLeft: 4, fontSize: '10px', color: daysLeft <= 7 ? '#dc2626' : '#6b7280' }}>
+                          ({daysLeft > 0 ? `${daysLeft} days left` : 'Passed'})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {(opportunity.salary_min || opportunity.salary_max) && (
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    <DollarSign style={{ width: 13, height: 13, marginTop: 2, flexShrink: 0, color: '#6b7280' }} />
+                    <div>
+                      <div style={{ fontSize: '9px', color: '#9ca3af', fontWeight: 700, textTransform: 'uppercase', marginBottom: 1 }}>Amount / Stipend</div>
+                      {opportunity.salary_min && opportunity.salary_max
+                        ? `${opportunity.salary_min.toLocaleString()} – ${opportunity.salary_max.toLocaleString()} ${opportunity.currency}`
+                        : opportunity.salary_min
+                        ? `${opportunity.salary_min.toLocaleString()}+ ${opportunity.currency}`
+                        : `Up to ${opportunity.salary_max?.toLocaleString()} ${opportunity.currency}`}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <hr style={{ margin: '0 0 14px', borderColor: '#e5e7eb' }} />
+
+            {/* ── DESCRIPTION & DETAILS ── */}
+            <div style={{ marginBottom: '14px' }}>
+              <p style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9ca3af', margin: '0 0 10px' }}>Description &amp; Details</p>
+
+              <div style={{ marginBottom: '12px' }}>
+                <h4 style={{ fontSize: '12px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>Description</h4>
+                <p style={{ fontSize: '13px', color: '#374151', lineHeight: 1.65, whiteSpace: 'pre-wrap', margin: 0 }}>{opportunity.description}</p>
+              </div>
+
+              {opportunity.requirements && (
+                <div style={{ marginBottom: '12px' }}>
+                  <h4 style={{ fontSize: '12px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>Requirements</h4>
+                  <p style={{ fontSize: '13px', color: '#374151', lineHeight: 1.65, whiteSpace: 'pre-wrap', margin: 0 }}>{opportunity.requirements}</p>
+                </div>
+              )}
+
+              {opportunity.benefits && (
+                <div style={{ marginBottom: '12px' }}>
+                  <h4 style={{ fontSize: '12px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>Benefits</h4>
+                  <p style={{ fontSize: '13px', color: '#374151', lineHeight: 1.65, whiteSpace: 'pre-wrap', margin: 0 }}>{opportunity.benefits}</p>
+                </div>
+              )}
+
+              {opportunity.application_process && (
+                <div style={{ marginBottom: '12px' }}>
+                  <h4 style={{ fontSize: '12px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>Application Process</h4>
+                  <p style={{ fontSize: '13px', color: '#374151', lineHeight: 1.65, whiteSpace: 'pre-wrap', margin: 0 }}>{opportunity.application_process}</p>
+                </div>
+              )}
+            </div>
+
+            {/* ── CONTACT & LINKS ── */}
+            {opportunity.external_url && (
+              <>
+                <hr style={{ margin: '0 0 14px', borderColor: '#e5e7eb' }} />
+                <div style={{ marginBottom: '14px' }}>
+                  <p style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9ca3af', margin: '0 0 8px' }}>Contact &amp; Links</p>
+                  <div style={{ fontSize: '12px' }}>
+                    <span style={{ color: '#6b7280', marginRight: 6 }}>External URL:</span>
+                    <a href={opportunity.external_url} target="_blank" rel="noopener noreferrer"
+                      style={{ color: '#4f46e5', wordBreak: 'break-all' }}>{opportunity.external_url}</a>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ── ACTIONS ── */}
+            <div style={{ display: 'flex', gap: '10px', marginTop: '16px', flexWrap: 'wrap' }}>
+              <button onClick={() => { setShowDetail(false); handleApply(); }}
+                style={{ flex: '1 1 120px', padding: '10px 16px', borderRadius: '8px', background: '#4f46e5', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}>
+                {opportunity.application_type === 'external' ? 'Apply Externally' : 'Apply Now'}
+              </button>
+              <button onClick={() => setShowDetail(false)}
+                style={{ flex: '1 1 80px', padding: '10px 16px', borderRadius: '8px', background: '#f3f4f6', color: '#374151', border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </Card>
   );
 };
@@ -294,6 +450,10 @@ export const OpportunitiesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("match");
+  const [visibleCount, setVisibleCount] = useState(5);
+
+  // Reset visible count when filters/search change
+  useEffect(() => { setVisibleCount(5); }, [searchTerm, filterType, sortBy]);
 
   // Load opportunities on component mount
   useEffect(() => {
@@ -382,7 +542,7 @@ export const OpportunitiesPage: React.FC = () => {
       />
       
       <div className="min-h-screen bg-neutral-50">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="w-full min-w-0 overflow-x-hidden px-2 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
           {/* Filters */}
           <Card className="mb-6 sm:mb-8">
             <CardBody className="p-3 sm:p-4 md:p-6">
@@ -488,7 +648,7 @@ export const OpportunitiesPage: React.FC = () => {
           {/* Opportunities List */}
           {!loading && !error && (
             <div className="space-y-4 sm:space-y-6">
-              {sortedOpportunities.map((opportunity) => (
+              {sortedOpportunities.slice(0, visibleCount).map((opportunity) => (
                 <OpportunityCard
                   key={opportunity.id}
                   opportunity={opportunity}
@@ -525,9 +685,14 @@ export const OpportunitiesPage: React.FC = () => {
           )}
 
           {/* Load More */}
-          {sortedOpportunities.length > 0 && (
+          {sortedOpportunities.length > visibleCount && (
             <div className="text-center mt-8">
-              <Button variant="secondary">{t("Load More Opportunities")}</Button>
+              <Button
+                variant="secondary"
+                onClick={() => setVisibleCount((c) => c + 5)}
+              >
+                {t("Load More Opportunities")}
+              </Button>
             </div>
           )}
         </div>
@@ -535,3 +700,4 @@ export const OpportunitiesPage: React.FC = () => {
     </Layout>
   );
 };
+

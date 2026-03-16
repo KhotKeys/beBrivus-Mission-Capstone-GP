@@ -64,6 +64,7 @@ export default {
   
   // Additional UI
   'Tracker': 'Kifuatiliaji',
+  'Messages': 'Ujumbe',
   'Find Opportunities': 'Tafuta fursa',
   'Find a Mentor': 'Tafuta mshauri',
   'Track Applications': 'Fuatilia maombi',

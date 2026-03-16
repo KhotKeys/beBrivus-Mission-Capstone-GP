@@ -12,15 +12,15 @@ const adminApiClient = axios.create({
 });
 
 export const adminTokenManager = {
-  getAccessToken: () => localStorage.getItem('admin_access_token'),
-  getRefreshToken: () => localStorage.getItem('admin_refresh_token'),
+  getAccessToken: () => localStorage.getItem('adminToken'),
+  getRefreshToken: () => localStorage.getItem('adminRefreshToken'),
   setTokens: (accessToken: string, refreshToken: string) => {
-    localStorage.setItem('admin_access_token', accessToken);
-    localStorage.setItem('admin_refresh_token', refreshToken);
+    localStorage.setItem('adminToken', accessToken);
+    localStorage.setItem('adminRefreshToken', refreshToken);
   },
   clearTokens: () => {
-    localStorage.removeItem('admin_access_token');
-    localStorage.removeItem('admin_refresh_token');
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminRefreshToken');
   },
   isTokenExpired: (token: string): boolean => {
     try {

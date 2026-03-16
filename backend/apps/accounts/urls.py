@@ -21,6 +21,7 @@ urlpatterns = [
     
     # Profile
     path('profile/', views.ProfileView.as_view(), name='profile'),
+    path('profile/picture/', views.DeleteProfilePictureView.as_view(), name='delete-profile-picture'),
     
     # Skills
     path('skills/', views.UserSkillViewSet.as_view(), name='skills'),

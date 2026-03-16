@@ -92,8 +92,8 @@ export const InstitutionApplicationResponsesPage: React.FC = () => {
         subtitle="Review and manage applications for your opportunities"
         variant="rounded"
       />
-      <div className="container mx-auto px-4 py-6 sm:py-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="w-full min-w-0 overflow-x-hidden px-2 sm:px-4 py-4 sm:py-8">
+        <div className="w-full max-w-7xl mx-auto min-w-0">
           {/* Navigation Tabs - Hidden on hero, kept for functionality */}
           <div className="flex gap-2 border-b border-neutral-200 mb-6" style={{ visibility: 'hidden', height: 0, overflow: 'hidden' }}>
             <Link
@@ -120,22 +120,22 @@ export const InstitutionApplicationResponsesPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-100 p-4 mb-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-100 p-2 sm:p-4 mb-4 sm:mb-6">
+            <div className="flex flex-col gap-2">
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-neutral-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Search applications..."
+                  placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full pl-8 pr-2 py-2 text-xs sm:text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-2 py-2 text-xs sm:text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
               >
                 <option value="all">All Status</option>
                 <option value="clicked">Clicked</option>
@@ -170,48 +170,48 @@ export const InstitutionApplicationResponsesPage: React.FC = () => {
               <p className="text-neutral-600">No data available</p>
             </div>
           ) : filteredApps && filteredApps.length > 0 ? (
-            <div className="grid gap-4">
+            <div className="grid gap-2 sm:gap-4">
               {filteredApps.map((app) => (
-                <div key={app.id} className="bg-white rounded-xl shadow-sm border border-neutral-100 p-4 sm:p-6 hover:shadow-md transition-shadow">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
-                        {app.user?.full_name?.[0] || 'U'}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-neutral-900 mb-1">{app.user?.full_name || 'Unknown User'}</h3>
-                        <p className="text-sm text-neutral-600 mb-2">
-                          <span className="font-medium">{app.opportunity?.title || 'Unknown Opportunity'}</span>
-                        </p>
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-neutral-500">
-                          <span className="flex items-center gap-1">
-                            <Mail className="w-4 h-4" />
-                            {app.user?.email || 'No email'}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            {new Date(app.submitted_at).toLocaleDateString()}
-                          </span>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            app.opportunity.application_type === 'internal' ? 'bg-[#e6f2f3] text-[#09373f]' : 'bg-blue-100 text-blue-800'
-                          }`}>
-                            {app.opportunity.application_type === 'internal' ? 'Internal' : 'External'}
-                          </span>
-                        </div>
-                      </div>
+                <div key={app.id} className="bg-white rounded-xl shadow-sm border border-neutral-100 p-2 sm:p-5 hover:shadow-md transition-shadow w-full min-w-0 overflow-hidden">
+                  {/* Top row: avatar + name/title */}
+                  <div className="flex items-start gap-2 mb-2">
+                    <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold text-sm sm:text-base flex-shrink-0">
+                      {app.user?.full_name?.[0] || 'U'}
                     </div>
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                      <span className={`inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium ${getStatusColor(app.status)}`}>
-                        {app.status.replace('_', ' ')}
-                      </span>
-                      <button
-                        onClick={() => setSelectedApp(app)}
-                        className="flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-                      >
-                        <Eye className="w-4 h-4" />
-                        Review
-                      </button>
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <h3 className="font-semibold text-neutral-900 text-xs sm:text-base" style={{ wordBreak: 'break-word' }}>{app.user?.full_name || 'Unknown User'}</h3>
+                      <p className="text-xs text-neutral-600" style={{ wordBreak: 'break-word' }}>{app.opportunity?.title || 'Unknown Opportunity'}</p>
                     </div>
+                  </div>
+                  {/* Meta: email */}
+                  <div className="flex items-center gap-1 mb-1 text-xs text-neutral-500 min-w-0 overflow-hidden">
+                    <Mail className="w-3 h-3 flex-shrink-0" />
+                    <span style={{ wordBreak: 'break-all', minWidth: 0 }}>{app.user?.email || 'No email'}</span>
+                  </div>
+                  {/* Meta: date + type */}
+                  <div className="flex items-center gap-2 flex-wrap mb-2 text-xs text-neutral-500">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3 flex-shrink-0" />
+                      {new Date(app.submitted_at).toLocaleDateString()}
+                    </span>
+                    <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${
+                      app.opportunity.application_type === 'internal' ? 'bg-[#e6f2f3] text-[#09373f]' : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {app.opportunity.application_type === 'internal' ? 'Internal' : 'External'}
+                    </span>
+                  </div>
+                  {/* Bottom row: status + review */}
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium flex-shrink-0 ${getStatusColor(app.status)}`}>
+                      {app.status.replace(/_/g, ' ')}
+                    </span>
+                    <button
+                      onClick={() => setSelectedApp(app)}
+                      className="flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-xs font-medium flex-shrink-0"
+                    >
+                      <Eye className="w-3 h-3" />
+                      Review
+                    </button>
                   </div>
                 </div>
               ))}
@@ -226,27 +226,26 @@ export const InstitutionApplicationResponsesPage: React.FC = () => {
       </div>
 
       {selectedApp && (
-        <div className="fixed inset-0 flex items-center justify-center p-4 z-50" style={{
+        <div className="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50" style={{
           backgroundImage: 'url(/email.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backdropFilter: 'blur(8px)'
         }}>
-          <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(8px)' }} />
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative z-10">
-            <div className="p-6 border-b border-neutral-100">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-neutral-900 mb-2">{selectedApp.user?.full_name || 'Unknown User'}</h2>
-                  <p className="text-neutral-600">{selectedApp.opportunity?.title || 'Unknown Opportunity'}</p>
+          <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }} />
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-y-auto relative z-10">
+            <div className="p-4 sm:p-6 border-b border-neutral-100 sticky top-0 bg-white z-10">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-2xl font-bold text-neutral-900 mb-1 truncate">{selectedApp.user?.full_name || 'Unknown User'}</h2>
+                  <p className="text-sm text-neutral-600 truncate">{selectedApp.opportunity?.title || 'Unknown Opportunity'}</p>
                 </div>
-                <button onClick={() => setSelectedApp(null)} className="text-neutral-400 hover:text-neutral-600">
-                  <XCircle className="w-6 h-6" />
+                <button onClick={() => setSelectedApp(null)} className="text-neutral-400 hover:text-neutral-600 flex-shrink-0">
+                  <XCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               </div>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
               {/* Applicant Info */}
               <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl p-4 border border-primary-100">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
@@ -276,7 +275,12 @@ export const InstitutionApplicationResponsesPage: React.FC = () => {
                   </div>
                   {(selectedApp as any).cv_url ? (
                     <a
-                      href={(selectedApp as any).cv_url}
+                      href={(() => {
+                        const url = (selectedApp as any).cv_url;
+                        if (!url) return '#';
+                        if (url.startsWith('http')) return url;
+                        return `${import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8001'}${url.startsWith('/') ? '' : '/'}${url}`;
+                      })()}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
@@ -394,38 +398,38 @@ export const InstitutionApplicationResponsesPage: React.FC = () => {
 
               {/* Action Buttons */}
               <div>
-                <h4 className="font-semibold text-neutral-900 mb-3">Update Application Status</h4>
-                <div className="grid grid-cols-2 gap-3">
+                <h4 className="font-semibold text-neutral-900 mb-3 text-sm sm:text-base">Update Application Status</h4>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   <button
                     onClick={() => updateStatusMutation.mutate({ id: selectedApp.id, status: 'under_review', feedback })}
                     disabled={updateStatusMutation.isPending}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 sm:px-4 sm:py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-xs sm:text-sm"
                   >
-                    <Clock className="w-4 h-4" />
+                    <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     Under Review
                   </button>
                   <button
                     onClick={() => updateStatusMutation.mutate({ id: selectedApp.id, status: 'interview_scheduled', feedback })}
                     disabled={updateStatusMutation.isPending}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 sm:px-4 sm:py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-xs sm:text-sm"
                   >
-                    <Calendar className="w-4 h-4" />
-                    Schedule Interview
+                    <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    Interview
                   </button>
                   <button
                     onClick={() => updateStatusMutation.mutate({ id: selectedApp.id, status: 'accepted', feedback })}
                     disabled={updateStatusMutation.isPending}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-[#125B66] text-white rounded-lg hover:bg-[#124666] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 sm:px-4 sm:py-3 bg-[#125B66] text-white rounded-lg hover:bg-[#124666] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-xs sm:text-sm"
                   >
-                    <CheckCircle className="w-4 h-4" />
+                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     Accept
                   </button>
                   <button
                     onClick={() => updateStatusMutation.mutate({ id: selectedApp.id, status: 'rejected', feedback })}
                     disabled={updateStatusMutation.isPending}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 sm:px-4 sm:py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-xs sm:text-sm"
                   >
-                    <XCircle className="w-4 h-4" />
+                    <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     Reject
                   </button>
                 </div>

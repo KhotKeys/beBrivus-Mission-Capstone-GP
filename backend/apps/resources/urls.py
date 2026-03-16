@@ -21,6 +21,7 @@ urlpatterns = [
     path('<slug:slug>/delete/', views.ResourceDeleteView.as_view(), name='resource-delete'),
     
     # Resource interactions
+    path('<int:resource_id>/view/', views.ResourceTrackViewView.as_view(), name='resource-track-view'),
     path('<int:resource_id>/rate/', views.ResourceRatingView.as_view(), name='resource-rate'),
     path('<int:resource_id>/bookmark/', views.ResourceBookmarkView.as_view(), name='resource-bookmark'),
     path('<int:resource_id>/progress/', views.ResourceProgressView.as_view(), name='resource-progress'),

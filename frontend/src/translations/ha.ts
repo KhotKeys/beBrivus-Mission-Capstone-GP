@@ -64,6 +64,7 @@ export default {
   
   // Additional UI
   'Tracker': 'Mai bi da kai',
+  'Messages': 'Saƙonni',
   'Find Opportunities': 'Nemo damarmakin',
   'Find a Mentor': 'Nemo mai jagoranci',
   'Track Applications': 'Bi aikace-aikace',

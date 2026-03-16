@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Layout } from "../components/layout";
+import { useTranslation } from 'react-i18next';
 import { 
   Target, 
   Users, 
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 export const PartnerWithUsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [selectedTier, setSelectedTier] = useState<'bronze' | 'silver' | 'gold' | 'platinum'>('gold');
   const [hoveredYear, setHoveredYear] = useState<number | null>(null);
 
@@ -204,15 +206,15 @@ export const PartnerWithUsPage: React.FC = () => {
                   <div className="flex flex-wrap gap-6 justify-center">
                     <div className="flex items-center bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200">
                       <div className="w-3 h-8 bg-gradient-to-t from-slate-400 to-slate-600 rounded mr-2"></div>
-                      <span className="text-sm font-semibold text-secondary-700">Organizations</span>
+                      <span className="text-sm font-semibold text-secondary-700">{t('Organizations')}</span>
                     </div>
                     <div className="flex items-center bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200">
                       <div className="w-3 h-3 bg-primary-500 rounded-full mr-2"></div>
-                      <span className="text-sm font-semibold text-secondary-700">Growth Trend</span>
+                      <span className="text-sm font-semibold text-secondary-700">{t('Growth Trend')}</span>
                     </div>
                     <div className="flex items-center bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200">
                       <div className="w-3 h-3 bg-success-500 rounded-full mr-2"></div>
-                      <span className="text-sm font-semibold text-secondary-700">Success Rate</span>
+                      <span className="text-sm font-semibold text-secondary-700">{t('Success Rate')}</span>
                     </div>
                   </div>
                 </div>
@@ -274,19 +276,19 @@ export const PartnerWithUsPage: React.FC = () => {
                                   <div className="text-xs font-bold text-slate-300 mb-2">{d.year} Performance</div>
                                   <div className="space-y-1.5">
                                     <div className="flex justify-between items-center">
-                                      <span className="text-xs text-slate-400">Organizations:</span>
+                                      <span className="text-xs text-slate-400">{t('Organizations:')}</span>
                                       <span className="text-sm font-bold text-primary-400">{d.partners}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                      <span className="text-xs text-slate-400">Opportunities:</span>
+                                      <span className="text-xs text-slate-400">{t('Opportunities:')}</span>
                                       <span className="text-sm font-bold text-success-400">{d.opportunities.toLocaleString()}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                      <span className="text-xs text-slate-400">Applications:</span>
+                                      <span className="text-xs text-slate-400">{t('Applications:')}</span>
                                       <span className="text-sm font-bold text-warning-400">{(d.applications / 1000).toFixed(0)}K</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                      <span className="text-xs text-slate-400">Success Rate:</span>
+                                      <span className="text-xs text-slate-400">{t('Success Rate:')}</span>
                                       <span className="text-sm font-bold text-purple-400">{d.placement}%</span>
                                     </div>
                                   </div>
@@ -407,28 +409,28 @@ export const PartnerWithUsPage: React.FC = () => {
                 <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl p-6 border border-primary-200">
                   <div className="flex items-center justify-between mb-4">
                     <TrendingUp className="w-10 h-10 text-primary-600" />
-                    <span className="text-3xl font-bold text-primary-900">1011%</span>
+                    <span className="text-3xl font-bold text-primary-900">{t('1011%')}</span>
                   </div>
-                  <h3 className="font-semibold text-primary-900 mb-2">Organization Growth</h3>
-                  <p className="text-sm text-primary-700">From 45 to 500+ organizations in 5 years, demonstrating consistent trust and value delivery</p>
+                  <h3 className="font-semibold text-primary-900 mb-2">{t('Organization Growth')}</h3>
+                  <p className="text-sm text-primary-700">{t('From 45 to 500+ organizations in 5 years, demonstrating consistent trust and value delivery')}</p>
                 </div>
 
                 <div className="bg-gradient-to-br from-success-50 to-success-100 rounded-2xl p-6 border border-success-200">
                   <div className="flex items-center justify-between mb-4">
                     <BarChart3 className="w-10 h-10 text-success-600" />
-                    <span className="text-3xl font-bold text-success-900">1100%</span>
+                    <span className="text-3xl font-bold text-success-900">{t('1100%')}</span>
                   </div>
-                  <h3 className="font-semibold text-success-900 mb-2">Opportunities Listed</h3>
-                  <p className="text-sm text-success-700">From 850 to 10,200+ opportunities, expanding access to global programs</p>
+                  <h3 className="font-semibold text-success-900 mb-2">{t('Opportunities Listed')}</h3>
+                  <p className="text-sm text-success-700">{t('From 850 to 10,200+ opportunities, expanding access to global programs')}</p>
                 </div>
 
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200">
                   <div className="flex items-center justify-between mb-4">
                     <Award className="w-10 h-10 text-purple-600" />
-                    <span className="text-3xl font-bold text-purple-900">88%</span>
+                    <span className="text-3xl font-bold text-purple-900">{t('88%')}</span>
                   </div>
-                  <h3 className="font-semibold text-purple-900 mb-2">Placement Success Rate</h3>
-                  <p className="text-sm text-purple-700">Improved from 68% to 88% through AI-powered matching and dedicated support</p>
+                  <h3 className="font-semibold text-purple-900 mb-2">{t('Placement Success Rate')}</h3>
+                  <p className="text-sm text-purple-700">{t('Improved from 68% to 88% through AI-powered matching and dedicated support')}</p>
                 </div>
               </div>
             </div>
@@ -460,8 +462,7 @@ export const PartnerWithUsPage: React.FC = () => {
                     {tier.popular && (
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
                         <span className="inline-flex items-center px-4 py-1 bg-primary-600 text-white text-sm font-semibold rounded-full shadow-lg">
-                          <Star className="w-4 h-4 mr-1" /> Most Popular
-                        </span>
+                          <Star className="w-4 h-4 mr-1" />{t('Most Popular')}</span>
                       </div>
                     )}
                     <div className="bg-white rounded-2xl p-6 h-full border-2 border-neutral-200">
@@ -501,22 +502,22 @@ export const PartnerWithUsPage: React.FC = () => {
                   <div className="flex items-start">
                     <BarChart3 className="w-6 h-6 text-primary-600 mr-3 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 className="font-semibold text-secondary-900 mb-1">Advanced Analytics</h4>
-                      <p className="text-sm text-secondary-600">Track applications, engagement, and ROI in real-time</p>
+                      <h4 className="font-semibold text-secondary-900 mb-1">{t('Advanced Analytics')}</h4>
+                      <p className="text-sm text-secondary-600">{t('Track applications, engagement, and ROI in real-time')}</p>
                     </div>
                   </div>
                   <div className="flex items-start">
                     <Target className="w-6 h-6 text-primary-600 mr-3 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 className="font-semibold text-secondary-900 mb-1">Smart Targeting</h4>
-                      <p className="text-sm text-secondary-600">Reach candidates matching your specific criteria</p>
+                      <h4 className="font-semibold text-secondary-900 mb-1">{t('Smart Targeting')}</h4>
+                      <p className="text-sm text-secondary-600">{t('Reach candidates matching your specific criteria')}</p>
                     </div>
                   </div>
                   <div className="flex items-start">
                     <Zap className="w-6 h-6 text-primary-600 mr-3 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 className="font-semibold text-secondary-900 mb-1">Dedicated Support</h4>
-                      <p className="text-sm text-secondary-600">Expert assistance from our partnerships team</p>
+                      <h4 className="font-semibold text-secondary-900 mb-1">{t('Dedicated Support')}</h4>
+                      <p className="text-sm text-secondary-600">{t('Expert assistance from our partnerships team')}</p>
                     </div>
                   </div>
                 </div>

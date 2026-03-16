@@ -10,6 +10,7 @@ export interface UserProfile {
   phone_number?: string;
   date_of_birth?: string;
   profile_picture?: string;
+  profile_picture_url?: string;
   bio: string;
   location: string;
   university: string;
@@ -75,11 +76,11 @@ export const profileApi = {
     const formData = new FormData();
     formData.append("profile_picture", file);
     return api.patch<UserProfile>("/auth/profile/", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: { "Content-Type": "multipart/form-data" },
     });
   },
+
+  deleteProfilePicture: () => api.delete("/auth/profile/picture/"),
 
   // Skills
   getSkills: () => api.get<UserSkill[]>("/auth/skills/"),

@@ -182,3 +182,63 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.title}"
+
+
+# ── E2E Encrypted Messaging Models ──────────────────────────────────────────
+
+class UserPublicKey(models.Model):
+    """
+    Stores each user's NaCl public key for E2E encryption.
+    Private key NEVER leaves the client browser.
+    """
+    user       = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='public_key',
+    )
+    public_key = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'messaging_user_public_keys'
+
+    def __str__(self):
+        return f'PublicKey for {self.user.email}'
+
+
+class E2EMessage(models.Model):
+    """
+    End-to-end encrypted message.
+    Server stores ciphertext only — plaintext never touches server.
+    """
+    conversation      = models.ForeignKey(
+        Conversation,
+        on_delete=models.CASCADE,
+        related_name='e2e_messages',
+    )
+    sender            = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='e2e_sent_messages',
+    )
+    encrypted_content          = models.TextField()                                  # recipient's copy
+    nonce                      = models.CharField(max_length=64, blank=True, default='')
+    recipient_pub_key          = models.CharField(max_length=64, blank=True, default='')
+    sender_encrypted_content   = models.TextField(blank=True, default='')            # sender's copy
+    sender_nonce               = models.CharField(max_length=64, blank=True, default='')
+    sender_public_key          = models.CharField(max_length=64, blank=True, default='')  # sender's pub key for recipient decryption
+    is_encrypted               = models.BooleanField(default=True)
+    is_read                    = models.BooleanField(default=False)
+    is_edited                  = models.BooleanField(default=False)
+    is_deleted                 = models.BooleanField(default=False)
+    read_at           = models.DateTimeField(null=True, blank=True)
+    created_at        = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table  = 'messaging_e2e_messages'
+        ordering  = ['created_at']
+
+    def __str__(self):
+        return f'E2EMessage {self.id} in conv {self.conversation_id}'

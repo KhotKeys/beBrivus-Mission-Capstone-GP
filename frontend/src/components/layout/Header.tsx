@@ -17,6 +17,7 @@ import {
   Trophy,
   Menu as MenuIcon,
   MessageCircle,
+  MessageSquare,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { Button } from "../ui";
@@ -40,8 +41,8 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white border-b border-secondary-200 sticky top-0 z-50" style={{ position: 'relative', zIndex: 9999 }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="bg-white border-b border-secondary-200 sticky top-0 z-50" style={{ minWidth: '150px' }}>
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8" style={{ width: '100%', boxSizing: 'border-box' }}>
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
@@ -51,6 +52,8 @@ export const Header: React.FC = () => {
                   ? "/mentor-dashboard"
                   : isAuthenticated && isInstitution
                   ? "/institution/opportunities"
+                  : isAuthenticated
+                  ? "/dashboard"
                   : "/"
               }
               className="flex items-center space-x-2"
@@ -65,53 +68,36 @@ export const Header: React.FC = () => {
 
           {/* Navigation - Desktop */}
           {isAuthenticated && !isMentor && !isInstitution && (
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link
-                to="/opportunities"
-                className="flex items-center space-x-1 text-secondary-700 hover:text-primary-600 transition-colors"
-              >
+            <nav className="hidden md:flex items-center space-x-4 flex-1 justify-center">
+              <Link to="/opportunities" className="flex items-center space-x-1 text-sm text-secondary-700 hover:text-[#1a5c3a] font-medium transition-colors whitespace-nowrap">
                 <Search className="w-4 h-4" />
                 <span>{t('Opportunities')}</span>
               </Link>
-              <Link
-                to="/mentors"
-                className="flex items-center space-x-1 text-secondary-700 hover:text-primary-600 transition-colors"
-              >
+              <Link to="/mentors" className="flex items-center space-x-1 text-sm text-secondary-700 hover:text-[#1a5c3a] font-medium transition-colors whitespace-nowrap">
                 <Users className="w-4 h-4" />
                 <span>{t('Mentors')}</span>
               </Link>
-              <Link
-                to="/tracker"
-                className="flex items-center space-x-1 text-secondary-700 hover:text-primary-600 transition-colors"
-              >
+              <Link to="/tracker" className="flex items-center space-x-1 text-sm text-secondary-700 hover:text-[#1a5c3a] font-medium transition-colors whitespace-nowrap">
                 <Target className="w-4 h-4" />
-                <span>Tracker</span>
+                <span>{t('Tracker')}</span>
               </Link>
-              <Link
-                to="/resources"
-                className="flex items-center space-x-1 text-secondary-700 hover:text-primary-600 transition-colors"
-              >
+              <Link to="/resources" className="flex items-center space-x-1 text-sm text-secondary-700 hover:text-[#1a5c3a] font-medium transition-colors whitespace-nowrap">
                 <BookOpen className="w-4 h-4" />
                 <span>{t('Resources')}</span>
               </Link>
-              <Link
-                to="/forum"
-                className="flex items-center space-x-1 text-secondary-700 hover:text-primary-600 transition-colors"
-              >
+              <Link to="/forum" className="flex items-center space-x-1 text-sm text-secondary-700 hover:text-[#1a5c3a] font-medium transition-colors whitespace-nowrap">
                 <Users className="w-4 h-4" />
                 <span>{t('Forum')}</span>
               </Link>
-              <Link
-                to="/feedback"
-                className="flex items-center space-x-1 text-secondary-700 hover:text-primary-600 transition-colors"
-              >
+              <Link to="/messages" className="flex items-center space-x-1 text-sm text-secondary-700 hover:text-[#1a5c3a] font-medium transition-colors whitespace-nowrap">
+                <MessageSquare className="w-4 h-4" />
+                <span>{t('Messages')}</span>
+              </Link>
+              <Link to="/feedback" className="flex items-center space-x-1 text-sm text-secondary-700 hover:text-[#1a5c3a] font-medium transition-colors whitespace-nowrap">
                 <MessageCircle className="w-4 h-4" />
                 <span>{t('Feedback')}</span>
               </Link>
-              <Link
-                to="/ai-coach"
-                className="flex items-center space-x-1 text-secondary-700 hover:text-primary-600 transition-colors"
-              >
+              <Link to="/ai-coach" className="flex items-center space-x-1 text-sm text-secondary-700 hover:text-[#1a5c3a] font-medium transition-colors whitespace-nowrap">
                 <Bot className="w-4 h-4" />
                 <span>{t('AI Coach')}</span>
               </Link>
@@ -119,7 +105,7 @@ export const Header: React.FC = () => {
           )}
 
           {isAuthenticated && isInstitution && (
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="hidden md:flex items-center flex-1 justify-center">
               <Link
                 to="/institution/opportunities"
                 className="flex items-center space-x-1 text-secondary-700 hover:text-primary-600 transition-colors"
@@ -151,11 +137,13 @@ export const Header: React.FC = () => {
           )} */}
 
           {/* Right side */}
-          <div className="flex items-center space-x-2 md:space-x-4">
-            {/* Language Selector - Always visible */}
-            <div className="hidden md:block">
-              <LanguageSelectorCompact />
-            </div>
+          <div className="flex items-center space-x-2 md:space-x-3 flex-shrink-0">
+            {/* Language Selector - hidden for mentor and institution */}
+            {!isMentor && !isInstitution && (
+              <div className="hidden md:block">
+                <LanguageSelectorCompact />
+              </div>
+            )}
             
             <button
               onClick={() => setMobileOpen((prev) => !prev)}
@@ -299,7 +287,7 @@ export const Header: React.FC = () => {
                     onClick={() => setMobileOpen(false)}
                   >
                     <Target className="w-4 h-4" />
-                    <span>Tracker</span>
+                    <span>{t('Tracker')}</span>
                   </Link>
                   <Link
                     to="/resources"
@@ -316,6 +304,14 @@ export const Header: React.FC = () => {
                   >
                     <Users className="w-4 h-4" />
                     <span>Forum</span>
+                  </Link>
+                  <Link
+                    to="/messages"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-secondary-700 hover:text-primary-600 hover:bg-secondary-100"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>{t('Messages')}</span>
                   </Link>
                   <Link
                     to="/feedback"
@@ -336,7 +332,8 @@ export const Header: React.FC = () => {
                 </>
               )}
               
-              {/* Language selector at bottom of mobile menu */}
+              {/* Language selector at bottom of mobile menu - hidden for mentor/institution */}
+              {!isMentor && !isInstitution && (
               <div style={{
                 padding: '12px 16px',
                 borderTop: '1px solid #e5e7eb',
@@ -383,6 +380,7 @@ export const Header: React.FC = () => {
                   <option value="dinka">🇸🇸 Dinka</option>
                 </select>
               </div>
+              )}
             </nav>
           </div>
         ) : (

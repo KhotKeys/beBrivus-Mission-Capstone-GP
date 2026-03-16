@@ -1,8 +1,10 @@
 import React from "react";
 import { Layout } from "../components/layout";
+import { useTranslation } from 'react-i18next';
 import { Award, GraduationCap, Globe, Star, TrendingUp } from "lucide-react";
 
 export const SuccessStoriesPage: React.FC = () => {
+  const { t } = useTranslation();
   const stories = [
     {
       name: "Sarah Johnson",
@@ -94,8 +96,8 @@ export const SuccessStoriesPage: React.FC = () => {
                   <TrendingUp className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-success-600" />
                 </div>
               </div>
-              <div className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold text-secondary-900 mb-0.5 xs:mb-1 sm:mb-2">92%</div>
-              <div className="text-[10px] xs:text-xs sm:text-sm text-secondary-600">Success Rate</div>
+              <div className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold text-secondary-900 mb-0.5 xs:mb-1 sm:mb-2">{t('92%')}</div>
+              <div className="text-[10px] xs:text-xs sm:text-sm text-secondary-600">{t('Success Rate')}</div>
             </div>
             <div className="bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg p-3 xs:p-4 sm:p-5 lg:p-6 text-center">
               <div className="flex justify-center mb-2 xs:mb-2.5 sm:mb-3 lg:mb-4">
@@ -103,8 +105,8 @@ export const SuccessStoriesPage: React.FC = () => {
                   <Award className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-primary-600" />
                 </div>
               </div>
-              <div className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold text-secondary-900 mb-0.5 xs:mb-1 sm:mb-2">3,500+</div>
-              <div className="text-[10px] xs:text-xs sm:text-sm text-secondary-600">Scholarships Won</div>
+              <div className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold text-secondary-900 mb-0.5 xs:mb-1 sm:mb-2">{t('3,500+')}</div>
+              <div className="text-[10px] xs:text-xs sm:text-sm text-secondary-600">{t('Scholarships Won')}</div>
             </div>
             <div className="bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg p-3 xs:p-4 sm:p-5 lg:p-6 text-center">
               <div className="flex justify-center mb-2 xs:mb-2.5 sm:mb-3 lg:mb-4">
@@ -112,8 +114,8 @@ export const SuccessStoriesPage: React.FC = () => {
                   <Globe className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-warning-600" />
                 </div>
               </div>
-              <div className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold text-secondary-900 mb-0.5 xs:mb-1 sm:mb-2">85+</div>
-              <div className="text-[10px] xs:text-xs sm:text-sm text-secondary-600">Countries</div>
+              <div className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold text-secondary-900 mb-0.5 xs:mb-1 sm:mb-2">{t('85+')}</div>
+              <div className="text-[10px] xs:text-xs sm:text-sm text-secondary-600">{t('Countries')}</div>
             </div>
             <div className="bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg p-3 xs:p-4 sm:p-5 lg:p-6 text-center">
               <div className="flex justify-center mb-2 xs:mb-2.5 sm:mb-3 lg:mb-4">
@@ -121,8 +123,8 @@ export const SuccessStoriesPage: React.FC = () => {
                   <GraduationCap className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-secondary-600" />
                 </div>
               </div>
-              <div className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold text-secondary-900 mb-0.5 xs:mb-1 sm:mb-2">$450M+</div>
-              <div className="text-[10px] xs:text-xs sm:text-sm text-secondary-600">Total Funding</div>
+              <div className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold text-secondary-900 mb-0.5 xs:mb-1 sm:mb-2">{t('$450M+')}</div>
+              <div className="text-[10px] xs:text-xs sm:text-sm text-secondary-600">{t('Total Funding')}</div>
             </div>
           </div>
 

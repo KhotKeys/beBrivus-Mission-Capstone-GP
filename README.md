@@ -250,7 +250,7 @@ The backend exposes REST endpoints under `/api/` for:
 - authentication and profile management
 - opportunities and applications
 - mentoring and booking
-- forum and moderation
+- forum, AI coaching, and moderation
 - resources
 - analytics and administration
 
@@ -258,7 +258,7 @@ Refer to app-specific views/serializers in `backend/apps/` for implementation-le
 
 ## 12. Deployment Notes
 
-The repository contains deployment-oriented assets and scripts (for example service files and compose configuration) to support server-based deployments.
+The repository contains deployment-oriented assets and scripts (for example, service files and compose configuration) to support server-based deployments.
 
 Minimum production recommendations:
 

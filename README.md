@@ -23,7 +23,7 @@ Core product goals:
 
 ### Live Demo
 - **Application URL**: [(https://bebrivus.com)]
-- **Demo Credentials**: Available upon request
+- **Demo Credentials**: [(https://drive.google.com/file/d/1v-CvAC4l6qrhcJUAuSOdp9d-DgHP_RsP/view?usp=drivesdk)]
 
 ### Design Assets
 - **Figma Design**: [[https://www.figma.com](https://www.figma.com/design/CNoGWFBj59n4JHGY4oVd0X/beBrivus-Capstone-Figma-Design?node-id=4567-271&p=f)]

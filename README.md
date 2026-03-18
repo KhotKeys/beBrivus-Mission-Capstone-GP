@@ -22,7 +22,7 @@ Core product goals:
 ## 2. Demo & Design
 
 ### Live Demo
-- **Application URL**: [[https://bebrivus.example.com](https://drive.google.com/file/d/1tFjFcZb7105Kh40Zw3N0b-ui1YCL1yYW/view)]
+- **Application URL**: [(https://bebrivus.com)]
 - **Demo Credentials**: Available upon request
 
 ### Design Assets

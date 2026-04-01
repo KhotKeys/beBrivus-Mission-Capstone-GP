@@ -53,43 +53,25 @@ Core product goals:
 
 ### Student Experience
 
-- Opportunity discovery with search and filtering.
-- Personal application tracking and progress monitoring.
-- Self-service account deletion from profile settings with confirmation and secure sign-out flow.
-- Feedback form submission with acknowledgment and support follow-up workflow.
-- Mentor discovery, booking, and communication.
-- Direct messaging with mentors, institutions, and other users for personalized support and communication.
-- Community forum participation.
-- Resource library access.
-- AI-assisted support for guidance and moderation-related features.
-- Notification-driven reminders and updates.
-- Access to Privacy Policy, Terms of Service, Cookie Policy, and Accessibility pages.
+- Discover opportunities, track applications, book mentors, access AI career coaching, join community forum, and use resource library — all with offline support and multilingual access.
 
 ### Institution Experience
 
-- Opportunity publishing and lifecycle management.
-- Application intake and review workflows.
-- Direct messaging with applicants and mentors for streamlined communication.
-- Candidate communication support.
-- Organization-facing dashboard tools.
+- Publish opportunities, review applications, and communicate with applicants through a secure admin-configured portal.
 
 ### Administrative Experience
 
-- User and role management.
-- Forum and content moderation.
-- Oversight of opportunities and resources.
-- Platform analytics and operational visibility.
-- Feedback intake/review workflows and response tracking for user-submitted issues.
+- Manage users, moderate content, oversee platform analytics, and handle user feedback.
 
 ## 4. Architecture
 
 High-level architecture:
 
-- Frontend: React + TypeScript SPA served by Vite in development.
-- Backend: Django + Django REST Framework.
-- Realtime/async: Channels and Celery workers.
-- Queue/cache: Redis.
-- Database: SQLite in local development, with migration path to PostgreSQL for production.
+- Frontend: React + TypeScript, Vite, Tailwind CSS, i18next, PWA
+- Backend: Django REST Framework, Channels, Celery
+- Cache/Queue: Redis
+- Database: SQLite (development) → PostgreSQL (production)
+- AI: Google Gemini API
 
 Repository layout:
 

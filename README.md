@@ -227,39 +227,23 @@ npm run build
 
 ## 11. API Surface (Summary)
 
-The backend exposes REST endpoints under `/api/` for:
-
-- authentication and profile management
-- opportunities and applications
-- mentoring and booking
-- forum, AI coaching, and moderation
-- resources
-- analytics and administration
-
-Refer to app-specific views/serializers in `backend/apps/` for implementation-level endpoint details.
+- REST endpoints available under /api/ covering authentication, opportunities, applications, mentoring, forum, AI coaching, resources, and analytics.
 
 ## 12. Deployment Notes
 
-The repository contains deployment-oriented assets and scripts (for example, service files and compose configuration) to support server-based deployments.
+- The repository contains deployment-oriented assets and scripts (for example, service files and compose configuration) to support server-based deployments.
 
 Minimum production recommendations:
 
-- move from SQLite to PostgreSQL
-- use secure secret management and rotate credentials
-- run with `DEBUG=False`
-- configure strict host/CORS policies
-- run asynchronous workers and Redis in managed services where possible
+- PostgreSQL required for production — replace SQLite
+- Set DEBUG=False and configure strict host and CORS policies
+- Use secure secret management and rotate credentials regularly
+- Run Redis and Celery workers as managed services
 
 ## 13. Security Guidance
 
-- Do not commit runtime secrets (`.env`, app passwords, API keys, production credentials).
-- Keep sensitive files ignored in `.gitignore`.
-- If a secret is exposed, rotate it immediately and remove it from repository history if necessary.
+- Never commit .env files, API keys, or credentials. Rotate any exposed secrets immediately and remove from repository history.
 
 ## 14. License
 
-This project is licensed under the MIT License.
-
-## 15. Maintainers
-
-Project ownership and contributor details can be maintained in this section as the team evolves.
+MIT License — Gabriel Khot Garang Pawuoi, 2026

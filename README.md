@@ -2,13 +2,14 @@
 
 beBrivus is a platform that helps African students discover opportunities, manage applications, and access mentorship and learning support in one product.
 
-The project combines a React frontend and a Django backend, with background workers for asynchronous processing, AI-assisted workflows, multilingual support, and role-based dashboards for students, institutions, and administrators.
+The project combines a React frontend and a Django backend, with background workers for asynchronous processing, AI-assisted workflows, multilingual support, and role-based dashboards for students, mentors, institutions, and administrators.
 
 ## 1. Project Scope
 
 beBrivus is designed around three user groups:
 
 - Students: discover opportunities, track applications, engage in community discussions, and request mentorship support.
+- Mentors Portal: receive mentorship support booking
 - Institutions: publish opportunities, receive applications, and manage applicant pipelines.
 - Administrators: govern content, moderate discussions, monitor activity, and maintain platform quality.
 
@@ -17,7 +18,7 @@ Core product goals:
 - Improve access to scholarships, internships, grants, and training programs.
 - Reduce missed deadlines with structured tracking and notifications.
 - Provide practical support through mentorship, resources, and AI guidance.
-- Ensure broad accessibility through multilingual and offline-capable experience.
+- Ensure broad accessibility through a multilingual and offline-capable experience.
 
 ## 2. Demo & Design
 
@@ -29,6 +30,7 @@ Core product goals:
 - **Figma Design**: [[https://www.figma.com](https://www.figma.com/design/CNoGWFBj59n4JHGY4oVd0X/beBrivus-Capstone-Figma-Design?node-id=4567-271&p=f)]
 - **Design Includes**:
   - Student dashboard wireframes
+  - Mentors Portal layouts
   - Institution portal layouts
   - Admin panel interface designs
   - Mobile responsive views
@@ -59,6 +61,10 @@ Core product goals:
 
 - Publish opportunities, review applications, and communicate with applicants through a secure admin-configured portal.
 
+### Mentors Portal
+
+- Mentors receive mentorship support booking
+
 ### Administrative Experience
 
 - Manage users, moderate content, oversee platform analytics, and handle user feedback.
@@ -76,7 +82,7 @@ High-level architecture:
 Repository layout:
 
 ```text
-beBrivus-Mission-Capstone/
+beBrivus-Mission-Capstone-GP/
   backend/
     apps/
       accounts/
